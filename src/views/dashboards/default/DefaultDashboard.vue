@@ -24,15 +24,15 @@
     <v-col cols="12">
       <BannerbienvenidaAdmin v-if="userRole === 'administrador'"></BannerbienvenidaAdmin>
       <br>
-      <TotalEarning></TotalEarning>
     </v-col>
+    <v-col cols="12" md="4">
+      <TotalOrder />
+    </v-col>
+    <TotalEarning></TotalEarning>
     <!-- -------------------------------------------------------------------- -->
     <!-- Total Order -->
     <!-- -------------------------------------------------------------------- -->
-    <v-col cols="12" md="4">
-      <br> <br> <br> <br>
-      <TotalOrder />
-    </v-col>
+    
     <!-- -------------------------------------------------------------------- -->
     <!-- Total Income -->
     <!-- -------------------------------------------------------------------- -->
