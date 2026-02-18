@@ -1,6 +1,6 @@
 import CrearBarbero from '@/views/dashboards/default/components/administrador/administracion/CrearBarbero.vue';
-import CrearCategoriaproducto from '@/views/dashboards/default/components/administrador/administracion/CrearCategoriaproducto.vue';
-import CrearCategoriaservicio from '@/views/dashboards/default/components/administrador/administracion/CrearCategoriaservicio.vue';
+import CategoriasProducto from '@/views/dashboards/default/components/administrador/administracion/CategoriasProducto.vue';
+import CategoriasServicio from '@/views/dashboards/default/components/administrador/administracion/CategoriasServicio.vue';
 import CrearProducto from '@/views/dashboards/default/components/administrador/administracion/CrearProducto.vue';
 import CrearServicio from '@/views/dashboards/default/components/administrador/administracion/CrearServicio.vue';
 import ListaBarberos from '@/views/dashboards/default/components/administrador/administracion/ListaBarberos.vue';
@@ -9,6 +9,7 @@ import ListaCategoriasservicio from '@/views/dashboards/default/components/admin
 import ListaClientes from '@/views/dashboards/default/components/administrador/administracion/ListaClientes.vue';
 import ListaProductos from '@/views/dashboards/default/components/administrador/administracion/ListaProductos.vue';
 import ListaServicios from '@/views/dashboards/default/components/administrador/administracion/ListaServicios.vue';
+import Proveedores from '@/views/dashboards/default/components/administrador/administracion/Proveedores.vue';
 import DashboardCitas from '@/views/dashboards/default/components/administrador/gestion-de-citas/DashboardCitas.vue';
 import GestionarCitas from '@/views/dashboards/default/components/administrador/gestion-de-citas/GestionarCitas.vue';
 import VistaAgenda from '@/views/dashboards/default/components/barbero/VistaAgenda.vue';
@@ -58,14 +59,14 @@ const MainRoutes = {
       component: CrearServicio
     },
     {
-      path: '/crear-categoria-producto',
-      name: 'CrearCategoriaproducto',
-      component: CrearCategoriaproducto
+      path: '/categorias-productos',
+      name: 'CategoriasProducto',
+      component: CategoriasProducto
     },
     {
-      path: '/crear-categoria-servicio',
-      name: 'CrearCategoriaservicio',
-      component: CrearCategoriaservicio
+      path: '/categorias-servicios',
+      name: 'CategoriasServicio',
+      component: CategoriasServicio
     },
     {
       path: '/crear-producto',
@@ -92,15 +93,11 @@ const MainRoutes = {
       name: 'ListaProductos',
       component: ListaProductos
     },
+    
     {
-      path: '/lista-categorias-producto',
-      name: 'ListaCategoriasproducto',
-      component: ListaCategoriasproducto
-    },
-    {
-      path: '/lista-categorias-servicio',
-      name: 'ListaCategoriasservicio',
-      component: ListaCategoriasservicio
+      path: '/proveedores',
+      name: 'Proveedores',
+      component: Proveedores
     },
     {
       path: '/dashboard-citas',

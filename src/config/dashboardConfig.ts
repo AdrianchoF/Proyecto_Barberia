@@ -107,36 +107,17 @@ const commonItems = {
     categoriasProductos: {
       title: 'Categorias de productos',
       icon: KeyIcon,
-      to: '/categorias-productos',
-      children: [
-        {
-          title: 'Lista de Categorias productos',
-          icon: CircleIcon,
-          to: '/lista-categorias-producto'
-        },
-        {
-          title: 'Crear Categoria producto',
-          icon: CircleIcon,
-          to: '/crear-categoria-producto'
-        }
-      ]
+      to: '/categorias-productos'
     },
     categoriasServicios: {
       title: 'Categorias de servicios',
       icon: KeyIcon,
-      to: '/categorias-servicios',
-      children: [
-        {
-          title: 'Lista de Categorias servicios',
-          icon: CircleIcon,
-          to: '/lista-categorias-servicio'
-        },
-        {
-          title: 'Crear Categoria servicio',
-          icon: CircleIcon,
-          to: '/crear-categoria-servicio'
-        }
-      ]
+      to: '/categorias-servicios'
+    },
+    proveedores: {
+      title: 'Proveedores',
+      icon: KeyIcon,
+      to: '/proveedores'
     },
     dashboardCita: {
       title: 'Dashboard Citas',
@@ -280,6 +261,7 @@ export default {
         commonItems.administrador.productos,
         commonItems.administrador.categoriasProductos,
         commonItems.administrador.categoriasServicios,
+        commonItems.administrador.proveedores,
         { divider: true },
         { header: 'Gestion de citas' },
         commonItems.administrador.dashboardCita,
