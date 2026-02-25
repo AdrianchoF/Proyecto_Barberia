@@ -6,17 +6,15 @@
 </template>
 
 <script setup>
-    import { ref, computed } from 'vue'
-    import { useProductosStore } from '@/stores/useProductosStore'
+    import { ref } from 'vue'
+    import { useCarritoStore } from '@/stores/carrito'
     import DetallesCompra from '@/components/shared/DetallesCompra.vue'
 
     const estadoCarrito = ref(false)
-
-    const TiendaProductos = computed(() => {
-        return useProductosStore()
-    })
+    const carritoStore = useCarritoStore()
 
     const activarCarrito = () => {
+        // open dialog in child component via prop, we could also toggle store but we'll keep prop
         estadoCarrito.value = true
     }
 </script>

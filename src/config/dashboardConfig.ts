@@ -96,11 +96,6 @@ const commonItems = {
           title: 'Lista de Productos',
           icon: CircleIcon,
           to: '/lista-productos'
-        },
-        {
-          title: 'Crear Producto',
-          icon: CircleIcon,
-          to: '/crear-producto'
         }
       ]
     },
@@ -118,6 +113,23 @@ const commonItems = {
       title: 'Proveedores',
       icon: KeyIcon,
       to: '/proveedores'
+    },
+    compras: {
+      title: 'Compras a Proveedores',
+      icon: KeyIcon,
+      to: '/compras',
+      children: [
+        {
+          title: 'Lista de Compras',
+          icon: CircleIcon,
+          to: '/lista-compras'
+        },
+        {
+          title: 'Nueva Orden',
+          icon: CircleIcon,
+          to: '/crear-compra'
+        }
+      ]
     },
     dashboardCita: {
       title: 'Dashboard Citas',
@@ -262,6 +274,7 @@ export default {
         commonItems.administrador.categoriasProductos,
         commonItems.administrador.categoriasServicios,
         commonItems.administrador.proveedores,
+        commonItems.administrador.compras,
         { divider: true },
         { header: 'Gestion de citas' },
         commonItems.administrador.dashboardCita,

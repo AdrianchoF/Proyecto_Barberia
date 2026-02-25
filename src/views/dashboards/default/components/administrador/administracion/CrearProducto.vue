@@ -3,6 +3,7 @@
         <v-card-title>Crear producto</v-card-title>
         <v-card-text>
             <v-form @submit.prevent="crearProducto" v-model="valid">
+                <v-text-field label="Código del producto" v-model="form.codigo" />
                 <v-text-field label="Nombre del producto" v-model="form.nombre" :rules="[v => !!v || 'El nombre es requerido']" required />
                 <v-textarea label="Descripción del producto" v-model="form.descripcion" :rules="[v => !!v || 'La descripción es requerida']" auto-grow required />
                 <v-text-field label="Precio del producto" v-model.number="form.precio"type="number" prefix="$" step="0.01":rules="[v => !!v || 'El precio es requerido', v => (v && !isNaN(parseFloat(v))) || 'El precio debe ser un número']" required />
@@ -29,6 +30,7 @@
     const productoStore = useProductoStore()
     const categoriaProductoStore = useCategoriaProductoStore()
     const form = ref({
+    codigo: '',
     nombre: '',
     descripcion: '',
     precio: 0,
@@ -66,6 +68,7 @@
 
     // Asegurar que precio y stock sean números
     const payload = {
+        codigo: form.value.codigo || undefined,
         nombre: form.value.nombre,
         descripcion: form.value.descripcion,
         precio: Number(form.value.precio),

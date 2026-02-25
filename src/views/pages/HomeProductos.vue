@@ -25,33 +25,55 @@
             </v-window-item>
         </v-window>
 
-        <DetallesCard></DetallesCard>
+        <DetallesCard
+            :mostrar="mostrarDetalles"
+            :producto="productoSeleccionado"
+            @update:mostrar="val => mostrarDetalles = val"
+        />
     </section>
 </template>
 
 <script setup>
-    import { ref, computed } from 'vue'
-    import { useProductosStore } from '@/stores/useProductosStore'
+    import { ref, computed, onMounted } from 'vue'
+    import { useProductoStore } from '@/stores/producto'
+    import { useCarritoStore } from '@/stores/carrito'
     import ProductoCard from '@/components/shared/ProductoCard.vue'
     import DetallesCard from '@/components/shared/DetallesCard.vue'
 
     // Estado local
     const Tabactivado = ref(0)
+    const mostrarDetalles = ref(false)
+    const productoSeleccionado = ref(null)
 
-    // Store de productos
-    const productoStore = useProductosStore()
+    // Stores
+    const productoStore = useProductoStore()
+    const carritoStore = useCarritoStore()
 
-    // Computed para las categorías desde Pinia
-    const categorias = computed(() => productoStore.categorias)
+    const categorias = computed(() => {
+        const map = {}
+        productoStore.productos.forEach(p => {
+            if (!p.publicado) return
+            const nombre = p.categoria?.nombre || 'Sin categoría'
+            if (!map[nombre]) {
+                map[nombre] = { nombre, productos: [] }
+            }
+            map[nombre].productos.push(p)
+        })
+        return Object.values(map)
+    })
 
-    // Métodos
     const emitirverDetalles = (producto) => {
-        productoStore.abrirDetalles(producto)
+        productoSeleccionado.value = producto
+        mostrarDetalles.value = true
     }
 
     const AgregaralCarrito = (producto) => {
-        productoStore.AgregaralCarrito(producto)
+        carritoStore.agregar(producto)
     }
+
+    onMounted(async () => {
+        await productoStore.getProductos(true)
+    })
 </script>
 
 <style scoped>

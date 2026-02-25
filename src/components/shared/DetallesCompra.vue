@@ -40,7 +40,7 @@
 <script setup>
     import { ref, watch, computed } from 'vue'
     import { storeToRefs } from 'pinia'
-    import { useProductosStore } from '@/stores/useProductosStore'
+    import { useCarritoStore } from '@/stores/carrito'
 
     const props = defineProps({
         dialog: {
@@ -51,8 +51,8 @@
 
     const emit = defineEmits(['update:dialog'])
 
-    const productosStore = useProductosStore()
-    const { ComprasCarrito } = storeToRefs(productosStore)
+    const carritoStore = useCarritoStore()
+    const { items: ComprasCarrito, mostrarDetalles } = storeToRefs(carritoStore)
 
     const dialogInterno = ref(props.dialog)
     const selected = ref([])
@@ -82,6 +82,6 @@
     }
 
     const vaciarCarrito = () => {
-        ComprasCarrito.value = []
+        carritoStore.vaciar()
     }
 </script>

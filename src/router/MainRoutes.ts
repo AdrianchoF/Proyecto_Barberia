@@ -1,7 +1,6 @@
 import CrearBarbero from '@/views/dashboards/default/components/administrador/administracion/CrearBarbero.vue';
 import CategoriasProducto from '@/views/dashboards/default/components/administrador/administracion/CategoriasProducto.vue';
 import CategoriasServicio from '@/views/dashboards/default/components/administrador/administracion/CategoriasServicio.vue';
-import CrearProducto from '@/views/dashboards/default/components/administrador/administracion/CrearProducto.vue';
 import CrearServicio from '@/views/dashboards/default/components/administrador/administracion/CrearServicio.vue';
 import ListaBarberos from '@/views/dashboards/default/components/administrador/administracion/ListaBarberos.vue';
 import ListaCategoriasproducto from '@/views/dashboards/default/components/administrador/administracion/ListaCategoriasproducto.vue';
@@ -10,6 +9,8 @@ import ListaClientes from '@/views/dashboards/default/components/administrador/a
 import ListaProductos from '@/views/dashboards/default/components/administrador/administracion/ListaProductos.vue';
 import ListaServicios from '@/views/dashboards/default/components/administrador/administracion/ListaServicios.vue';
 import Proveedores from '@/views/dashboards/default/components/administrador/administracion/Proveedores.vue';
+import ListaCompras from '@/views/dashboards/default/components/administrador/administracion/ListaCompras.vue';
+import CrearCompra from '@/views/dashboards/default/components/administrador/administracion/CrearCompra.vue';
 import DashboardCitas from '@/views/dashboards/default/components/administrador/gestion-de-citas/DashboardCitas.vue';
 import GestionarCitas from '@/views/dashboards/default/components/administrador/gestion-de-citas/GestionarCitas.vue';
 import VistaAgenda from '@/views/dashboards/default/components/barbero/VistaAgenda.vue';
@@ -69,11 +70,6 @@ const MainRoutes = {
       component: CategoriasServicio
     },
     {
-      path: '/crear-producto',
-      name: 'CrearProducto',
-      component: CrearProducto
-    },
-    {
       path: '/lista-barberos',
       name: 'ListaBarberos',
       component: ListaBarberos
@@ -98,6 +94,16 @@ const MainRoutes = {
       path: '/proveedores',
       name: 'Proveedores',
       component: Proveedores
+    },
+    {
+      path: '/lista-compras',
+      name: 'ListaCompras',
+      component: ListaCompras
+    },
+    {
+      path: '/crear-compra',
+      name: 'CrearCompra',
+      component: CrearCompra
     },
     {
       path: '/dashboard-citas',

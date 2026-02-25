@@ -1,9 +1,12 @@
 <template>
     <div class="producto-card">
-        <img :src="producto.img || defaultImage" :alt="producto.nombre" class="producto-img">
+        <!-- prefer imagenUrl if set, else use img alias or default -->
+        <img :src="producto.imagenUrl || producto.img || defaultImage" :alt="producto.nombre" class="producto-img">
         <div class="info-producto">
             <h3 class="nombre-producto"> {{ producto.nombre }} </h3>
-            <p class="precio-producto">$ {{ producto.precio.toLocaleString() }} </p>
+            <p class="precio-producto">
+                $ {{ (producto.precio_venta != null ? producto.precio_venta : producto.precio).toLocaleString() }}
+            </p>
             <div class="botonescarta">
                 <button class="btn-detalles" @click="emitirverDetalles">Ver Detalles</button>
                 <button class="btn-carrito" @click="emitirAgregarCarrito">Agregar al carrito</button>
