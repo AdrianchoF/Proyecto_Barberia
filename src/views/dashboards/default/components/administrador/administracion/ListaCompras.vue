@@ -180,6 +180,7 @@
         <v-dialog v-model="dialogConfirmacion" max-width="800">
             <v-card>
                 <v-card-title>Adjuntar / Pegar confirmación proveedor - Compra #{{ detallesCompra?.id_compra }}</v-card-title>
+                <v-card-text style="color: darkorange;">Por favor pegar la informacion de la confirmacion en este orden (codigo producto, nombre producto, cantidad, precio unitario)</v-card-text>
                 <v-card-text>
                                 <v-textarea v-model="textoConfirmacion" label="Pega aquí la confirmación (texto del WhatsApp o correo)" rows="8"></v-textarea>
                     <v-file-input
