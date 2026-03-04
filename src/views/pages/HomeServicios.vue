@@ -1,76 +1,105 @@
 <template>
   <div>
     <section id="servicios-section">
-      <div class="promo-ticker">
+      <div v-if="cintaServicios && cintaServicios.activo" class="promo-ticker">
         <div class="promo-track">
-          <span>💈🔥 RECUERDA TODOS NUESTROS MIERCOLES DE CANDELA, CON TODA LA BARBERIA EN UN 20% DE DESCUENTO 💈🔥 | VEN Y DISFRUTA DE NUESTRO ESPACIO DE DISTRACCION CON NUESTRAS CONSOLAS DE VIDEOJUEGOS 🎮 | FINES DE SEMANA SERVICIO ESTANDAR CON GRANIZADO GRATIS 🥤</span>
+          <span>{{ cintaServicios.texto }}</span>
         </div>
       </div>
       <v-container class="py-10" fluid>
-        <h2 class="section-title">NUESTROS SERVICIOS | Lo que ofrecemos</h2>
-        <v-row dense justify="center" align="stretch" class="espacio-cards">
-          <v-col v-for="(servicio, k) in categorias[tab].servicios" :key="k" cols="12" sm="6" md="4" class="d-flex">
-            <v-card class="mx-auto" max-width="400" :class="`tipo-${servicio.tipo}`">
+        <h2 class="section-title">NUESTROS SERVICIOS | Los mas populares</h2>
+        
+        <v-row v-if="loading" justify="center" class="py-10">
+          <v-progress-circular indeterminate color="#ee6f38" size="64" />
+        </v-row>
+
+        <v-row v-else dense justify="center" align="stretch" class="espacio-cards">
+          <v-col v-for="(servicio, k) in serviciosDestacados" :key="k" cols="12" sm="6" md="4" class="d-flex">
+            <v-card class="mx-auto" max-width="400" :class="`tipo-gold`">
               <div class="media-servicio">
-                <video class="video-servicio" autoplay muted loop playsinline>
-                  <source :src="servicio.video" type="video/mp4" />
+                <video v-if="servicio.videoUrl" class="video-servicio" autoplay muted loop playsinline :key="servicio.videoUrl">
+                  <source :src="servicio.videoUrl" type="video/mp4" />
                 </video>
+                <div v-else class="no-video-placeholder d-flex align-center justify-center h-100 bg-grey-darken-4">
+                   <i class="fas fa-cut fa-3x text-grey-lighten-1"></i>
+                </div>
                 <div class="titulo-superpuesto">{{ servicio.nombre }}</div>
               </div>
-              <v-card-subtitle class="pt-4"> {{ servicio.precio }} - {{ servicio.tiempo }} </v-card-subtitle>
+              <v-card-subtitle class="pt-4"> 💰 ${{ formatPrecio(servicio.precio) }} COP - ⏱️ {{ formatDuracion(servicio.duracionAprox) }} </v-card-subtitle>
               <v-card-text> {{ servicio.descripcion }} </v-card-text>
               <v-card-actions>
-                <v-btn class="botonAgendar" @click="abrirModal()">AGENDAR</v-btn>
+                <v-btn class="botonAgendar" @click="agendarServicio(servicio.id)">AGENDAR</v-btn>
               </v-card-actions>
             </v-card>
           </v-col>
         </v-row>
+
+        <div class="ver-mas-container text-center mt-8">
+           <v-btn variant="outlined" color="white" size="large" class="ver-mas-btn" @click="abrirModal()">
+             VER MÁS SERVICIOS <i class="fas fa-chevron-right ml-2"></i>
+           </v-btn>
+        </div>
       </v-container>
-      <vistareserva-cita v-model="showModal"></vistareserva-cita>
+      <vistareserva-cita v-model="showModal" :initial-service-id="idPreseleccionado"></vistareserva-cita>
     </section>
   </div>
 </template>
 
 <script setup>
-  import { ref, reactive} from 'vue'
+  import { ref, computed, onMounted } from 'vue'
+  import { useServiceStore } from '@/stores/services'
+  import { useCintaStore } from '@/stores/cintas'
   import VistareservaCita from '@/views/pages/VistareservaCita.vue'
 
-  const tab = ref(0)
+  const servicioStore = useServiceStore()
+  const cintaStore = useCintaStore()
   const showModal = ref(false)
-  const categorias = reactive([
-    {
-      servicios: [
-        {
-          nombre: 'SERVICIO ESTANDAR',
-          tipo : 'estandar',
-          precio: '💰 $15.000 COP',
-          tiempo: '⏱️ 30 min',
-          descripcion: 'Asesoria de imagen y corte de tu preferencia, incluye bebida',
-          video : '/imagenes/servicios/videoservicioestandar.mp4'
-        },
-        {
-          nombre: 'SERVICIO SILVER',
-          tipo : 'silver',
-          precio: '💰 $22.000 COP',
-          tiempo: '⏱️ 40 min',
-          descripcion: 'Asesoria de imagen, corte de tu preferencia, perfilado de barba, cejas, mascarilla y bebida incluida',
-          video : '/imagenes/servicios/videoserviciosilver.mp4'
-        },
-        {
-          nombre: 'SERVICIO GOLD',
-          tipo : 'gold',
-          precio: '💰 $30.000 COP',
-          tiempo: '⏱️ 60 min',
-          descripcion: 'Asesoria de imagen, corte de tu preferencia, perfilado de barba, cejas, lavado de cabello, masaje y bebida incluida',
-          video : '/imagenes/servicios/videoserviciogold.mp4'
-        }
-      ]
-    }
-  ])
+  const loading = ref(false)
+  const idPreseleccionado = ref(null)
+
+  const serviciosDestacados = computed(() => {
+    return servicioStore.services.filter(s => s.esDestacado).slice(0, 3)
+  })
+
+  const cintaServicios = computed(() => {
+    return cintaStore.cintas.find(c => c.ubicacion === 'servicios')
+  })
+
+  const formatPrecio = (valor) => {
+    if (!valor) return '0';
+    return Number(valor).toLocaleString('es-CO');
+  };
+
+  const formatDuracion = (time) => {
+    if (!time) return '';
+    const [h, m] = time.split(':');
+    if (h === '00') return `${m} min`;
+    return `${parseInt(h)}h ${m}m`;
+  };
   
   function abrirModal() {
+    idPreseleccionado.value = null
     showModal.value = true
   }
+
+  function agendarServicio(id) {
+    idPreseleccionado.value = id
+    showModal.value = true
+  }
+
+  onMounted(async () => {
+    loading.value = true
+    try {
+      if (servicioStore.services.length === 0) {
+        await servicioStore.getServices()
+      }
+      if (cintaStore.cintas.length === 0) {
+        await cintaStore.getCintas()
+      }
+    } finally {
+      loading.value = false
+    }
+  })
 </script>
 
 <style scoped>

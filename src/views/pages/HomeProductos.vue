@@ -1,8 +1,8 @@
 <template>
     <div>
-        <div class="promo-ticker">
+        <div v-if="cintaProductos && cintaProductos.activo" class="promo-ticker">
             <div class="promo-track">
-                <span>👉🏻 POR LA COMPRA DE MAS DE 3 PRODUCTOS DE NUESTRA SECCION OBTEN UN 10% EN EL TOTAL DE LA COMPRA 🤑🚨</span>
+                <span>{{ cintaProductos.texto }}</span>
             </div>
         </div>
     </div>
@@ -37,6 +37,7 @@
     import { ref, computed, onMounted } from 'vue'
     import { useProductoStore } from '@/stores/producto'
     import { useCarritoStore } from '@/stores/carrito'
+    import { useCintaStore } from '@/stores/cintas'
     import ProductoCard from '@/components/shared/ProductoCard.vue'
     import DetallesCard from '@/components/shared/DetallesCard.vue'
 
@@ -48,6 +49,7 @@
     // Stores
     const productoStore = useProductoStore()
     const carritoStore = useCarritoStore()
+    const cintaStore = useCintaStore()
 
     const categorias = computed(() => {
         const map = {}
@@ -62,6 +64,10 @@
         return Object.values(map)
     })
 
+    const cintaProductos = computed(() => {
+        return cintaStore.cintas.find(c => c.ubicacion === 'productos')
+    })
+
     const emitirverDetalles = (producto) => {
         productoSeleccionado.value = producto
         mostrarDetalles.value = true
@@ -73,6 +79,9 @@
 
     onMounted(async () => {
         await productoStore.getProductos(true)
+        if (cintaStore.cintas.length === 0) {
+            await cintaStore.getCintas()
+        }
     })
 </script>
 

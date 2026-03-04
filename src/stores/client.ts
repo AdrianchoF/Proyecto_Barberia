@@ -35,14 +35,52 @@ export const useClientStore = defineStore('client', {
                 return data;
             } catch (err: unknown) {
                 if (axios.isAxiosError(err) && err.response?.data?.message) {
-                this.error = err.response.data.message
+                    this.error = err.response.data.message
                 } else {
-                this.error = 'Error cargando clientes'
+                    this.error = 'Error cargando clientes'
                 }
                 return [];
             } finally {
                 this.loading = false
-        }
+            }
         },
+        async updateClient(id: number, payload: Partial<Client>) {
+            this.loading = true
+            try {
+                const { data } = await api.patch(`/auth/${id}`, payload, { withCredentials: true })
+                const index = this.clients.findIndex(c => c.id === id)
+                if (index !== -1) {
+                    this.clients[index] = { ...this.clients[index], ...data }
+                }
+                return data
+            } catch (err: unknown) {
+                if (axios.isAxiosError(err) && err.response?.data?.message) {
+                    this.error = err.response.data.message
+                } else {
+                    this.error = 'Error actualizando cliente'
+                }
+                throw this.error
+            } finally {
+                this.loading = false
+            }
+        },
+
+        async deleteClient(id: number) {
+            this.loading = true
+            try {
+                await api.delete(`/auth/${id}`, { withCredentials: true })
+                this.clients = this.clients.filter(c => c.id !== id)
+                return true
+            } catch (err: unknown) {
+                if (axios.isAxiosError(err) && err.response?.data?.message) {
+                    this.error = err.response.data.message
+                } else {
+                    this.error = 'Error eliminando cliente'
+                }
+                throw this.error
+            } finally {
+                this.loading = false
+            }
+        }
     },
 })

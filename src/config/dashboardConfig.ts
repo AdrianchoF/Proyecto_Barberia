@@ -54,6 +54,11 @@ const commonItems = {
           title: 'Crear Servicio',
           icon: 'fas fa-plus-circle',
           to: '/crear-servicio'
+        },
+        {
+          title: 'Cat. Servicios',
+          icon: 'fas fa-layer-group',
+          to: '/categorias-servicios'
         }
       ]
     },
@@ -66,18 +71,13 @@ const commonItems = {
           title: 'Lista de Productos',
           icon: 'fas fa-list',
           to: '/lista-productos'
+        },
+        {
+          title: 'Cat. Productos',
+          icon: 'fas fa-tags',
+          to: '/categorias-productos'
         }
       ]
-    },
-    categoriasProductos: {
-      title: 'Cat. Productos',
-      icon: 'fas fa-tags',
-      to: '/categorias-productos'
-    },
-    categoriasServicios: {
-      title: 'Cat. Servicios',
-      icon: 'fas fa-layer-group',
-      to: '/categorias-servicios'
     },
     proveedores: {
       title: 'Proveedores',
@@ -110,7 +110,19 @@ const commonItems = {
       title: 'Gestionar Citas',
       icon: 'fas fa-calendar-check',
       to: '/gestion-citas'
-    }
+    },
+    paginaPrincipal: {
+      title: 'Gestión de Página',
+      icon: 'fas fa-desktop',
+      to: '/config/pagina-principal',
+      children: [
+        {
+          title: 'Cintas Promocionales',
+          icon: 'fas fa-ad',
+          to: '/config/cintas'
+        }
+      ]
+    },
   },
   cliente: {
     agendarCita: {
@@ -149,7 +161,7 @@ export default {
   "menuadministrador": [
     { header: 'Menu Administrador' },
     {
-      title: "Inicio",
+      title: "Dashboard Principal",
       icon: "fas fa-home",
       to: "/inicio-dashboard"
     },
@@ -159,14 +171,17 @@ export default {
     commonItems.administrador.barberos,
     commonItems.administrador.servicios,
     commonItems.administrador.productos,
-    commonItems.administrador.categoriasProductos,
-    commonItems.administrador.categoriasServicios,
-    commonItems.administrador.proveedores,
-    commonItems.administrador.compras,
     { divider: true },
     { header: 'Gestion de citas' },
     commonItems.administrador.dashboardCita,
-    commonItems.administrador.gestionCitas
+    commonItems.administrador.gestionCitas,
+    { divider: true },
+    { header: 'Gestion de compras' },
+    commonItems.administrador.compras,
+    commonItems.administrador.proveedores,
+    { divider: true },
+    { header: 'Personalización' },
+    commonItems.administrador.paginaPrincipal,
   ],
 
   "menubarbero": [

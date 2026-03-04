@@ -146,6 +146,45 @@ export const useBarberStore = defineStore('barber', {
       } finally {
         this.loading = false
       }
+    },
+
+    async updateBarber(id: number, payload: Partial<Barber>) {
+      this.loading = true
+      try {
+        const { data } = await api.patch(`/auth/${id}`, payload, { withCredentials: true })
+        const index = this.barbers.findIndex(b => b.id === id)
+        if (index !== -1) {
+          this.barbers[index] = { ...this.barbers[index], ...data }
+        }
+        return data
+      } catch (err: unknown) {
+        if (axios.isAxiosError(err) && err.response?.data?.message) {
+          this.error = err.response.data.message
+        } else {
+          this.error = 'Error actualizando barbero'
+        }
+        throw this.error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async deleteBarber(id: number) {
+      this.loading = true
+      try {
+        await api.delete(`/auth/${id}`, { withCredentials: true })
+        this.barbers = this.barbers.filter(b => b.id !== id)
+        return true
+      } catch (err: unknown) {
+        if (axios.isAxiosError(err) && err.response?.data?.message) {
+          this.error = err.response.data.message
+        } else {
+          this.error = 'Error eliminando barbero'
+        }
+        throw this.error
+      } finally {
+        this.loading = false
+      }
     }
   },
 })

@@ -127,8 +127,30 @@
       required: true,
       default: false,
     },
+    initialServiceId: {
+      type: Number,
+      default: null
+    }
   })
   const emit = defineEmits(['update:modelValue'])
+
+  // Watcher para manejar apertura y cierre del diálogo
+  watch(() => props.modelValue, (isOpen) => {
+    if (isOpen) {
+      if (props.initialServiceId) {
+        console.log('📦 Pre-seleccionando servicio:', props.initialServiceId)
+        reservaStore.setServicios([props.initialServiceId])
+        currentIndex.value = 0
+        reservaStore.setCurrentTab(0)
+      }
+    } else {
+      // ✅ RESET AUTOMÁTICO AL CERRAR (incluso si dan clic fuera)
+      console.log('🧹 Limpiando reserva al cerrar...')
+      reservaStore.resetReserva()
+      currentIndex.value = 0
+      reservaStore.setCurrentTab(0)
+    }
+  })
 
   // ✅ Estado
   const items = ['Servicios', 'Fecha y Hora', 'Profesional', 'Confirmacion']
@@ -225,6 +247,8 @@
 
   // ✅ Métodos - AHORA ACTUALIZAN LA STORE
   function closeDialog() {
+    reservaStore.resetReserva() // ✅ Limpiar todo al cerrar
+    currentIndex.value = 0      // ✅ Volver al primer tab
     emit('update:modelValue', false)
   }
 
