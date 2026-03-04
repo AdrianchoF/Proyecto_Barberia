@@ -1,333 +1,210 @@
-import {
-    CircleIcon,
-    WindmillIcon,
-    TypographyIcon,
-    ShadowIcon,
-    PaletteIcon,
-    KeyIcon,
-    BugIcon,
-    DashboardIcon,
-    BrandChromeIcon,
-    HelpIcon
-} from 'vue-tabler-icons';
-
 // Opciones comunes que pueden usar todos los roles
 const commonItems = {
   dashboard: {
     title: 'Dashboard Principal',
-    icon: DashboardIcon,
+    icon: 'fas fa-chart-line',
     to: '/dashboard/default'
   },
   PaginaPrincipal: {
-    title: 'Pagina Principal',
-    icon: DashboardIcon,
+    title: 'Página Principal',
+    icon: 'fas fa-home',
     to: '/pages/pagina-principal'
   },
   administrador: {
-    authentication: {
-      title: 'Authentication',
-      icon: KeyIcon,
-      to: '/auth',
-      children: [
-        {
-          title: 'Login',
-          icon: CircleIcon,
-          to: '/login1'
-        },
-        {
-          title: 'Register',
-          icon: CircleIcon,
-          to: '/register'
-        }
-      ]
-    },
     clientes: {
       title: 'Clientes',
-      icon: KeyIcon,
+      icon: 'fas fa-users',
       to: '/clientes',
       children: [
         {
           title: 'Lista de Clientes',
-          icon: CircleIcon,
+          icon: 'fas fa-list',
           to: '/lista-clientes'
         },
       ]
     },
     barberos: {
       title: 'Barberos',
-      icon: KeyIcon,
+      icon: 'fas fa-cut',
       to: '/barberos',
       children: [
         {
           title: 'Lista de Barberos',
-          icon: CircleIcon,
+          icon: 'fas fa-list',
           to: '/lista-barberos'
         },
         {
           title: 'Crear Barbero',
-          icon: CircleIcon,
+          icon: 'fas fa-user-plus',
           to: '/crear-barbero'
         }
       ]
     },
     servicios: {
       title: 'Servicios',
-      icon: KeyIcon,
+      icon: 'fas fa-concierge-bell',
       to: '/servicios',
       children: [
         {
           title: 'Lista de Servicios',
-          icon: CircleIcon,
+          icon: 'fas fa-list',
           to: '/lista-servicios'
         },
         {
           title: 'Crear Servicio',
-          icon: CircleIcon,
+          icon: 'fas fa-plus-circle',
           to: '/crear-servicio'
         }
       ]
     },
     productos: {
       title: 'Productos',
-      icon: KeyIcon,
+      icon: 'fas fa-box-open',
       to: '/productos',
       children: [
         {
           title: 'Lista de Productos',
-          icon: CircleIcon,
+          icon: 'fas fa-list',
           to: '/lista-productos'
         }
       ]
     },
     categoriasProductos: {
-      title: 'Categorias de productos',
-      icon: KeyIcon,
+      title: 'Cat. Productos',
+      icon: 'fas fa-tags',
       to: '/categorias-productos'
     },
     categoriasServicios: {
-      title: 'Categorias de servicios',
-      icon: KeyIcon,
+      title: 'Cat. Servicios',
+      icon: 'fas fa-layer-group',
       to: '/categorias-servicios'
     },
     proveedores: {
       title: 'Proveedores',
-      icon: KeyIcon,
+      icon: 'fas fa-truck',
       to: '/proveedores'
     },
     compras: {
       title: 'Compras a Proveedores',
-      icon: KeyIcon,
+      icon: 'fas fa-shopping-cart',
       to: '/compras',
       children: [
         {
           title: 'Lista de Compras',
-          icon: CircleIcon,
+          icon: 'fas fa-list',
           to: '/lista-compras'
         },
         {
           title: 'Nueva Orden',
-          icon: CircleIcon,
+          icon: 'fas fa-file-invoice-dollar',
           to: '/crear-compra'
         }
       ]
     },
     dashboardCita: {
       title: 'Dashboard Citas',
-      icon: KeyIcon,
+      icon: 'fas fa-calendar-alt',
       to: '/dashboard-citas'
     },
     gestionCitas: {
       title: 'Gestionar Citas',
-      icon: KeyIcon,
+      icon: 'fas fa-calendar-check',
       to: '/gestion-citas'
     }
   },
   cliente: {
-    authentication: {
-      title: 'Authentication',
-      icon: KeyIcon,
-      to: '/auth',
-      children: [
-        {
-          title: 'Login',
-          icon: CircleIcon,
-          to: '/login1'
-        },
-        {
-          title: 'Register',
-          icon: CircleIcon,
-          to: '/register'
-        }
-      ]
-    },
     agendarCita: {
       title: 'Reservar Cita',
-      icon: KeyIcon,
+      icon: 'fas fa-calendar-plus',
       to: '/reservar-cita'
     },
     citas: {
       title: 'Mis Citas',
-      icon: KeyIcon,
+      icon: 'fas fa-calendar-check',
       to: '/mis-citas',
       children: [
         {
           title: 'Citas actuales',
-          icon: CircleIcon,
+          icon: 'fas fa-clock',
           to: '/mis-citas'
         },
         {
           title: 'Historial de citas',
-          icon: CircleIcon,
+          icon: 'fas fa-history',
           to: '/historial-citas'
         }
       ]
     }
   },
   barbero: {
-    authentication: {
-      title: 'Authentication',
-      icon: KeyIcon,
-      to: '/auth',
-      children: [
-        {
-          title: 'Login',
-          icon: CircleIcon,
-          to: '/login1'
-        },
-        {
-          title: 'Register',
-          icon: CircleIcon,
-          to: '/register'
-        }
-      ]
-    },
     agendaCitas: {
       title: 'Mi agenda',
-      icon: KeyIcon,
+      icon: 'fas fa-calendar-alt',
       to: '/agenda-citas'
     }
-  },
-  error404: {
-    title: 'Error 404',
-    icon: BugIcon,
-    to: '/error'
-  },
-  typography: {
-    title: 'Typography',
-    icon: TypographyIcon,
-    to: '/utils/typography'
-  },
-  shadows: {
-    title: 'Shadows',
-    icon: ShadowIcon,
-    to: '/utils/shadows'
-  },
-  colors: {
-    title: 'Colors',
-    icon: PaletteIcon,
-    to: '/utils/colors'
-  },
-  icons: {
-    title: 'Icons',
-    icon: WindmillIcon,
-    to: '/forms/radio',
-    children: [
-      {
-        title: 'Tabler Icons',
-        icon: CircleIcon,
-        to: '/icons/tabler'
-      },
-      {
-        title: 'Material Icons',
-        icon: CircleIcon,
-        to: '/icons/material'
-      }
-    ]
-  },
-  samplePage: {
-    title: 'Sample Page',
-    icon: BrandChromeIcon,
-    to: '/starter'
-  },
-  documentation: {
-    title: 'Documentation',
-    icon: HelpIcon,
-    to: 'https://codedthemes.gitbook.io/berry-vuetify/',
-    type: 'external'
   }
 };
 
 export default {
-    "menuadministrador": [
-        { header: 'Menu Administrador' },
-        {
-        title: "Inicio",
-        icon: "mdi-account-multiple",
-        to: "/inicio-dashboard"
-        },
-        { divider: true },
-        { header: 'Administración' },
-        commonItems.administrador.clientes,
-        commonItems.administrador.barberos,
-        commonItems.administrador.servicios,
-        commonItems.administrador.productos,
-        commonItems.administrador.categoriasProductos,
-        commonItems.administrador.categoriasServicios,
-        commonItems.administrador.proveedores,
-        commonItems.administrador.compras,
-        { divider: true },
-        { header: 'Gestion de citas' },
-        commonItems.administrador.dashboardCita,
-        commonItems.administrador.gestionCitas,
-        { divider: true },
-        commonItems.samplePage,
-        commonItems.documentation
-    ],
+  "menuadministrador": [
+    { header: 'Menu Administrador' },
+    {
+      title: "Inicio",
+      icon: "fas fa-home",
+      to: "/inicio-dashboard"
+    },
+    { divider: true },
+    { header: 'Administración' },
+    commonItems.administrador.clientes,
+    commonItems.administrador.barberos,
+    commonItems.administrador.servicios,
+    commonItems.administrador.productos,
+    commonItems.administrador.categoriasProductos,
+    commonItems.administrador.categoriasServicios,
+    commonItems.administrador.proveedores,
+    commonItems.administrador.compras,
+    { divider: true },
+    { header: 'Gestion de citas' },
+    commonItems.administrador.dashboardCita,
+    commonItems.administrador.gestionCitas
+  ],
 
-    "menubarbero": [
-        { header: 'Menu Barbero' },
-        {
-        title: "Inicio",
-        icon: "mdi-account-multiple",
-        to: "/inicio-dashboard"
-        },
-        { divider: true },
-        { header: 'Trabajo' },
-        commonItems.barbero.agendaCitas,
-        {
-        title: "Clientes",
-        icon: "mdi-account-multiple",
-        to: "/clientes"
-        },
-        { divider: true },
-        { header: 'Utilidades' },
-        commonItems.colors,
-        commonItems.icons,
-        { divider: true },
-        commonItems.samplePage
-    ],
+  "menubarbero": [
+    { header: 'Menu Barbero' },
+    {
+      title: "Inicio",
+      icon: "fas fa-home",
+      to: "/inicio-dashboard"
+    },
+    { divider: true },
+    { header: 'Trabajo' },
+    commonItems.barbero.agendaCitas,
+    {
+      title: "Clientes",
+      icon: "fas fa-users",
+      to: "/clientes"
+    }
+  ],
 
-    "menucliente": [
-        { header: 'Menu Cliente' },
-        commonItems.dashboard,
-        commonItems.PaginaPrincipal,
-        { divider: true },
-        { header: 'Servicios' },
-        commonItems.cliente.agendarCita,
-        commonItems.cliente.citas,
-        {
-        title: "Historial",
-        icon: "mdi-history",
-        to: "/historial"
-        },
-        { divider: true },
-        { header: 'Cuenta' },
-        {
-        title: "Mi Perfil",
-        icon: "mdi-account-circle",
-        to: "/perfil"
-        },
-        { divider: true },
-        commonItems.samplePage
-    ]
+  "menucliente": [
+    { header: 'Menu Cliente' },
+    commonItems.dashboard,
+    commonItems.PaginaPrincipal,
+    { divider: true },
+    { header: 'Servicios' },
+    commonItems.cliente.agendarCita,
+    commonItems.cliente.citas,
+    {
+      title: "Historial",
+      icon: "fas fa-history",
+      to: "/historial"
+    },
+    { divider: true },
+    { header: 'Cuenta' },
+    {
+      title: "Mi Perfil",
+      icon: "fas fa-user-circle",
+      to: "/perfil"
+    }
+  ]
 };

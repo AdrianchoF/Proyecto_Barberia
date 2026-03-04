@@ -2,30 +2,26 @@
 import { shallowRef, ref, onMounted, computed } from 'vue';
 import { useCustomizerStore } from '../../../stores/customizer';
 import { useAuthStore } from '@/stores/auth';
-import menus from "../../../config/dashboardConfig.js";
+import menus from "../../../config/dashboardConfig";
 import NavGroup from './NavGroup/NavGroup.vue';
 import NavItem from './NavItem/NavItem.vue';
 import NavCollapse from './NavCollapse/NavCollapse.vue';
-//import Logo from '../logo/LogoMain.vue';
 
 const customizer = useCustomizerStore();
 const authStore = useAuthStore();
 
-// Definir el tipo para los elementos del menú
 type MenuItem = {
   header?: string;
   hiddenOnCollapse?: boolean;
   href?: string;
   title?: string;
-  icon?: string | any; // Permitir string o componente
+  icon?: string | any; 
   divider?: boolean;
   children?: MenuItem[];
-  // Agregar otras propiedades según sea necesario
 };
 
 const menu = ref<MenuItem[]>([]);
 
-// Cargar el menú según el rol del usuario
 onMounted(() => {
   const role = (authStore.user && typeof authStore.user === 'object' && typeof (authStore.user as any).Role === 'string')
     ? ((authStore.user as any).Role as string).toLowerCase()
@@ -41,12 +37,10 @@ onMounted(() => {
       menu.value = menus.menucliente;
       break;
     default:
-      menu.value = []; // O algún otro valor por defecto
+      menu.value = [];
   }
-  console.log("Menu cargado:", menu.value);
 });
 
-// Computed para usar el menú dinámico
 const sidebarMenu = computed(() => menu.value);
 </script>
 
@@ -54,36 +48,57 @@ const sidebarMenu = computed(() => menu.value);
   <v-navigation-drawer
     left
     v-model="customizer.Sidebar_drawer"
-    elevation="0"
+    elevation="4"
+    width="290"
     rail-width="75"
     mobile-breakpoint="lg"
     app
-    class="leftSidebar"
+    class="brand-sidebar"
     :rail="customizer.mini_sidebar"
     expand-on-hover
   >
-    <!---Logo part -->
-    <div class="d-flex justify-center align-center my-4">
-      <img src="/imagenes/logo/logo2.png" alt="Logo" style="width: 100px; max-width: 100%;"/>
+    <!-- Logo -->
+    <div class="d-flex justify-center align-center my-6 logo-container">
+      <img src="/imagenes/logo/logo2.png" alt="Logo" class="sidebar-logo" />
     </div>
-    <!-- ---------------------------------------------- -->
-    <!---Navigation -->
-    <!-- ---------------------------------------------- -->
+    
+    <!-- Menu -->
     <perfect-scrollbar class="scrollnavbar">
-      <v-list class="pa-4">
-        <!---Menu Loop -->
+      <v-list class="pa-4 pt-0">
         <template v-for="(item, i) in sidebarMenu" :key="i">
-          <!---Item Sub Header -->
           <NavGroup :item="item" v-if="item.header" :key="item.title" />
-          <!---Item Divider -->
-          <v-divider class="my-3" v-else-if="item.divider" />
-          <!---If Has Child -->
+          <v-divider class="my-3 sidebar-divider" v-else-if="item.divider" />
           <NavCollapse class="leftPadding" :item="item" :level="0" v-else-if="item.children" />
-          <!---Single Item-->
           <NavItem :item="item" v-else class="leftPadding" />
-          <!---End Single Item-->
         </template>
       </v-list>
     </perfect-scrollbar>
   </v-navigation-drawer>
 </template>
+
+<style scoped>
+.brand-sidebar {
+  background-color: #ffffff;
+  border-right: 1px solid #f0f0f0 !important;
+}
+
+.logo-container {
+  padding: 0 20px;
+}
+
+.sidebar-logo {
+  width: 140px;
+  max-width: 100%;
+  transition: all 0.3s;
+}
+
+.sidebar-divider {
+  border-color: #f0f0f0;
+  opacity: 1;
+}
+
+/* Customize the scrollbar padding */
+.scrollnavbar {
+  height: calc(100vh - 90px);
+}
+</style>

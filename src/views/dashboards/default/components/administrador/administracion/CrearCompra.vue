@@ -1,61 +1,90 @@
 <template>
-    <v-container>
-        <h2 class="text-h5 mb-6">Nueva Orden de Compra</h2>
+  <v-container fluid class="py-6">
 
-        <v-alert v-if="compraStore.error" type="error" class="mb-4" dismissible @click="compraStore.limpiarMensajes()">
-            {{ compraStore.error }}
+    <!-- ══════════════════════════════ -->
+    <!-- CARD PRINCIPAL                -->
+    <!-- ══════════════════════════════ -->
+    <v-card class="brand-card" elevation="2" rounded="xl" style="max-width:760px; margin:auto">
+
+      <div class="form-header">
+        <div class="header-icon"><i class="fas fa-file-invoice"></i></div>
+        <div>
+          <h2 class="header-title">Nueva Orden de Compra</h2>
+          <p class="header-subtitle">Selecciona el proveedor e inicia el pedido por WhatsApp</p>
+        </div>
+      </div>
+
+      <v-card-text class="pa-6">
+
+        <v-alert v-if="compraStore.error" type="error" variant="tonal" rounded="lg" class="mb-4" closable @click:close="compraStore.limpiarMensajes()">
+          {{ compraStore.error }}
+        </v-alert>
+        <v-alert v-if="compraStore.successMessage" type="success" variant="tonal" rounded="lg" class="mb-4" closable @click:close="compraStore.limpiarMensajes()">
+          {{ compraStore.successMessage }}
         </v-alert>
 
-        <v-alert v-if="compraStore.successMessage" type="success" class="mb-4" dismissible @click="compraStore.limpiarMensajes()">
-            {{ compraStore.successMessage }}
+        <!-- SECCIÓN: PROVEEDOR -->
+        <div class="section-label">
+          <i class="fas fa-truck section-icon"></i>
+          <span>Seleccionar Proveedor</span>
+        </div>
+
+        <v-select
+          v-model="formulario.id_proveedor"
+          :items="proveedoresDisponibles"
+          item-title="nombre"
+          item-value="id"
+          label="Proveedor"
+          variant="outlined"
+          rounded="lg"
+          density="comfortable"
+          class="mb-2"
+        >
+          <template #prepend-inner>
+            <i class="fas fa-building field-icon"></i>
+          </template>
+        </v-select>
+
+        <v-alert type="info" variant="tonal" rounded="lg" density="compact" class="mb-6">
+          <i class="fas fa-info-circle mr-2"></i>
+          El administrador realiza el pedido por WhatsApp. Aquí solo se crea una orden pendiente para registrar la operación.
         </v-alert>
 
-        <v-row>
-            <v-col cols="12" md="6">
-                <v-card class="pa-6">
-                    <h3 class="text-h6 mb-4">Seleccionar Proveedor</h3>
+        <!-- SECCIÓN: ACCIONES -->
+        <v-divider class="mb-5" />
 
-                    <v-select
-                        v-model="formulario.id_proveedor"
-                        :items="proveedoresDisponibles"
-                        item-title="nombre"
-                        item-value="id"
-                        label="Proveedor"
-                        variant="outlined"
-                        class="mb-4"
-                    ></v-select>
+        <div class="section-label">
+          <i class="fas fa-bolt section-icon"></i>
+          <span>Acciones</span>
+        </div>
 
-                    <div class="text-body-2">El administrador debe realizar el pedido por WhatsApp. Aquí sólo se crea una orden pendiente para registrar la operación.</div>
-                </v-card>
-            </v-col>
+        <v-btn
+          class="submit-btn mb-3"
+          size="large"
+          rounded="lg"
+          block
+          :loading="compraStore.loading"
+          :disabled="!formulario.id_proveedor || compraStore.loading"
+          @click="iniciarPedidoPorWhatsApp"
+        >
+          <i class="fab fa-whatsapp mr-2" style="font-size:16px"></i>
+          Iniciar Pedido por WhatsApp y Guardar
+        </v-btn>
 
-            <v-col cols="12" md="6">
-                <v-card class="pa-6">
-                    <h3 class="text-h6 mb-4">Acciones</h3>
+        <v-btn
+          variant="outlined"
+          size="large"
+          rounded="lg"
+          block
+          @click="volverAtras"
+          :disabled="compraStore.loading"
+        >
+          <i class="fas fa-arrow-left mr-2"></i> Cancelar y Volver
+        </v-btn>
 
-                    <v-btn
-                        color="success"
-                        class="w-100"
-                        :loading="compraStore.loading"
-                        :disabled="!formulario.id_proveedor || compraStore.loading"
-                        @click="iniciarPedidoPorWhatsApp"
-                    >
-                        Iniciar pedido por WhatsApp y Guardar
-                    </v-btn>
-
-                    <v-btn
-                        color="gray"
-                        variant="text"
-                        @click="volverAtras"
-                        class="w-100 mt-2"
-                        :disabled="compraStore.loading"
-                    >
-                        Cancelar
-                    </v-btn>
-                </v-card>
-            </v-col>
-        </v-row>
-    </v-container>
+      </v-card-text>
+    </v-card>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -69,139 +98,84 @@ const compraStore = useCompraStore();
 const proveedorStore = useProveedorStore();
 
 const formulario = ref({
-    id_proveedor: null as number | null,
-    fecha_compra: new Date().toISOString().slice(0, 16),
+  id_proveedor: null as number | null,
+  fecha_compra: new Date().toISOString().slice(0, 16),
 });
 
 const carrito = ref<any[]>([]);
-
-const nuevoProducto = ref({
-    nombre: '',
-    cantidad: 0,
-    precio_unitario: 0,
-    descripcion: '',
-    categoriaId: null as number | null,
-    imagenUrl: '',
-});
-
+const nuevoProducto = ref({ nombre: '', cantidad: 0, precio_unitario: 0, descripcion: '', categoriaId: null as number | null, imagenUrl: '' });
 const proveedoresDisponibles = ref<any[]>([]);
 const categoriasDisponibles = ref<any[]>([]);
 
-const proveedorSeleccionado = computed(() => {
-    return proveedoresDisponibles.value.find(p => p.id === formulario.value.id_proveedor);
-});
+const proveedorSeleccionado = computed(() => proveedoresDisponibles.value.find(p => p.id === formulario.value.id_proveedor));
 
-// auto hide store messages
-watch(() => compraStore.successMessage, (val) => {
-    if (val) setTimeout(() => compraStore.limpiarMensajes(), 3000);
-});
-watch(() => compraStore.error, (val) => {
-    if (val) setTimeout(() => compraStore.limpiarMensajes(), 3000);
-});
-
-const enlaceWhatsapp = computed(() => {
-    if (!proveedorSeleccionado.value?.telefono) return '';
-    const telefono = proveedorSeleccionado.value.telefono.replace(/\D/g, '');
-    const mensaje = `Hola, necesito hacer un pedido a través del sistema de la barbería.`;
-    return `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
-});
-
-const calcularSubtotal = () => {
-    return carrito.value.reduce((sum, item) => sum + (item.cantidad * item.precio_unitario), 0);
-};
-
-const agregarAlCarrito = () => {
-    if (!nuevoProducto.value.nombre || !nuevoProducto.value.cantidad || !nuevoProducto.value.precio_unitario) {
-        compraStore.error = 'Completa los campos requeridos';
-        return;
-    }
-
-    carrito.value.push({
-        nombre_producto: nuevoProducto.value.nombre,
-        descripcion_producto: nuevoProducto.value.descripcion,
-        cantidad: nuevoProducto.value.cantidad,
-        precio_unitario: nuevoProducto.value.precio_unitario,
-        categoriaId_producto: nuevoProducto.value.categoriaId,
-        imagenUrl_producto: nuevoProducto.value.imagenUrl,
-    });
-
-    // Limpiar formulario
-    nuevoProducto.value = {
-        nombre: '',
-        cantidad: 0,
-        precio_unitario: 0,
-        descripcion: '',
-        categoriaId: null,
-        imagenUrl: '',
-    };
-
-    compraStore.successMessage = 'Producto agregado al carrito';
-    setTimeout(() => compraStore.limpiarMensajes(), 2000);
-};
-
-const eliminarDelCarrito = (index: number) => {
-    carrito.value.splice(index, 1);
-};
-
-const guardarCompra = async () => {
-    // Deprecated in new flow — kept for compatibility
-};
-
-const enviarPorWhatsApp = async () => {
-    // Deprecated in new flow — kept for compatibility
-};
+watch(() => compraStore.successMessage, (val) => { if (val) setTimeout(() => compraStore.limpiarMensajes(), 3000); });
+watch(() => compraStore.error, (val) => { if (val) setTimeout(() => compraStore.limpiarMensajes(), 3000); });
 
 const iniciarPedidoPorWhatsApp = async () => {
-    if (!formulario.value.id_proveedor) {
-        compraStore.error = 'Selecciona un proveedor';
-        return;
+  if (!formulario.value.id_proveedor) {
+    compraStore.error = 'Selecciona un proveedor';
+    return;
+  }
+  try {
+    const created = await compraStore.createCompra({ id_proveedor: formulario.value.id_proveedor, detalles: [] } as any);
+    const proveedor = proveedorSeleccionado.value;
+    const telefono = proveedor?.telefono ? proveedor.telefono.replace(/\D/g, '') : undefined;
+    let mensaje = `Hola ${proveedor?.nombre || ''},\n`;
+    mensaje += `Necesito realizar un pedido. Orden ID: ${created.id_compra || ''}\n`;
+    mensaje += `Por favor confirmar disponibilidad y enviar factura o confirmación.`;
+
+    if (telefono) {
+      window.open(`https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`, '_blank');
+      compraStore.successMessage = 'Orden creada y chat de WhatsApp abierto.';
+    } else {
+      compraStore.successMessage = 'Orden creada. No se encontró teléfono del proveedor.';
     }
-
-    try {
-        // crear orden mínima (sin detalles) en servidor
-        const created = await compraStore.createCompra({
-            id_proveedor: formulario.value.id_proveedor,
-            detalles: [],
-        } as any);
-
-        const proveedor = proveedorSeleccionado.value;
-        const telefono = proveedor?.telefono ? proveedor.telefono.replace(/\D/g, '') : undefined;
-        let mensaje = `Hola ${proveedor?.nombre || ''},\n`;
-        mensaje += `Necesito realizar un pedido. Orden ID: ${created.id_compra || ''}\n`;
-        mensaje += `Por favor confirmar disponibilidad y enviar factura o confirmación.`;
-
-        if (telefono) {
-            const url = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
-            window.open(url, '_blank');
-            compraStore.successMessage = 'Orden creada y chat de WhatsApp abierto.';
-        } else {
-            compraStore.successMessage = 'Orden creada. No se encontró teléfono del proveedor.';
-        }
-
-        setTimeout(() => router.push('/lista-compras'), 800);
-    } catch (error) {
-        console.error('Error al iniciar pedido por WhatsApp:', error);
-    }
+    setTimeout(() => router.push('/lista-compras'), 800);
+  } catch (error) {
+    console.error('Error al iniciar pedido por WhatsApp:', error);
+  }
 };
 
-const volverAtras = () => {
-    router.push('/lista-compras');
-};
+const volverAtras = () => { router.push('/lista-compras'); };
 
 onMounted(async () => {
-    await proveedorStore.getProveedores();
-    proveedoresDisponibles.value = proveedorStore.proveedores || [];
-
-    // Cargar categorías (esto es una llamada adicional, idealmente vendría del store)
-    // Por ahora usamos un placeholder
-    categoriasDisponibles.value = [
-        { id: 1, nombre: 'General' },
-    ];
+  await proveedorStore.getProveedores();
+  proveedoresDisponibles.value = proveedorStore.proveedores || [];
+  categoriasDisponibles.value = [{ id: 1, nombre: 'General' }];
 });
 </script>
 
 <style scoped>
-.w-100 {
-    width: 100%;
+.form-header {
+  display: flex; align-items: center; gap: 16px;
+  padding: 22px 28px;
+  background: linear-gradient(135deg, #ee6f38 0%, #d45a22 100%);
+  color: white; border-radius: 12px 12px 0 0;
 }
+.header-icon {
+  width: 48px; height: 48px; min-width: 48px;
+  border-radius: 12px; background: rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center; font-size: 20px;
+}
+.header-title { font-size: 1.3rem; font-weight: 700; margin: 0 0 2px; }
+.header-subtitle { font-size: 0.8rem; margin: 0; opacity: 0.85; }
+
+.section-label {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 0.82rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.8px;
+  color: #555; margin-bottom: 14px;
+}
+.section-icon {
+  background: #ee6f38; color: white;
+  padding: 5px 7px; border-radius: 7px; font-size: 12px;
+}
+.field-icon { color: #7f8c9a; font-size: 13px; margin-right: 4px; }
+
+.submit-btn {
+  background: linear-gradient(135deg, #ee6f38, #d45a22) !important;
+  color: white !important; font-weight: 700;
+}
+.submit-btn:disabled { opacity: 0.45 !important; }
 </style>

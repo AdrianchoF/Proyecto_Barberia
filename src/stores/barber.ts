@@ -14,7 +14,8 @@ interface Barber {
 
 interface Horario {
   diasemana: string
-  idFranja: number
+  hora_inicio: string
+  hora_fin: string
 }
 
 interface BarberWithSchedule extends Barber {
@@ -81,30 +82,17 @@ export const useBarberStore = defineStore('barber', {
 
         const { data: newBarber } = await api.post(
           '/auth/register-barber',
-          barberData,
+          { ...barberData, horarios },
           { withCredentials: true }
         )
 
-        // Crear los horarios para el barbero recién creado
-        if (horarios && horarios.length > 0) {
-          const schedulePromises = horarios.map(horario =>
-            api.post(
-              '/horario-barbero', // Asegúrate que esta ruta coincida con tu controlador
-              {
-                barberoId: newBarber.id,
-                diasemana: horario.diasemana,
-                idFranja: horario.idFranja
-              },
-              { withCredentials: true }
-            )
-          )
-
-          await Promise.all(schedulePromises)
-        }
+        // Ya NO es necesario un for loop o promises para enviar los horarios uno por uno 
+        // porque el backend de auth/register-barber ahora los recibe todos en un solo array.
+        // Las interfaces del backend han sido actualizadas.
 
         // Agregar el barbero a la lista
         this.barbers.push(newBarber)
-        
+
         return {
           barber: newBarber,
           horarios: horarios,

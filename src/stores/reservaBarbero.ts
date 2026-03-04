@@ -12,11 +12,8 @@ interface Barbero {
 interface Horario {
     id: number
     Dia_semana: string
-    franja: {
-        id_franja: number
-        hora_inicio: string
-        hora_fin: string
-    }
+    hora_inicio: string
+    hora_fin: string
 }
 
 interface ReservaBarberoState {
@@ -42,7 +39,7 @@ export const useReservaBarberoStore = defineStore('reservaBarbero', {
         // Obtener el día de la semana en español (sin acentos)
         diaSemana: (state) => {
             if (!state.fechaSeleccionada) return null
-            
+
             const diasSemana = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado']
             const fecha = new Date(state.fechaSeleccionada + 'T00:00:00')
             return diasSemana[fecha.getDay()]
@@ -55,15 +52,15 @@ export const useReservaBarberoStore = defineStore('reservaBarbero', {
 
         // Verificar si el tab actual debe tener botón habilitado
         botonHabilitadoPorTab: (state) => {
-            switch(state.currentTab) {
+            switch (state.currentTab) {
                 case 0: // Servicios
-                return state.serviciosSeleccionados.length > 0
+                    return state.serviciosSeleccionados.length > 0
                 case 1: // Fecha y Hora
-                return !!(state.fechaSeleccionada && state.horaSeleccionada)
+                    return !!(state.fechaSeleccionada && state.horaSeleccionada)
                 case 2: // Confirmación
-                return false // Se maneja desde el componente
+                    return false // Se maneja desde el componente
                 default:
-                return false
+                    return false
             }
         },
 
@@ -72,7 +69,7 @@ export const useReservaBarberoStore = defineStore('reservaBarbero', {
             if (!state.horariosBarbero || state.horariosBarbero.length === 0) {
                 return []
             }
-            
+
             // Extraer días únicos
             const dias = [...new Set(state.horariosBarbero.map(h => h.Dia_semana))]
             return dias
@@ -83,10 +80,14 @@ export const useReservaBarberoStore = defineStore('reservaBarbero', {
             if (!state.horariosBarbero || state.horariosBarbero.length === 0) {
                 return []
             }
-            
+
             return state.horariosBarbero
                 .filter(h => h.Dia_semana === diaSemana)
-                .map(h => h.franja)
+                .map(h => ({
+                    id_franja: h.id,
+                    hora_inicio: h.hora_inicio,
+                    hora_fin: h.hora_fin
+                }))
                 .sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio))
         },
 
@@ -103,7 +104,7 @@ export const useReservaBarberoStore = defineStore('reservaBarbero', {
             this.barberoPreseleccionado = barbero
             this.horariosBarbero = horarios
             this.currentTab = 0
-            
+
             console.log('✅ Reserva iniciada con barbero:', barbero.nombre)
             console.log('📅 Horarios cargados:', horarios.length)
         },
@@ -136,7 +137,7 @@ export const useReservaBarberoStore = defineStore('reservaBarbero', {
             this.fechaSeleccionada = null
             this.horaSeleccionada = null
             this.currentTab = 0
-            
+
             console.log('🔄 Reserva de barbero reseteada')
         }
     }
