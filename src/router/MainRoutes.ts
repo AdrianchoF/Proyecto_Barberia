@@ -14,6 +14,7 @@ import CrearCompra from '@/views/dashboards/default/components/administrador/adm
 import DashboardCitas from '@/views/dashboards/default/components/administrador/gestion-de-citas/DashboardCitas.vue';
 import GestionarCitas from '@/views/dashboards/default/components/administrador/gestion-de-citas/GestionarCitas.vue';
 import GestionCintas from '@/views/dashboards/default/components/administrador/gestion-pagina/GestionCintas.vue';
+import GestionUbicacion from '@/views/dashboards/default/components/administrador/gestion-pagina/GestionUbicacion.vue';
 import VistaAgenda from '@/views/dashboards/default/components/barbero/VistaAgenda.vue';
 import ModalseleccionReserva from '@/views/dashboards/default/components/cliente/ModalseleccionReserva.vue';
 import ReservarCita from '@/views/dashboards/default/components/cliente/ReservarCita.vue';
@@ -120,6 +121,11 @@ const MainRoutes = {
       path: '/config/cintas',
       name: 'GestionCintas',
       component: GestionCintas
+    },
+    {
+      path: '/config/ubicacion',
+      name: 'GestionUbicacion',
+      component: GestionUbicacion
     },
     {
       name: 'Starter',

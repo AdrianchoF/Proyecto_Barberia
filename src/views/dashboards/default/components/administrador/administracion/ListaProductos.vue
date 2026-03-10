@@ -135,6 +135,15 @@
                       </button>
                     </template>
                   </v-tooltip>
+
+                  <!-- Botón Eliminar Real -->
+                  <v-tooltip text="Eliminar permanentemente" location="top">
+                    <template #activator="{ props }">
+                      <button v-bind="props" type="button" class="action-btn delete-real-btn ml-1" @click="abrirConfirmarEliminar(producto)">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </template>
+                  </v-tooltip>
                 </td>
               </tr>
             </tbody>
@@ -296,6 +305,33 @@
       </v-card>
     </v-dialog>
 
+    <!-- ══════════════════════════════════════════ -->
+    <!-- DIALOG: CONFIRMAR ELIMINACIÓN             -->
+    <!-- ══════════════════════════════════════════ -->
+    <v-dialog v-model="dialogEliminar" max-width="420">
+      <v-card rounded="xl" elevation="10">
+        <div class="dialog-header delete-real">
+          <i class="fas fa-exclamation-triangle mr-2"></i> Eliminar Producto
+        </div>
+        <v-card-text class="pa-5 text-center">
+          <div class="mb-4">
+            <i class="fas fa-trash-alt text-error" style="font-size: 64px;"></i>
+          </div>
+          <p class="text-h6 mb-2">¿Estás seguro?</p>
+          <p>Deseas eliminar permanentemente: <br><strong>{{ productoAEliminar?.nombre }}</strong></p>
+          <v-alert type="warning" variant="tonal" density="compact" class="mt-4 text-left" rounded="lg">
+            Esta acción no se puede deshacer y eliminará el producto del catálogo y el inventario.
+          </v-alert>
+        </v-card-text>
+        <v-card-actions class="pa-4 pt-0 gap-2">
+          <v-btn variant="outlined" rounded="lg" @click="dialogEliminar = false" class="flex-grow-1">Cancelar</v-btn>
+          <v-btn color="error" variant="flat" rounded="lg" @click="confirmarEliminar" :loading="productoStore.loading" class="flex-grow-1">
+            Sí, Eliminar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
   </v-container>
 </template>
 
@@ -324,6 +360,9 @@ const editImagenBase64 = ref(null);
 
 const editForm = ref({ codigo: '', nombre: '', imagenUrl: '', categoriaId: null, precio_venta: 0, descripcionPublica: '', ingredientes: '', modo_uso: '', cantidades: '', beneficiosTexto: '' });
 const pubForm = ref({ imagenUrl: '', categoriaId: null, precio_venta: 0, descripcionPublica: '', ingredientes: '', modo_uso: '', cantidades: '', beneficiosTexto: '' });
+
+const dialogEliminar = ref(false);
+const productoAEliminar = ref(null);
 
 const formatPrecio = (valor) => Number(valor).toLocaleString('es-CO');
 
@@ -441,6 +480,22 @@ const despublicar = async (producto) => {
     try { await productoStore.despublicarProducto(producto.id); } catch (e) { console.error('Error al despublicar', e); }
 };
 
+const abrirConfirmarEliminar = (producto) => {
+    productoAEliminar.value = producto;
+    dialogEliminar.value = true;
+};
+
+const confirmarEliminar = async () => {
+    if (!productoAEliminar.value?.id) return;
+    try {
+        await productoStore.deleteProducto(productoAEliminar.value.id);
+        dialogEliminar.value = false;
+        productoAEliminar.value = null;
+    } catch (e) {
+        console.error('Error al eliminar producto', e);
+    }
+};
+
 onMounted(async () => {
     await productoStore.getProductos();
     await cargarCategorias();
@@ -502,10 +557,12 @@ onMounted(async () => {
 .edit-btn { background: #fff3e0; color: #ee6f38; } .edit-btn:hover { background: #ee6f38; color: white; }
 .deliver-btn { background: #e3f2fd; color: #1565c0; } .deliver-btn:hover { background: #1565c0; color: white; }
 .delete-btn { background: #ffeaea; color: #e53935; } .delete-btn:hover { background: #e53935; color: white; }
+.delete-real-btn { background: #f5f5f5; color: #444; border: 1px solid #ddd; } .delete-real-btn:hover { background: #e53935; color: white; border-color: #e53935; }
 
 /* ── Dialog Components ── */
 .dialog-header { padding: 18px 22px; background: linear-gradient(135deg, #ee6f38, #d45a22); color: white; font-weight: 700; font-size: 1rem; border-radius: 12px 12px 0 0; }
 .dialog-header.edit { background: linear-gradient(135deg, #f9a825, #f57f17); }
+.dialog-header.delete-real { background: linear-gradient(135deg, #e53935, #b71c1c); }
 .section-label { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #555; }
 .section-icon { background: #ee6f38; color: white; padding: 4px 6px; border-radius: 6px; font-size: 11px; }
 

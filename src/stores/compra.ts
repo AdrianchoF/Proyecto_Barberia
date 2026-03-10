@@ -7,6 +7,7 @@ export interface DetalleCompra {
     cantidad: number;
     cantidad_recibida?: number;
     precio_unitario: number;
+    codigo_producto?: string;
 }
 
 export interface Compra {
@@ -130,22 +131,19 @@ export const useCompraStore = defineStore('compra', {
             this.successMessage = null;
         },
 
-        resetCompraActual() {
-            this.compraActual = null;
-        }
-        ,
-
-        async parseConfirmation(compraId: number, text: string) {
+        async deleteCompra(id: number) {
             this.loading = true;
             this.error = null;
             try {
-                const { data } = await api.post(`/compra-producto/${compraId}/confirmacion`, { text }, { withCredentials: true });
-                return data;
+                await api.delete(`/compra-producto/${id}`, { withCredentials: true });
+                this.compras = this.compras.filter(c => c.id_compra !== id);
+                this.successMessage = 'Orden de compra eliminada';
+                return true;
             } catch (error) {
                 if (axios.isAxiosError(error) && error.response?.data?.message) {
                     this.error = error.response.data.message;
                 } else {
-                    this.error = 'Error al analizar la confirmación';
+                    this.error = 'Error al eliminar la compra';
                 }
                 throw error;
             } finally {
@@ -153,27 +151,8 @@ export const useCompraStore = defineStore('compra', {
             }
         },
 
-        async parseConfirmationFile(compraId: number, file: File) {
-            this.loading = true;
-            this.error = null;
-            try {
-                const form = new FormData();
-                form.append('file', file);
-                const { data } = await api.post(`/compra-producto/${compraId}/confirmacion/archivo`, form, {
-                    withCredentials: true,
-                    headers: { 'Content-Type': 'multipart/form-data' },
-                });
-                return data;
-            } catch (error) {
-                if (axios.isAxiosError(error) && error.response?.data?.message) {
-                    this.error = error.response.data.message;
-                } else {
-                    this.error = 'Error al analizar el archivo de confirmación';
-                }
-                throw error;
-            } finally {
-                this.loading = false;
-            }
+        resetCompraActual() {
+            this.compraActual = null;
         },
 
         async addDetalles(compraId: number, detalles: any[]) {

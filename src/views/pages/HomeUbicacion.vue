@@ -21,7 +21,8 @@
 </template>
 
 <script setup>
-    import { onMounted, ref } from 'vue';
+    import { onMounted, ref, computed } from 'vue';
+    import { useConfiguracionStore } from '@/stores/configuracion';
     import L from 'leaflet';
     import 'leaflet/dist/leaflet.css';
     import 'leaflet-routing-machine';
@@ -29,9 +30,12 @@
     import 'leaflet-control-geocoder';
     import 'leaflet-control-geocoder/dist/Control.Geocoder.css';
 
-    // Coordenadas de StyleHub Barber Shop
-    const barberLat = 8.752611;
-    const barberLng = -75.884609;
+    const configStore = useConfiguracionStore();
+
+    // Coordenadas de StyleHub Barber Shop (Dinámicas)
+    const barberLat = computed(() => configStore.config?.latitud || 8.752611);
+    const barberLng = computed(() => configStore.config?.longitud || -75.884609);
+    const barberNombre = computed(() => configStore.config?.nombre || 'StyleHub Barber Shop');
 
     const origenTexto = ref('');
     let origenCoords = null; // para guardar coordenadas del navegador
@@ -58,11 +62,14 @@
         }
     }
 
-    onMounted(() => {
+    onMounted(async () => {
+        // Cargar configuración de la base de datos
+        await configStore.fetchConfiguracion();
+
         // Inicializar mapa
         map = L.map('map', {
             zoomControl: false // Removemos controles default para reposicionarlos
-        }).setView([barberLat, barberLng], 14);
+        }).setView([barberLat.value, barberLng.value], 14);
 
         // Agregar controles de zoom en posición personalizada
         L.control.zoom({
@@ -89,18 +96,18 @@
         });
 
         // Marcador de la barbería
-        const barberMarker = L.marker([barberLat, barberLng], { icon: barberIcon })
+        const barberMarker = L.marker([barberLat.value, barberLng.value], { icon: barberIcon })
             .addTo(map)
             .bindPopup(`
                 <div class="custom-popup">
-                    <h3>StyleHub Barber Shop</h3>
+                    <h3>${barberNombre.value}</h3>
                     <p>📍 Tu destino</p>
                 </div>
             `)
             .openPopup();
 
         // Tooltip permanente para la barbería
-        barberMarker.bindTooltip('StyleHub Barber Shop', {
+        barberMarker.bindTooltip(barberNombre.value, {
             permanent: true,
             direction: 'top',
             offset: [0, -55],
@@ -234,7 +241,7 @@
 
         // Solo centrar si no hay ruta activa o si es la primera vez
         if (!routingControl || !isTracking.value) {
-            const bounds = L.latLngBounds([origenCoords, [barberLat, barberLng]]);
+            const bounds = L.latLngBounds([origenCoords, [barberLat.value, barberLng.value]]);
             map.fitBounds(bounds, { padding: [50, 50] });
         }
     }
@@ -245,7 +252,7 @@
         // Actualizar punto de origen de la ruta
         const newWaypoints = [
             L.latLng(lat, lng),
-            L.latLng(barberLat, barberLng)
+            L.latLng(barberLat.value, barberLng.value)
         ];
 
         routingControl.setWaypoints(newWaypoints);
@@ -304,7 +311,7 @@
         routingControl = L.Routing.control({
             waypoints: [
                 startLatLng,
-                L.latLng(barberLat, barberLng)
+                L.latLng(barberLat.value, barberLng.value)
             ],
             router: L.Routing.osrmv1({
                 serviceUrl: 'https://router.project-osrm.org/route/v1',
@@ -373,7 +380,7 @@
         
         // Volver a la vista inicial solo si no está siguiendo
         if (!isTracking.value) {
-            map.setView([barberLat, barberLng], 14);
+            map.setView([barberLat.value, barberLng.value], 14);
         }
     }
 

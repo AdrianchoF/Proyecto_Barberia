@@ -120,6 +120,11 @@ const commonItems = {
           title: 'Cintas Promocionales',
           icon: 'fas fa-ad',
           to: '/config/cintas'
+        },
+        {
+          title: 'Ubicación y Datos',
+          icon: 'fas fa-map-marker-alt',
+          to: '/config/ubicacion'
         }
       ]
     },
