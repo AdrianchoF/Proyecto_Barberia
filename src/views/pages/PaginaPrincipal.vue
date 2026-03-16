@@ -166,6 +166,9 @@
       <HomeServicios></HomeServicios>
     </div>
     <div class="reveal-on-scroll">
+      <HomeNosotros></HomeNosotros>
+    </div>
+    <div class="reveal-on-scroll">
       <HomeBarberos></HomeBarberos>
     </div>
     <div class="reveal-on-scroll">
@@ -199,6 +202,7 @@ import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
 import HomeServicios from '@/views/pages/HomeServicios.vue';
+import HomeNosotros from '@/views/pages/HomeNosotros.vue';
 import HomeBarberos from '@/views/pages/HomeBarberos.vue';
 import HomeProductos from '@/views/pages/HomeProductos.vue';
 import HomeUbicacion from './HomeUbicacion.vue';
@@ -220,7 +224,7 @@ const navLinks = [
   { text: 'BARBEROS', to: '#barberos-section' },
   { text: 'PRODUCTOS', to: '#productos-section' },
   { text: 'UBICACIÓN', to: '#ubicacion-section' },
-  { text: '¿QUIÉNES SOMOS?', to: '#servicios-section' }
+  { text: '¿QUIÉNES SOMOS?', to: '#nosotros-section' }
 ];
 
 const images = [
