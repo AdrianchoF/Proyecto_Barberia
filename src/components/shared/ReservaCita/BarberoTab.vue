@@ -1,39 +1,55 @@
 <template>
     <v-container class="barbero-container">
-        <h3 class="text-h3 mb-4">Selecciona un profesional</h3>
+        <h3 class="titulo-barberos">Tu profesional de confianza</h3>
 
         <!-- 🔹 Alerta si no hay fecha/hora seleccionada -->
-        <v-alert v-if="!reservaStore.tieneFechaYHora" type="info" variant="tonal" class="mb-4">
-            Por favor, selecciona primero una fecha y hora en el paso anterior
+        <v-alert v-if="!reservaStore.tieneFechaYHora" type="info" variant="tonal" class="mb-4 text-orange border-orange">
+            Selecciona primero una fecha y hora para ver los barberos disponibles
         </v-alert>
 
         <!-- 🔹 Lista de barberos disponibles -->
         <div v-else class="scroll-barberos">
-            <div v-if="loading" class="text-center py-8">
-                <v-progress-circular indeterminate color="primary" />
-                <p class="mt-4 text-grey">Buscando barberos disponibles...</p>
+            <div v-if="loading" class="text-center py-16">
+                <v-progress-circular indeterminate color="primary" size="64" />
+                <p class="mt-4 text-grey">Consultando agenda...</p>
             </div>
 
-            <div v-else-if="barberosDisponibles.length === 0" class="text-center py-8">
-                <i class="fas fa-user-slash" style="font-size: 64px; color: #bdbdbd;"></i>
-                <p class="mt-4 text-grey">No hay barberos disponibles para esta fecha y hora</p>
+            <div v-else-if="barberosDisponibles.length === 0" class="text-center py-16">
+                <i class="fas fa-user-clock" style="font-size: 80px; color: rgba(255,255,255,0.05);"></i>
+                <p class="mt-4 text-grey">No hay barberos disponibles para este horario</p>
+                <v-btn variant="text" color="primary" @click="emit('estado-barbero-siguiente', false)">Cambiar horario</v-btn>
             </div>
 
             <div v-else class="lista-barberos">
-                <v-card v-for="barbero in barberosDisponibles" :key="barbero.id" class="barbero-card" outlined :class="{ 'barbero-seleccionado': reservaStore.barberoSeleccionado?.id === barbero.id }">
-                    <v-btn size="x-small" variant="outlined" class="btn-seleccionar" :class="{ 'btn-activo': reservaStore.barberoSeleccionado?.id === barbero.id }"@click.stop="seleccionarBarbero(barbero)">
-                        {{ reservaStore.barberoSeleccionado?.id === barbero.id ? 'Seleccionado' : 'Seleccionar' }}
+                <div 
+                    v-for="barbero in barberosDisponibles" 
+                    :key="barbero.id" 
+                    class="barbero-card" 
+                    :class="{ 'barbero-seleccionado': reservaStore.barberoSeleccionado?.id === barbero.id }"
+                    @click="seleccionarBarbero(barbero)"
+                >
+                    <v-btn 
+                        size="x-small" 
+                        class="btn-seleccionar" 
+                        :class="{ 'btn-activo': reservaStore.barberoSeleccionado?.id === barbero.id }"
+                        @click.stop="seleccionarBarbero(barbero)"
+                    >
+                        {{ reservaStore.barberoSeleccionado?.id === barbero.id ? 'Elegido' : 'Elegir' }}
                     </v-btn>
-                    <v-avatar size="64" class="ma-4">
-                        <v-img :src="barbero.foto" />
-                    </v-avatar>
+
+                    <div class="avatar-wrapper">
+                        <v-avatar size="100" class="barbero-avatar">
+                            <v-img :src="barbero.foto" />
+                        </v-avatar>
+                    </div>
+
                     <div class="barbero-info">
                         <span class="nombre-barbero">{{ barbero.nombre }} {{ barbero.apellido }}</span>
                         <v-btn variant="text" size="small" class="sobre-mi-btn" @click.stop="abrirDialog(barbero)">
-                            Sobre mí
+                            Ver perfil
                         </v-btn>
                     </div>
-                </v-card>
+                </div>
             </div>
         </div>
 
@@ -135,90 +151,145 @@
 
 <style scoped>
     .barbero-container {
-        max-width: 500px;
-        margin-left: 40px;
-        text-align: left;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 40px;
+        color: white;
+    }
+
+    .titulo-barberos {
+        font-size: 1.8rem !important;
+        font-weight: 800;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 30px !important;
     }
 
     .scroll-barberos {
-        max-height: 450px;
+        max-height: 550px;
         overflow-y: auto;
-        padding-right: 8px;
+        padding-right: 15px;
     }
 
+    /* Scrollbar */
     .scroll-barberos::-webkit-scrollbar {
-        width: 8px;
+        width: 6px;
+    }
+
+    .scroll-barberos::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 10px;
     }
 
     .scroll-barberos::-webkit-scrollbar-thumb {
-        background-color: #b0b0b0;
+        background: rgba(238, 111, 56, 0.3);
         border-radius: 10px;
     }
 
     .scroll-barberos::-webkit-scrollbar-thumb:hover {
-        background-color: #8c8c8c;
+        background: #ee6f38;
     }
 
     .lista-barberos {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 25px;
+        margin-top: 20px;
     }
 
     .barbero-card {
-        display: flex;
-        align-items: center;
-        margin-bottom: 12px;
-        transition: 0.2s ease;
+        position: relative;
+        background: rgba(255, 255, 255, 0.03) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 20px !important;
+        padding: 30px 20px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
     }
 
     .barbero-card:hover {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        transform: translateX(4px);
+        background: rgba(255, 255, 255, 0.07) !important;
+        border-color: rgba(238, 111, 56, 0.4) !important;
+        transform: translateY(-8px);
     }
 
     .barbero-seleccionado {
-        border: 2px solid #ee6f38 !important;
-        background-color: #f1f1f1;
+        background: rgba(238, 111, 56, 0.1) !important;
+        border-color: #ee6f38 !important;
+        box-shadow: 0 10px 30px rgba(238, 111, 56, 0.15);
+    }
+
+    .avatar-wrapper {
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+    .barbero-avatar {
+        border: 3px solid rgba(255, 255, 255, 0.1);
+        padding: 4px;
+        transition: all 0.3s ease;
+    }
+
+    .barbero-seleccionado .barbero-avatar {
+        border-color: #ee6f38;
+        box-shadow: 0 0 20px rgba(238, 111, 56, 0.3);
     }
 
     .btn-seleccionar {
         position: absolute;
-        top: 8px;
-        right: 8px;
-        z-index: 2;
-        text-transform: none;
-        font-size: 0.7rem;
-        border-radius: 8px;
-        transition: all 0.2s ease;
+        top: 15px;
+        right: 15px;
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        color: white !important;
+        border-radius: 10px !important;
+        padding: 4px 12px !important;
+        transition: all 0.3s ease;
     }
 
     .btn-activo {
-        background-color: #ee6f38 !important;
-        color: white !important;
+        background: #ee6f38 !important;
         border-color: #ee6f38 !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(238, 111, 56, 0.3);
     }
 
     .barbero-info {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
+        width: 100%;
     }
 
     .nombre-barbero {
-        font-size: 1rem;
-        color: #333;
-        font-weight: 500;
-        margin-bottom: 4px;
+        display: block;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 8px;
     }
 
     .sobre-mi-btn {
-        text-transform: none;
-        font-size: 0.8rem;
-        color: #757575;
-        padding: 0;
-        min-width: 0;
-        align-self: flex-start;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        color: rgba(255, 255, 255, 0.4);
+        transition: color 0.3s ease;
+    }
+
+    .sobre-mi-btn:hover {
+        color: #ee6f38;
+    }
+
+    @media (max-width: 600px) {
+        .barbero-container {
+            padding: 20px;
+        }
+        .lista-barberos {
+            grid-template-columns: 1fr;
+        }
     }
 </style>

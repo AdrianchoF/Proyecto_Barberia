@@ -1,127 +1,109 @@
 <template>
   <v-container class="fecha-hora-container">
-    <h3 class="text-h3 mb-4">Selecciona una fecha y hora</h3>
+    <h3 class="titulo-fecha-hora">¿Cuándo te esperamos?</h3>
 
     <div class="scroll-fecha-hora">
       <!-- 🔹 Selector de fecha horizontal estilo moderno -->
-      <v-card class="pa-4 mb-6" elevation="2" rounded="lg">
-        <div class="d-flex justify-space-between align-center mb-4">
+      <v-card class="calendar-section" elevation="0">
+        <div class="d-flex justify-space-between align-center mb-6">
           <div>
-            <v-label class="text-subtitle-1 d-block mb-1">Selecciona un día</v-label>
             <span class="mes-anio">{{ mesYAnioActual }}</span>
           </div>
-          <div class="d-flex ga-2 align-center position-relative">
-            <v-menu v-model="mostrarCalendario" :close-on-content-click="false" location="bottom end" offset="8">
-              <template v-slot:activator="{ props }">
-                <v-btn icon size="small" variant="outlined" color="#ee6f38" v-bind="props" title="Ver calendario completo">
+          <div class="d-flex ga-3 align-center">
+            <v-menu v-model="mostrarCalendario" :close-on-content-click="false" location="bottom end" offset="12">
+              <template v-slot:activator="{ props: menuProps }">
+                <v-btn icon size="small" variant="flat" class="btn-nav-calendar" v-bind="menuProps" title="Ver calendario completo">
                   <i class="fas fa-calendar-alt"></i>
                 </v-btn>
               </template>
 
-              <v-card min-width="320">
+              <v-card min-width="320" class="booking-card">
                 <v-card-text class="pa-0">
                   <v-date-picker 
                     v-model="fechaCalendario" 
                     :min="fechaMinima" 
-                    :allowed-dates="esDiaDisponible"
                     color="#ee6f38" 
                     show-adjacent-months 
                     hide-header 
                     elevation="0" 
+                    theme="dark" 
                     @update:model-value="aplicarFechaCalendario"
                   ></v-date-picker>
                 </v-card-text>
               </v-card>
             </v-menu>
             
-            <v-btn icon size="small" variant="outlined" color="black" @click="semanaAnterior">
+            <v-btn icon size="small" variant="flat" class="btn-nav-calendar" @click="semanaAnterior">
               <i class="fas fa-chevron-left"></i>
             </v-btn>
-            <v-btn icon size="small" variant="outlined" color="black" @click="semanaSiguiente">
+            <v-btn icon size="small" variant="flat" class="btn-nav-calendar" @click="semanaSiguiente">
               <i class="fas fa-chevron-right"></i>
             </v-btn>
           </div>
         </div>
 
-        <!-- Días en formato horizontal -->
         <div class="dias-horizontales">
           <div v-for="(date, index) in diasVisibles" :key="index" class="dia-card"
             :class="{ 
               'dia-seleccionado': esMismaFecha(date, fechaSeleccionada),
               'dia-hoy': esHoy(date) && !esMismaFecha(date, fechaSeleccionada),
-              'dia-deshabilitado': !esDiaHabilitado(date)
+              'dia-deshabilitado': esDiaPasado(date) || !esDiaHabilitado(date)
             }"
-            @click="seleccionarDia(date)"
+            @click="(!esDiaPasado(date) && esDiaHabilitado(date)) ? seleccionarDia(date) : null"
           >
             <span class="dia-nombre">{{ obtenerNombreDia(date) }}</span>
-            <span class="dia-numero">{{ date.getDate() }}</span>
+            <span class="dia-numero">{{ date ? date.getDate() : '' }}</span>
           </div>
         </div>
       </v-card>
 
-      <!-- 🔹 Selector de INTERVALOS HORARIOS -->
-      <v-card class="pa-4" elevation="2" rounded="lg">
-        <v-label class="text-subtitle-1 mb-2">
-          <i class="fas fa-clock mr-2"></i>
-          Selecciona una hora
+      <!-- 🔹 Selector de hora con Franjas Horarias -->
+      <v-card class="time-section" elevation="0">
+        <v-label class="text-subtitle-1 mb-4 text-white font-weight-bold">
+            <i class="fas fa-clock mr-2 text-orange"></i>
+            Elegir Hora
         </v-label>
         
-        <div v-if="!fechaSeleccionada" class="text-center py-4 text-grey">
-          <i class="fas fa-calendar-day mr-2"></i>
-          Primero selecciona una fecha
+        <div v-if="!fechaSeleccionada" class="text-center py-8 text-white">
+          <i class="fas fa-calendar-day mb-3 d-block" style="font-size: 40px; opacity: 0.2;"></i>
+          Selecciona una fecha para ver los horarios del barbero
         </div>
         
-        <div v-else-if="intervalosDisponibles.length === 0" class="text-center py-4 text-grey">
-          <i class="fas fa-calendar-times mr-2"></i>
-          No hay horarios disponibles para este día
-        </div>
-        
-        <div v-else class="franjas-grid mt-3">
-          <div 
-            v-for="intervalo in intervalosDisponibles" 
-            :key="intervalo.horaInicio"
-            class="franja-card"
-            :class="{ 
-              'franja-seleccionada': horaSeleccionada === intervalo.horaInicio,
-              'franja-deshabilitada': intervalo.deshabilitado
-            }"
-            @click="seleccionarIntervalo(intervalo)"
-          >
-            <i class="fas fa-clock"></i>
-            <div class="franja-horario">
-              <span>{{ formatearHora24to12(intervalo.horaInicio) }}</span>
-            </div>
-            <div class="duracion-servicio">
-              <span class="text-caption">{{ intervalo.duracion }}</span>
-            </div>
-            <!-- ⭐ Indicador de hora pasada -->
-            <div v-if="intervalo.deshabilitado" class="hora-pasada-badge">
-              <i class="fas fa-clock-rotate-left"></i>
-            </div>
-          </div>
-        </div>
-
-        <!-- Info de duración de servicios -->
-        <div v-if="duracionTotalMinutos > 0" class="mt-3">
-          <v-alert density="compact" color="blue-lighten-5" variant="tonal">
-            <div class="text-caption">
-              <i class="fas fa-info-circle mr-1"></i>
-              Duración total de servicios: <strong>{{ formatearDuracion(duracionTotalMinutos) }}</strong>
-            </div>
-          </v-alert>
+        <div v-else>
+           <div v-if="cargandoFranjas" class="text-center py-8">
+              <v-progress-circular indeterminate color="orange" size="40"></v-progress-circular>
+              <p class="mt-4 text-white opacity-60">Consultando disponibilidad...</p>
+           </div>
+           
+           <div v-else-if="franjasDisponibles.length === 0" class="error-box text-center py-4">
+              <i class="fas fa-calendar-times mr-2" style="font-size: 24px;"></i>
+              <p class="mt-2 mb-0">El profesional no tiene horarios disponibles para este día o duración.</p>
+           </div>
+           
+           <div v-else class="franjas-grid">
+               <div
+                  v-for="franja in franjasDisponibles"
+                  :key="franja.id_franja"
+                  class="time-chip-wrapper"
+                  :class="horaSeleccionada === franja.hora_inicio ? 'time-chip-selected' : 'time-chip'"
+                  @click="seleccionarHora(franja.hora_inicio)"
+                >
+                  <i class="fas fa-clock mr-2" :class="horaSeleccionada === franja.hora_inicio ? 'text-white' : 'text-orange'"></i>
+                  {{ formatearHora(franja.hora_inicio) }}
+               </div>
+           </div>
         </div>
       </v-card>
 
-      <!-- 🔹 Resumen temporal -->
       <div v-if="fechaSeleccionada && horaSeleccionada" class="resumen-seleccion mt-6">
-        <v-alert type="success" border="start" color="#ee6f38" variant="tonal">
-          <div class="d-flex align-center mb-2">
-            <i class="fas fa-check-circle mr-2"></i>
-            <strong>Tu Cita con {{ reservaBarberoStore.nombreCompletoBarbero }}:</strong>
+        <v-alert class="resumen-card" theme="dark">
+          <div class="d-flex align-center gap-3">
+            <v-icon color="orange" size="large">mdi-calendar-check</v-icon>
+            <div>
+                <p class="ma-0 font-weight-bold text-orange">Cita programada:</p>
+                <p class="ma-0 text-white font-weight-medium">{{ formatearFecha(fechaSeleccionada) }} a las {{ formatearHora(horaSeleccionada) }}</p>
+            </div>
           </div>
-          <i class="fas fa-calendar-alt mr-2"></i>{{ formatearFecha(fechaSeleccionada) }}<br>
-          <i class="fas fa-clock mr-2"></i>Hora de inicio: {{ formatearHora24to12(horaSeleccionada) }}<br>
-          <i class="fas fa-hourglass-half mr-2"></i>Duración: {{ formatearDuracion(duracionTotalMinutos) }}
         </v-alert>
       </div>
     </div>
@@ -142,175 +124,69 @@
   const fechaSeleccionada = ref(null)
   const horaSeleccionada = ref(null)
   const semanaActual = ref(new Date())
-  const mostrarCalendario = ref(false)
-  const fechaCalendario = ref(null)
   const horaActual = ref(new Date())
   const intervalId = ref(null)
-  const horasOcupadas = ref([]) // ⭐ NUEVO: Horas ocupadas del barbero
+  const mostrarCalendario = ref(false)
+  const fechaCalendario = ref(null)
+  const horasOcupadas = ref([])
+  const cargandoFranjas = ref(false)
   
   const nombresMeses = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
   ]
 
-  // ⭐ Calcular duración total de servicios seleccionados
-  const duracionTotalMinutos = computed(() => {
-    const serviciosIds = reservaBarberoStore.serviciosSeleccionados
-    if (!serviciosIds || serviciosIds.length === 0) return 30 // Default 30 min
-    
-    const servicios = serviceStore.services.filter(s => serviciosIds.includes(s.id))
-    
-    return servicios.reduce((total, servicio) => {
-      const match = servicio.duracionAprox.match(/(\d+):(\d+):(\d+)/)
-      if (match) {
-        const horas = parseInt(match[1])
-        const minutos = parseInt(match[2])
-        return total + (horas * 60) + minutos
-      }
-      return total
-    }, 0) || 30
-  })
-
-  // ⭐ Generar intervalos de horarios disponibles
-  const intervalosDisponibles = computed(() => {
-    if (!fechaSeleccionada.value) return []
-    
-    const diaSemana = obtenerDiaSemanaTexto(fechaSeleccionada.value)
-    const franjas = reservaBarberoStore.franjasDelDia(diaSemana)
-    
-    if (franjas.length === 0) return []
-    
-    const intervalos = []
-    const duracion = duracionTotalMinutos.value
-    const incremento = duracion
-    const esHoySeleccionado = esHoy(fechaSeleccionada.value)
-    
-    franjas.forEach(franja => {
-      const [horaInicioH, horaInicioM] = franja.hora_inicio.split(':').map(Number)
-      const [horaFinH, horaFinM] = franja.hora_fin.split(':').map(Number)
-      
-      const inicioEnMinutos = horaInicioH * 60 + horaInicioM
-      const finEnMinutos = horaFinH * 60 + horaFinM
-      
-      for (let minutos = inicioEnMinutos; minutos < finEnMinutos; minutos += incremento) {
-        const finDelServicio = minutos + duracion
-        
-        if (finDelServicio <= finEnMinutos) {
-          const horas = Math.floor(minutos / 60)
-          const mins = minutos % 60
-          const horaInicio = `${String(horas).padStart(2, '0')}:${String(mins).padStart(2, '0')}:00`
-          
-          // ⭐ Verificar si el intervalo ya pasó (solo si es hoy)
-          const yaPaso = esHoySeleccionado && hasPasadoLaHora(horaInicio)
-          
-          // ⭐ NUEVO: Verificar si la hora está ocupada
-          const estaOcupada = verificarHoraOcupada(horaInicio, duracion)
-          
-          intervalos.push({
-            horaInicio,
-            duracion: formatearDuracion(duracion),
-            franjaId: franja.id_franja,
-            deshabilitado: yaPaso || estaOcupada // ⭐ Deshabilitar si pasó o está ocupada
-          })
-        }
-      }
-    })
-    
-    return intervalos
-  })
-
-  // ⭐ NUEVO: Verificar si una hora está ocupada
-  const verificarHoraOcupada = (horaInicio, duracionMin) => {
-    if (!horasOcupadas.value || horasOcupadas.value.length === 0) return false
-    
-    // Calcular fin del intervalo propuesto
-    const inicioMin = horaAMinutos(horaInicio)
-    const finMin = inicioMin + duracionMin
-    
-    // Verificar si se solapa con alguna cita existente
-    return horasOcupadas.value.some((ocupada) => {
-      const ocupadaInicioMin = horaAMinutos(ocupada.horaInicio)
-      const ocupadaFinMin = horaAMinutos(ocupada.horaFin)
-      
-      // Hay solapamiento si: (inicio1 < fin2) AND (inicio2 < fin1)
-      return (inicioMin < ocupadaFinMin) && (ocupadaInicioMin < finMin)
-    })
-  }
-
-  // ⭐ NUEVO: Convertir hora a minutos
-  const horaAMinutos = (hora) => {
-    const [h, m] = hora.split(':').map(Number)
-    return h * 60 + m
-  }
-
-  // ⭐ Verificar si una hora ya pasó
-  const hasPasadoLaHora = (horaIntervalo) => {
-    const ahora = horaActual.value
-    const [horasIntervalo, minutosIntervalo] = horaIntervalo.split(':').map(Number)
-    
-    const horaActualEnMinutos = ahora.getHours() * 60 + ahora.getMinutes()
-    const horaIntervaloEnMinutos = horasIntervalo * 60 + minutosIntervalo
-    
-    return horaIntervaloEnMinutos <= horaActualEnMinutos
-  }
-
   const fechaMinima = computed(() => {
     const hoy = new Date()
     return hoy.toISOString().split('T')[0]
   })
 
-  const esDiaDisponible = (fecha) => {
-    const fechaObj = new Date(fecha)
-    return esDiaHabilitado(fechaObj)
+  // ✅ Calcular duración total de los servicios seleccionados
+  const duracionTotal = computed(() => {
+    if (!reservaBarberoStore.serviciosSeleccionados || reservaBarberoStore.serviciosSeleccionados.length === 0) return 30
+    
+    return reservaBarberoStore.serviciosSeleccionados.reduce((total, id) => {
+      const servicio = serviceStore.services.find(s => s.id === id)
+      if (servicio) {
+        // Formato esperado: "HH:mm:ss" o "30" (minutos)
+        const duracion = servicio.duracionAprox || '00:30:00'
+        if (duracion.includes(':')) {
+          const [h, m] = duracion.split(':').map(Number)
+          return total + (h * 60) + m
+        }
+        return total + parseInt(duracion)
+      }
+      return total
+    }, 0)
+  })
+
+  // Obtener nombre dia sin tildes para map
+  const obtenerDiaStoreName = (fecha) => {
+     if (!fecha) return '';
+     const diasSemana = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+     return diasSemana[fecha.getDay()];
+  }
+
+  // Verifica si un dia de la semana especifico esta habilitado por el barbero
+  const esDiaHabilitado = (fecha) => {
+      if (!fecha) return false;
+      const diaStore = obtenerDiaStoreName(fecha);
+      const diasDisponibles = reservaBarberoStore.diasDisponiblesBarbero || [];
+      return diasDisponibles.includes(diaStore);
   }
 
   const aplicarFechaCalendario = (fecha) => {
     if (fecha) {
       const fechaObj = new Date(fecha)
+      if (!esDiaHabilitado(fechaObj)) return
       fechaSeleccionada.value = fechaObj
       semanaActual.value = new Date(fechaObj)
       mostrarCalendario.value = false
     }
   }
 
-  const esDiaHabilitado = (fecha) => {
-    if (esDiaPasado(fecha)) return false
-    const diaSemana = obtenerDiaSemanaTexto(fecha)
-    const diasDisponibles = reservaBarberoStore.diasDisponiblesBarbero
-    return diasDisponibles.includes(diaSemana)
-  }
-
-  const obtenerDiaSemanaTexto = (fecha) => {
-    const dias = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado']
-    return dias[fecha.getDay()]
-  }
-
-  const seleccionarIntervalo = (intervalo) => {
-    // ⭐ No permitir seleccionar intervalos deshabilitados
-    if (intervalo.deshabilitado) return
-    
-    horaSeleccionada.value = intervalo.horaInicio
-    console.log('⏰ Hora seleccionada:', intervalo.horaInicio)
-  }
-
-  const formatearHora24to12 = (hora24) => {
-    const [horasStr, minutos] = hora24.split(':')
-    const h = parseInt(horasStr, 10)
-    const ampm = h >= 12 ? 'PM' : 'AM'
-    const h12 = h % 12 || 12
-    return `${h12}:${minutos} ${ampm}`
-  }
-
-  const formatearDuracion = (minutos) => {
-    const horas = Math.floor(minutos / 60)
-    const mins = minutos % 60
-    if (horas > 0) {
-      return mins > 0 ? `${horas}h ${mins}min` : `${horas}h`
-    }
-    return `${mins}min`
-  }
-
   const esDiaPasado = (fecha) => {
+    if (!fecha) return true;
     const hoy = new Date()
     hoy.setHours(0, 0, 0, 0)
     const fechaComparar = new Date(fecha)
@@ -318,32 +194,96 @@
     return fechaComparar < hoy
   }
 
-  // ⭐ Iniciar actualización de hora cada minuto
-  const iniciarActualizacionHora = () => {
-    horaActual.value = new Date()
-    
-    const actualizarYValidar = () => {
-      horaActual.value = new Date()
+  // 🔥 ALGORITMO DE GENERACIÓN DE FRANJAS
+  const franjasDisponibles = computed(() => {
+      if (!fechaSeleccionada.value) return [];
+      const diaStore = obtenerDiaStoreName(fechaSeleccionada.value);
+      const jornadas = reservaBarberoStore.horariosBarbero.filter(h => h.Dia_semana === diaStore);
       
-      // Si hay una hora seleccionada y ahora pasó, limpiarla
-      if (horaSeleccionada.value && esHoy(fechaSeleccionada.value)) {
-        if (hasPasadoLaHora(horaSeleccionada.value)) {
-          horaSeleccionada.value = null
-        }
-      }
-    }
-    
-    const ahora = new Date()
-    const segundosRestantes = 60 - ahora.getSeconds()
-    const milisegundosRestantes = (segundosRestantes * 1000) - ahora.getMilliseconds()
-    
-    setTimeout(() => {
-      actualizarYValidar()
-      intervalId.value = setInterval(actualizarYValidar, 60000)
-    }, milisegundosRestantes)
+      if (jornadas.length === 0) return [];
+
+      const franjas = [];
+      const duracionMinutos = duracionTotal.value;
+      const gap = 0; // Podría añadirse un gap entre citas si se requiere
+
+      jornadas.forEach(jornada => {
+          let actual = timeToMinutes(jornada.hora_inicio);
+          const fin = timeToMinutes(jornada.hora_fin);
+
+          while (actual + duracionMinutos <= fin) {
+              const inicioStr = minutesToTime(actual);
+              const finStr = minutesToTime(actual + duracionMinutos);
+
+              // Validar contra horas ocupadas
+              const estaOcupada = horasOcupadas.value.some(ocupada => {
+                  const oInicio = timeToMinutes(ocupada.hora_inicio);
+                  const oFin = timeToMinutes(ocupada.hora_fin);
+                  // Hay solapamiento si:
+                  return (actual < oFin && actual + duracionMinutos > oInicio);
+              });
+
+              // Validar contra hora actual si es hoy
+              let esPasada = false;
+              if (esHoy(fechaSeleccionada.value)) {
+                  const ahoraMins = (horaActual.value.getHours() * 60) + horaActual.value.getMinutes();
+                  if (actual <= ahoraMins) esPasada = true;
+              }
+
+              if (!estaOcupada && !esPasada) {
+                  franjas.push({
+                      id_franja: `${inicioStr}-${finStr}`,
+                      hora_inicio: inicioStr,
+                      hora_fin: finStr
+                  });
+              }
+
+              // Incrementar por la duración del servicio (o por un bloque fijo si se prefiere)
+              actual += duracionMinutos; 
+          }
+      });
+
+      return franjas;
+  })
+
+  // Helpers para conversión de tiempo
+  const timeToMinutes = (timeStr) => {
+      if (!timeStr || typeof timeStr !== 'string') return 0;
+      const [h, m] = timeStr.split(':').map(Number);
+      return (h * 60) + m;
   }
 
-  // ⭐ Detener actualización al desmontar
+  const minutesToTime = (totalMinutes) => {
+      const h = Math.floor(totalMinutes / 60);
+      const m = totalMinutes % 60;
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00`;
+  }
+
+  // Cargar horas ocupadas cuando cambia la fecha
+  watch(fechaSeleccionada, async (nuevaFecha) => {
+      if (nuevaFecha && reservaBarberoStore.barberoPreseleccionado) {
+          cargandoFranjas.value = true;
+          try {
+              const fechaISO = nuevaFecha.toISOString().split('T')[0];
+              const result = await citaStore.obtenerHorasOcupadasBarbero(
+                  reservaBarberoStore.barberoPreseleccionado.id, 
+                  fechaISO
+              );
+              horasOcupadas.value = result.horasOcupadas || [];
+          } catch (error) {
+              console.error("Error cargando disponibilidad:", error);
+          } finally {
+              cargandoFranjas.value = false;
+          }
+      }
+  })
+
+  const iniciarActualizacionHora = () => {
+    horaActual.value = new Date()
+    intervalId.value = setInterval(() => {
+        horaActual.value = new Date()
+    }, 60000)
+  }
+
   const detenerActualizacionHora = () => {
     if (intervalId.value) {
       clearInterval(intervalId.value)
@@ -352,14 +292,13 @@
   }
 
   onMounted(() => {
-    // ⭐ Iniciar actualización de hora
     iniciarActualizacionHora()
-    
+    // Recuperar de la store si existe
     if (reservaBarberoStore.fechaSeleccionada) {
       const f = reservaBarberoStore.fechaSeleccionada
       fechaSeleccionada.value = typeof f === 'string' ? new Date(f + 'T00:00:00') : f
       semanaActual.value = new Date(fechaSeleccionada.value)
-      fechaCalendario.value = reservaBarberoStore.fechaSeleccionada
+      fechaCalendario.value = fechaSeleccionada.value
     }
     if (reservaBarberoStore.horaSeleccionada) {
       horaSeleccionada.value = reservaBarberoStore.horaSeleccionada
@@ -367,7 +306,6 @@
   })
 
   onUnmounted(() => {
-    // ⭐ Detener actualización al desmontar
     detenerActualizacionHora()
   })
 
@@ -382,35 +320,16 @@
     return dias
   })
 
-  watch([fechaSeleccionada, horaSeleccionada], () => {
-    const ambosSeleccionados = !!(fechaSeleccionada.value && horaSeleccionada.value)
-    emit('estado-fechayhora-siguiente', ambosSeleccionados)
-    
-    if (ambosSeleccionados) {
+  watch([fechaSeleccionada, horaSeleccionada], ([nuevaFecha, nuevaHora]) => {
+    const esValido = !!(nuevaFecha && nuevaHora && nuevaHora.trim() !== '')
+    emit('estado-fechayhora-siguiente', esValido)
+    if (esValido) {
       actualizarFechayHora()
-    }
-  }, { deep: true })
-
-  // ⭐ NUEVO: Cargar horas ocupadas cuando cambia la fecha
-  watch(fechaSeleccionada, async (nuevaFecha) => {
-    horaSeleccionada.value = null
-    
-    if (nuevaFecha && reservaBarberoStore.barberoPreseleccionado) {
-      const fechaISO = nuevaFecha.toISOString().split('T')[0]
-      console.log('📅 Consultando disponibilidad para:', fechaISO)
-      
-      const resultado = await citaStore.obtenerHorasOcupadasBarbero(
-        reservaBarberoStore.barberoPreseleccionado.id,
-        fechaISO
-      )
-      
-      horasOcupadas.value = resultado.horasOcupadas || []
-      console.log('🚫 Horas ocupadas:', horasOcupadas.value)
     }
   })
 
   const mesYAnioActual = computed(() => {
-    const fechaMedia = diasVisibles.value[3] || semanaActual.value
+    const fechaMedia = (diasVisibles.value && diasVisibles.value[3]) || semanaActual.value
     return `${nombresMeses[fechaMedia.getMonth()]} ${fechaMedia.getFullYear()}`
   })
 
@@ -426,252 +345,195 @@
     semanaActual.value = nuevaFecha
   }
 
-  const esHoy = (fecha) => {
-    const hoy = new Date()
-    return fecha.toDateString() === hoy.toDateString()
-  }
-
-  const esMismaFecha = (fecha1, fecha2) => {
-    if (!fecha1 || !fecha2) return false
-    const f1 = new Date(fecha1)
-    const f2 = new Date(fecha2)
-    return f1.toDateString() === f2.toDateString()
-  }
-
-  const obtenerNombreDia = (fecha) => {
-    const nombres = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb']
-    return nombres[fecha.getDay()]
-  }
+  const esHoy = (fecha) => fecha && fecha.toDateString() === new Date().toDateString()
+  const esMismaFecha = (fecha1, fecha2) => fecha1 && fecha2 && fecha1.toDateString() === fecha2.toDateString()
+  const obtenerNombreDia = (fecha) => fecha ? ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'][fecha.getDay()] : ''
 
   const seleccionarDia = (fecha) => {
-    if (!esDiaHabilitado(fecha)) {
-      return
-    }
     fechaSeleccionada.value = fecha
+    horaSeleccionada.value = null
+  }
+
+  const seleccionarHora = (hora) => {
+    horaSeleccionada.value = hora
   }
 
   const actualizarFechayHora = () => {
     if (!fechaSeleccionada.value || !horaSeleccionada.value) return
-
-    let fechaISO = ''
-    if (fechaSeleccionada.value instanceof Date && !isNaN(fechaSeleccionada.value)) {
-      fechaISO = fechaSeleccionada.value.toISOString().split('T')[0]
-    }
-    
-    // ⭐ IMPORTANTE: Guardar la hora tal cual viene (ya tiene formato HH:MM:SS)
-    // NO agregar :00 adicional
+    const fechaISO = fechaSeleccionada.value.toISOString().split('T')[0]
     reservaBarberoStore.setFechaHora(fechaISO, horaSeleccionada.value)
+    emit('emit-fechay-hora', { fecha: fechaISO, hora: horaSeleccionada.value })
   }
 
   const formatearFecha = (fecha) => {
     if (!fecha) return ''
-    let dateObj = null
-    if (fecha instanceof Date && !isNaN(fecha)) {
-      dateObj = fecha
-    } else if (typeof fecha === 'string') {
-      if (/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
-        dateObj = new Date(fecha + 'T00:00:00')
-      }
-    }
-    if (!dateObj || isNaN(dateObj)) return 'Invalid Date'
-    const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
-    return dateObj.toLocaleDateString('es-ES', opciones)
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
+    return fecha.toLocaleDateString('es-ES', options)
+  }
+
+  const formatearHora = (hora) => {
+    if (!hora) return ''
+    const [hStr, m] = hora.split(':')
+    const h = parseInt(hStr)
+    const ampm = h >= 12 ? 'PM' : 'AM'
+    const h12 = h % 12 || 12
+    return `${h12}:${m} ${ampm}`
   }
 </script>
 
 <style scoped>
   .fecha-hora-container {
-    max-width: 700px;
-    margin-left: 40px;
-    text-align: left;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px;
+    color: white;
+  }
+
+  .titulo-fecha-hora {
+    font-size: 1.8rem !important;
+    font-weight: 800;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 30px !important;
   }
 
   .scroll-fecha-hora {
-    max-height: 600px;
+    max-height: 550px;
     overflow-y: auto;
-    padding-right: 8px;
+    padding-right: 15px;
   }
 
-  .scroll-fecha-hora::-webkit-scrollbar {
-    width: 8px;
-  }
+  .scroll-fecha-hora::-webkit-scrollbar { width: 6px; }
+  .scroll-fecha-hora::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); border-radius: 10px; }
+  .scroll-fecha-hora::-webkit-scrollbar-thumb { background: rgba(238, 111, 56, 0.3); border-radius: 10px; }
 
-  .scroll-fecha-hora::-webkit-scrollbar-thumb {
-    background-color: #b0b0b0;
-    border-radius: 10px;
-  }
-
-  .scroll-fecha-hora::-webkit-scrollbar-thumb:hover {
-    background-color: #8c8c8c;
+  .calendar-section, .time-section {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 20px !important;
+    padding: 25px !important;
+    margin-bottom: 30px !important;
   }
 
   .mes-anio {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: black;
-    text-transform: capitalize;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #ee6f38;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .btn-nav-calendar {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
   }
 
   .dias-horizontales {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 12px;
+    margin-top: 20px;
   }
 
   .dia-card {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 16px 8px;
-    background-color: #f5f5f5;
-    border-radius: 12px;
+    padding: 15px 5px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
     cursor: pointer;
     transition: all 0.3s ease;
-    position: relative;
-    user-select: none;
   }
 
-  .dia-card:hover {
-    background-color: #e0e0e0;
-    transform: translateY(-2px);
-  }
-
-  .dia-deshabilitado {
-    background-color: #fafafa;
-    color: #bdbdbd;
-    cursor: not-allowed;
-    opacity: 0.5;
-  }
-
-  .dia-deshabilitado:hover {
-    background-color: #fafafa;
-    transform: none;
+  .dia-card:hover:not(.dia-deshabilitado) {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-5px);
   }
 
   .dia-seleccionado {
-    background: linear-gradient(135deg, #ee6f38 0%, #ee6f38 100%);
-    color: white;
-    box-shadow: 0 4px 12px rgba(238, 111, 56, 0.3);
-    transform: scale(1.05);
+    background: #ee6f38 !important;
+    color: white !important;
+    border-color: #ee6f38 !important;
+    box-shadow: 0 8px 25px rgba(238, 111, 56, 0.4);
+    transform: scale(1.05) translateY(-5px);
   }
 
-  .dia-hoy {
-    border: 2px solid #ee6f38;
-  }
-
-  .dia-hoy::after {
-    content: '';
-    position: absolute;
-    bottom: 4px;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background-color: #ee6f38;
-  }
-
-  .dia-seleccionado.dia-hoy::after {
-    background-color: white;
-  }
+  .dia-deshabilitado { opacity: 0.2; cursor: not-allowed; }
 
   .dia-nombre {
-    font-size: 0.75rem;
-    font-weight: 500;
+    font-size: 0.7rem;
+    font-weight: 700;
     text-transform: uppercase;
-    margin-bottom: 4px;
-    opacity: 0.8;
+    margin-bottom: 5px;
+    color: rgba(255, 255, 255, 0.5);
   }
 
+  .dia-seleccionado .dia-nombre { color: white; }
+
   .dia-numero {
-    font-size: 1.5rem;
-    font-weight: 700;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: white;
   }
 
   .franjas-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+  }
+  
+  .time-chip-wrapper {
+      padding: 10px 20px;
+      border-radius: 50px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
   }
 
-  .franja-card {
-    padding: 12px;
-    background-color: #f5f5f5;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    border: 2px solid transparent;
+  .time-chip {
+      background: rgba(255, 255, 255, 0.03) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      color: rgba(255, 255, 255, 0.8) !important;
+  }
+  
+  .time-chip:hover {
+      background: rgba(255, 255, 255, 0.08) !important;
+      border-color: rgba(238, 111, 56, 0.5) !important;
+      color: white !important;
+      transform: translateY(-2px);
+  }
+  
+  .time-chip-selected {
+      background: #ee6f38 !important;
+      border-color: #ee6f38 !important;
+      color: white !important;
+      font-weight: 700;
+      box-shadow: 0 4px 15px rgba(238, 111, 56, 0.4);
+      transform: translateY(-2px);
   }
 
-  .franja-card:hover {
-    background-color: #e0e0e0;
-    transform: translateY(-2px);
-    border-color: #ee6f38;
+  .error-box {
+    background: rgba(211, 47, 47, 0.1);
+    color: #ff5252;
+    padding: 10px 15px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    border: 1px solid rgba(211, 47, 47, 0.2);
   }
 
-  .franja-seleccionada {
-    background: linear-gradient(135deg, #ee6f38 0%, #ee6f38 100%);
-    color: white;
-    box-shadow: 0 4px 12px rgba(238, 111, 56, 0.3);
-    transform: scale(1.05);
-    border-color: #ee6f38;
+  .resumen-card {
+    background: rgba(238, 111, 56, 0.05) !important;
+    border: 1px solid rgba(238, 111, 56, 0.2) !important;
+    border-radius: 15px !important;
   }
 
-  .franja-deshabilitada {
-    background-color: #f5f5f5;
-    color: #bdbdbd;
-    cursor: not-allowed;
-    opacity: 0.5;
-    position: relative;
-  }
-
-  .franja-deshabilitada:hover {
-    background-color: #f5f5f5;
-    transform: none;
-    border-color: transparent;
-  }
-
-  .hora-pasada-badge {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    font-size: 10px;
-    color: #999;
-  }
-
-  .franja-horario {
-    font-weight: 600;
-    font-size: 1rem;
-  }
-
-  .duracion-servicio {
-    opacity: 0.8;
-    font-size: 0.75rem;
-  }
-
-  .text-grey {
-    color: #757575;
-    font-size: 0.95rem;
-  }
-
-  .fas {
-    vertical-align: middle;
-  }
-
-  @media (max-width: 600px) {
-    .dias-horizontales {
-      grid-template-columns: repeat(4, 1fr);
-    }
-    
-    .franjas-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .fecha-hora-container {
-      margin-left: 0;
-    }
-  }
+  :deep(.v-date-picker) { background: #1a1a1a !important; color: white !important; }
 </style>

@@ -1,35 +1,34 @@
 <template>
   <v-container class="fecha-hora-container">
-    <h3 class="text-h3 mb-4">Selecciona una fecha y hora</h3>
+    <h3 class="titulo-fecha-hora">¿Cuándo te esperamos?</h3>
 
     <div class="scroll-fecha-hora">
       <!-- 🔹 Selector de fecha horizontal estilo moderno -->
-      <v-card class="pa-4 mb-6" elevation="2" rounded="lg">
-        <div class="d-flex justify-space-between align-center mb-4">
+      <v-card class="calendar-section" elevation="0">
+        <div class="d-flex justify-space-between align-center mb-6">
           <div>
-            <v-label class="text-subtitle-1 d-block mb-1">Selecciona un día</v-label>
             <span class="mes-anio">{{ mesYAnioActual }}</span>
           </div>
-          <div class="d-flex ga-2 align-center position-relative">
+          <div class="d-flex ga-3 align-center">
             <!-- 🆕 Botón para abrir calendario completo con v-menu -->
-            <v-menu v-model="mostrarCalendario" :close-on-content-click="false" location="bottom end" offset="8">
+            <v-menu v-model="mostrarCalendario" :close-on-content-click="false" location="bottom end" offset="12">
               <template v-slot:activator="{ props }">
-                <v-btn icon size="small" variant="outlined" color="#ee6f38"v-bind="props"title="Ver calendario completo">
+                <v-btn icon size="small" variant="flat" class="btn-nav-calendar" v-bind="props" title="Ver calendario completo">
                   <i class="fas fa-calendar-alt"></i>
                 </v-btn>
               </template>
 
-              <v-card min-width="320">
+              <v-card min-width="320" class="booking-card">
                 <v-card-text class="pa-0">
-                  <v-date-picker v-model="fechaCalendario" :min="fechaMinima" color="#ee6f38" show-adjacent-months hide-header elevation="0" @update:model-value="aplicarFechaCalendario"></v-date-picker>
+                  <v-date-picker v-model="fechaCalendario" :min="fechaMinima" color="#ee6f38" show-adjacent-months hide-header elevation="0" theme="dark" @update:model-value="aplicarFechaCalendario"></v-date-picker>
                 </v-card-text>
               </v-card>
             </v-menu>
             
-            <v-btn icon size="small" variant="outlined" color="black" @click="semanaAnterior">
+            <v-btn icon size="small" variant="flat" class="btn-nav-calendar" @click="semanaAnterior">
               <i class="fas fa-chevron-left"></i>
             </v-btn>
-            <v-btn icon size="small" variant="outlined" color="black" @click="semanaSiguiente">
+            <v-btn icon size="small" variant="flat" class="btn-nav-calendar" @click="semanaSiguiente">
               <i class="fas fa-chevron-right"></i>
             </v-btn>
           </div>
@@ -52,24 +51,23 @@
       </v-card>
 
       <!-- 🔹 Selector de hora con input type="time" -->
-      <v-card class="pa-4" elevation="2" rounded="lg">
-        <v-label class="text-subtitle-1 mb-2">
-          <i class="fas fa-clock mr-2"></i>
-          Selecciona una hora
+      <v-card class="time-section" elevation="0">
+        <v-label class="text-subtitle-1 mb-4 text-white font-weight-bold">
+            <i class="fas fa-clock mr-2 text-orange"></i>
+            Elegir Hora
         </v-label>
         
-        <div v-if="!fechaSeleccionada" class="text-center py-4 text-grey">
-          <i class="fas fa-calendar-day mr-2"></i>
-          Primero selecciona una fecha
+        <div v-if="!fechaSeleccionada" class="text-center py-8 text-white">
+          <i class="fas fa-calendar-day mb-3 d-block" style="font-size: 40px; opacity: 0.2;"></i>
+          Selecciona una fecha para ver horarios
         </div>
         
         <div v-else class="hora-selector">
           <v-text-field 
             v-model="horaSeleccionada" 
             type="time" 
-            variant="outlined" 
+            variant="flat" 
             density="comfortable" 
-            placeholder="HH:MM" 
             hide-details
             class="time-input"
             :min="horaMinima"
@@ -77,19 +75,19 @@
             @blur="validarHora"
           >
             <template v-slot:prepend-inner>
-              <i class="fas fa-clock" style="color: #666; font-size: 18px;"></i>
+              <i class="fas fa-clock text-orange mr-2"></i>
             </template>
           </v-text-field>
           
           <!-- Mensaje de ayuda/error -->
-          <div v-if="esHoy(fechaSeleccionada)" class="mt-2">
-            <div v-if="esHoraInvalida" class="text-caption error-text">
-              <i class="fas fa-exclamation-circle mr-1"></i>
-              No puedes seleccionar una hora que ya pasó. Hora mínima: {{ formatearHoraMinima }}
+          <div v-if="esHoy(fechaSeleccionada)" class="mt-4">
+            <div v-if="esHoraInvalida" class="error-box">
+              <i class="fas fa-exclamation-circle mr-2"></i>
+              Hora no disponible. Mínimo: {{ formatearHoraMinima }}
             </div>
-            <div v-else class="text-caption text-grey">
-              <i class="fas fa-info-circle mr-1"></i>
-              Puedes seleccionar desde las {{ formatearHoraMinima }} en adelante
+            <div v-else class="info-box">
+              <i class="fas fa-info-circle mr-2 text-orange"></i>
+              Horarios disponibles desde las {{ formatearHoraMinima }}
             </div>
           </div>
         </div>
@@ -97,13 +95,14 @@
 
       <!-- 🔹 Resumen temporal -->
       <div v-if="fechaSeleccionada && horaSeleccionada && !esHoraInvalida" class="resumen-seleccion mt-6">
-        <v-alert type="success" border="start" color="#ee6f38" variant="tonal">
-          <div class="d-flex align-center mb-2">
-            <i class="fas fa-check-circle mr-2"></i>
-            <strong>Tu Cita:</strong>
+        <v-alert class="resumen-card" theme="dark">
+          <div class="d-flex align-center gap-3">
+            <v-icon color="orange" size="large">mdi-calendar-check</v-icon>
+            <div>
+                <p class="ma-0 font-weight-bold text-orange">Cita programada:</p>
+                <p class="ma-0 text-white font-weight-medium">{{ formatearFecha(fechaSeleccionada) }} a las {{ formatearHora(horaSeleccionada) }}</p>
+            </div>
           </div>
-          <i class="fas fa-calendar-alt mr-2"></i>{{ formatearFecha(fechaSeleccionada) }}<br>
-          <i class="fas fa-clock mr-2"></i>Hora: {{ formatearHora(horaSeleccionada) }}
         </v-alert>
       </div>
     </div>
@@ -423,35 +422,72 @@
 
 <style scoped>
   .fecha-hora-container {
-    max-width: 700px;
-    margin-left: 40px;
-    text-align: left;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px;
+    color: white;
+  }
+
+  .titulo-fecha-hora {
+    font-size: 1.8rem !important;
+    font-weight: 800;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 30px !important;
   }
 
   .scroll-fecha-hora {
-    max-height: 600px;
+    max-height: 550px;
     overflow-y: auto;
-    padding-right: 8px;
+    padding-right: 15px;
   }
 
+  /* Scrollbar */
   .scroll-fecha-hora::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
+  }
+
+  .scroll-fecha-hora::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 10px;
   }
 
   .scroll-fecha-hora::-webkit-scrollbar-thumb {
-    background-color: #b0b0b0;
+    background: rgba(238, 111, 56, 0.3);
     border-radius: 10px;
   }
 
   .scroll-fecha-hora::-webkit-scrollbar-thumb:hover {
-    background-color: #8c8c8c;
+    background: #ee6f38;
+  }
+
+  .calendar-section, .time-section {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 20px !important;
+    padding: 25px !important;
+    margin-bottom: 30px !important;
   }
 
   .mes-anio {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: black;
-    text-transform: capitalize;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #ee6f38;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .btn-nav-calendar {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+  }
+
+  .btn-nav-calendar:hover {
+    background: rgba(238, 111, 56, 0.1) !important;
+    border-color: #ee6f38 !important;
+    color: #ee6f38 !important;
   }
 
   /* Diseño horizontal de días */
@@ -459,133 +495,137 @@
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 12px;
+    margin-top: 20px;
   }
 
   .dia-card {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 16px 8px;
-    background-color: #f5f5f5;
-    border-radius: 12px;
+    padding: 15px 5px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     user-select: none;
   }
 
-  .dia-card:hover {
-    background-color: #e0e0e0;
-    transform: translateY(-2px);
+  .dia-card:hover:not(.dia-deshabilitado) {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-5px);
+    border-color: rgba(255, 255, 255, 0.2);
   }
 
   .dia-deshabilitado {
-    background-color: #fafafa;
-    color: #bdbdbd;
+    opacity: 0.2;
     cursor: not-allowed;
-    opacity: 0.5;
-  }
-
-  .dia-deshabilitado:hover {
-    background-color: #fafafa;
-    transform: none;
   }
 
   .dia-seleccionado {
-    background: linear-gradient(135deg, #ee6f38 0%, #ee6f38 100%);
-    color: white;
-    box-shadow: 0 4px 12px rgba(238, 111, 56, 0.3);
-    transform: scale(1.05);
+    background: #ee6f38 !important;
+    color: white !important;
+    border-color: #ee6f38 !important;
+    box-shadow: 0 8px 25px rgba(238, 111, 56, 0.4);
+    transform: scale(1.05) translateY(-5px);
   }
 
-  .dia-hoy {
-    border: 2px solid #ee6f38;
-  }
-
-  .dia-hoy::after {
-    content: '';
-    position: absolute;
-    bottom: 4px;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background-color: #ee6f38;
-  }
-
-  .dia-seleccionado.dia-hoy::after {
-    background-color: white;
+  .dia-hoy:not(.dia-seleccionado) {
+    border: 1px solid #ee6f38;
+    background: rgba(238, 111, 56, 0.05);
   }
 
   .dia-nombre {
-    font-size: 0.75rem;
-    font-weight: 500;
+    font-size: 0.7rem;
+    font-weight: 700;
     text-transform: uppercase;
-    margin-bottom: 4px;
-    opacity: 0.8;
+    margin-bottom: 5px;
+    letter-spacing: 0.5px;
+    color: rgba(255, 255, 255, 0.5); /* Changed for better contrast */
+  }
+
+  .dia-seleccionado .dia-nombre {
+    color: white;
+    opacity: 0.9;
   }
 
   .dia-numero {
-    font-size: 1.5rem;
-    font-weight: 700;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: white; /* Changed for better contrast */
   }
 
   /* Selector de hora */
-  .hora-selector {
-    margin-top: 12px;
+  .time-input {
+    max-width: 300px;
+    margin-bottom: 10px;
   }
 
-  .time-input {
-    max-width: 250px;
+  .time-input :deep(.v-field) {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+  }
+
+  .time-input :deep(.v-field--focused) {
+    border-color: #ee6f38 !important;
+    box-shadow: 0 0 15px rgba(238, 111, 56, 0.2);
   }
 
   .time-input :deep(input[type="time"]) {
-    font-size: 1.1rem;
-    font-weight: 500;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: white !important;
   }
 
   .time-input :deep(input[type="time"]::-webkit-calendar-picker-indicator) {
+    filter: invert(1) brightness(0.8) sepia(1) saturate(5) hue-rotate(-30deg);
     cursor: pointer;
-    font-size: 1.2rem;
-    opacity: 0.6;
-    transition: opacity 0.2s;
+    transform: scale(1.2);
   }
 
-  .time-input :deep(input[type="time"]::-webkit-calendar-picker-indicator:hover) {
-    opacity: 1;
+  .error-box {
+    background: rgba(211, 47, 47, 0.1);
+    color: #ff5252;
+    padding: 10px 15px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1px solid rgba(211, 47, 47, 0.2);
   }
 
-  /* Estilo para hora inválida */
-  .hora-invalida :deep(.v-field) {
-    border: 2px solid #d32f2f !important;
-    background-color: #ffebee;
-  }
-
-  .hora-invalida :deep(input) {
-    color: #d32f2f;
-  }
-
-  .error-text {
-    color: #d32f2f;
+  .info-box {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.85rem;
     font-weight: 500;
   }
 
-  .text-grey {
-    color: #757575;
-    font-size: 0.95rem;
+  .resumen-card {
+    background: rgba(238, 111, 56, 0.05) !important;
+    border: 1px solid rgba(238, 111, 56, 0.2) !important;
+    border-radius: 15px !important;
   }
 
-  .fas {
-    vertical-align: middle;
+  /* Dark Calendar Styles */
+  :deep(.v-date-picker) {
+    background: #1a1a1a !important;
+    color: white !important;
   }
 
-  /* Responsive */
+  :deep(.v-date-picker-month__day--selected .v-btn) {
+    background-color: #ee6f38 !important;
+    color: white !important;
+  }
+
   @media (max-width: 600px) {
+    .fecha-hora-container {
+      padding: 20px;
+    }
     .dias-horizontales {
       grid-template-columns: repeat(4, 1fr);
-    }
-    
-    .fecha-hora-container {
-      margin-left: 0;
     }
   }
 </style>

@@ -1,32 +1,29 @@
 <template>
-  <div class="text-center pa-4">
-    <v-dialog v-model="props.modelValue" transition="dialog-bottom-transition" fullscreen>
-      <v-card>
-
-        <div class="boton-cerrar">
-          <!-- <v-btn icon="mdi-close" @click="closeDialog"></v-btn> -->
-          <i class="fa-solid fa-x" @click="closeDialog"></i>
+  <v-dialog v-model="props.modelValue" transition="dialog-bottom-transition" fullscreen>
+      <v-card class="booking-card">
+        <div class="booking-header">
+          <v-card-title class="titulo-reserva">
+            <h3 class="text-h4 font-weight-bold">AGENDAR TU CITA</h3>
+            <p class="text-caption text-grey">Vive la experiencia StyleHub</p>
+          </v-card-title>
+          
+          <div class="boton-cerrar" @click="closeDialog">
+            <i class="fa-solid fa-x"></i>
+          </div>
         </div>
-        
-        <v-card-title class="titulo-reserva text-center justify-center py-6">
-          <h3>RESERVACION DE CITAS</h3>
-        </v-card-title>
 
         <!-- Contenedor principal con layout de dos columnas -->
-        <div class="d-flex" style="height: calc(100vh - 120px);">
+        <div class="booking-content d-flex">
           
-          <!-- Columna izquierda: Tabs y contenido -->
-          <div style="flex: 1; overflow-y: auto;">
+          <div class="left-column">
             <!-- Tabs -->
-            <v-tabs v-model="currentTab" class="custom-tabs" bg-color="transparent">
-              <v-tab v-for="(item, index) in items" :key="item" :value="item" :disabled="!isTabEnabled(index)"> 
-                <span class="tab-content">
-                  <span class="tab-number">
-                    <i :class="`fa-solid fa-${index + 1}`"></i>
-                  </span>
-                  {{ item }}
-                  <i v-if="index < items.length - 1" class="fa-solid fa-arrow-right arrow-icon"></i>
-                </span>
+            <v-tabs v-model="currentTab" class="custom-tabs" bg-color="transparent" height="70">
+              <v-tab v-for="(item, index) in items" :key="item" :value="item" :disabled="!isTabEnabled(index)" class="step-tab"> 
+                <div class="tab-content" :class="{ 'active-step': currentTab === item }">
+                  <span class="tab-number">{{ index + 1 }}</span>
+                  <span class="tab-label desktop-only">{{ item }}</span>
+                  <i v-if="index < items.length - 1" class="fa-solid fa-chevron-right arrow-icon desktop-only"></i>
+                </div>
               </v-tab>
             </v-tabs>
 
@@ -61,7 +58,7 @@
           </div>
 
           <!-- Columna derecha: Detalles de la cita (fija) -->
-          <div style="width: 600px; padding: 16px; overflow-y: auto; border-left: 2px solid #e0e0e0;">
+          <div class="right-column desktop-only">
             <DetalleReserva
             :servicios="serviciosSeleccionados"
             :barbero="reservaStore.barberoSeleccionado"
@@ -96,8 +93,7 @@
         :horarios-alternativos="horariosAlternativos"
         :barberos-alternativos="barberosAlternativos"
       />
-    </v-dialog>
-  </div>
+  </v-dialog>
 </template>
 
 <script setup>
@@ -374,71 +370,141 @@
 
 <style scoped>
 
-  .titulo-reserva {
-    background-color: #f8f9fa;
-    border-bottom: 2px solid #e0e0e0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 16px 0;
+  .booking-card {
+    background: rgba(18, 18, 18, 0.95) !important;
+    backdrop-filter: blur(20px) !important;
+    color: white !important;
+    font-family: 'Outfit', sans-serif;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
   }
-  
+
+  .booking-header {
+    position: relative;
+    padding: 30px 40px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  .titulo-reserva {
+    display: block !important;
+    padding: 0 !important;
+  }
 
   .titulo-reserva h3 {
-    font-size: 1.6rem;
-    font-weight: 600;
-    color: #222;
+    margin: 0;
+    color: #ee6f38;
+    letter-spacing: 2px;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    font-size: 1.6rem;
+    font-weight: 800;
   }
 
   .boton-cerrar {
     position: absolute;
-    top: 15px;      /* separa del borde superior */
-    right: 20px;    /* separa del borde derecho */
+    top: 35px;
+    right: 40px;
     font-size: 20px;
     cursor: pointer;
-    color: #333;
-    transition: transform 0.2s ease, color 0.2s ease;
+    color: rgba(255, 255, 255, 0.5);
+    transition: all 0.3s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
   }
 
   .boton-cerrar:hover {
-    transform: scale(1.2);
-    color: #000;
+    background: rgba(238, 111, 56, 0.2);
+    color: #ee6f38;
+    transform: rotate(90deg);
+  }
+
+  .booking-content {
+    height: calc(100vh - 120px);
+  }
+
+  .left-column {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .right-column {
+    width: 100%;
+    max-width: 450px;
+    background: rgba(0, 0, 0, 0.3);
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 0;
+    overflow-y: auto;
   }
 
   .custom-tabs {
-    padding-left: 30px;
+    background: rgba(0, 0, 0, 0.2) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   }
 
-  .custom-tabs :deep(.v-slide-group__content) {
-    gap: 0;
-    justify-content: flex-start;
+  .step-tab {
+    opacity: 0.6;
+    transition: all 0.3s ease;
   }
 
-  .custom-tabs :deep(.v-tab) {
-    min-width: auto !important;
-    padding: 10px 16px !important;
-    text-transform: none !important;
-    letter-spacing: normal !important;
-    font-size: 0.813rem;
-    min-height: 40px !important;
+  .step-tab[aria-selected="true"] {
+    opacity: 1;
   }
 
   .tab-content {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
   }
 
   .tab-number {
-    display: inline-flex;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
     align-items: center;
-    color: black;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 800;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .active-step .tab-number {
+    background: #ee6f38;
+    border-color: #ee6f38;
+    box-shadow: 0 0 15px rgba(238, 111, 56, 0.4);
+  }
+
+  .tab-label {
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: 13px;
   }
 
   .arrow-icon {
-    font-size: 0.75rem;
-    opacity: 0.7;
+    font-size: 12px;
+    margin-left: 10px;
+    opacity: 0.3;
+  }
+
+  @media (max-width: 960px) {
+    .booking-header {
+      padding: 20px;
+    }
+    .boton-cerrar {
+      top: 25px;
+      right: 20px;
+    }
+    .right-column {
+      display: none !important;
+    }
   }
 </style>

@@ -5,6 +5,14 @@ import Google from '@/assets/images/auth/social-google.svg';
 import { useAuthStore } from '@/stores/auth';
 import { Form } from 'vee-validate';
 
+const props = defineProps({
+  isModal: {
+    type: Boolean,
+    default: false
+  }
+});
+const emit = defineEmits(['auth-success', 'change-view']);
+
 const router = useRouter();
 const checkbox = ref(false);
 const valid = ref(false);
@@ -24,164 +32,255 @@ async function validate(values: any, { setErrors }: any) {
   const authStore = useAuthStore();
   
   try {
-    console.log('🔄 Iniciando login...');
     const result = await authStore.login({ email: email.value, password: password.value });
-    console.log('✅ Login exitoso:', result);
     
     // 🎯 FORZAR LA CARGA DEL USUARIO
     await authStore.loadUser();
     
-    console.log('👤 Usuario después de loadUser:', authStore.user);
-    console.log('🔐 Rol del usuario:', (authStore.user as any)?.Role);
+    // Si estamos en un Modal, simplemente emitimos éxito para que se cierre
+    if (props.isModal) {
+      emit('auth-success');
+    }
     
-    // 🔍 VERIFICAR SI VIENE DE LA RESERVA DESDE SERVICIOS
+    // ✅ VERIFICAR SI VIENE DE RESERVA
     const returnToReserva = sessionStorage.getItem('returnToReserva');
-    console.log('🔙 ¿Volver a reserva desde servicios?', returnToReserva);
-    
     if (returnToReserva === 'true') {
       sessionStorage.removeItem('returnToReserva');
-      console.log('📍 Redirigiendo de vuelta a reserva desde servicios');
-      router.push('/');
-      
-      setTimeout(() => {
-        const event = new CustomEvent('open-reserva-dialog');
-        window.dispatchEvent(event);
-      }, 100);
-      
+      if (!props.isModal) router.push('/');
+      setTimeout(() => window.dispatchEvent(new CustomEvent('open-reserva-dialog')), props.isModal ? 300 : 100);
       return;
     }
     
-    // ⭐ NUEVO: VERIFICAR SI VIENE DE LA RESERVA DESDE BARBEROS
     const returnToReservaBarbero = sessionStorage.getItem('returnToReservaBarbero');
-    console.log('🔙 ¿Volver a reserva desde barbero?', returnToReservaBarbero);
-    
     if (returnToReservaBarbero === 'true') {
       sessionStorage.removeItem('returnToReservaBarbero');
-      console.log('📍 Redirigiendo de vuelta a reserva desde barbero');
-      router.push('/'); // O la ruta donde está la sección de barberos
-      
-      setTimeout(() => {
-        const event = new CustomEvent('open-reserva-barbero-dialog');
-        window.dispatchEvent(event);
-      }, 100);
-      
+      if (!props.isModal) router.push('/'); 
+      setTimeout(() => window.dispatchEvent(new CustomEvent('open-reserva-barbero-dialog')), props.isModal ? 300 : 100);
       return;
     }
     
-    // 🚀 REDIRIGIR SEGÚN EL ROL (solo si NO viene de reserva)
+    // REDIRECCIÓN BASADA EN ROL (Admin/Barbero -> Dashboard, Cliente -> Inicio)
     const userRole = (authStore.user as any)?.Role;
-    
     if (userRole === 'cliente') {
-      console.log('📍 Cliente - Redirigiendo a página principal');
-      router.push('/');
-    } else if (userRole === 'administrador' || userRole === 'barbero') {
-      console.log('📍 Admin/Barbero - Redirigiendo a dashboard');
-      router.push('/dashboard');
+      // Solo redirige a '/' si no estamos ya allí o si viene de otra ruta
+      if (!props.isModal || router.currentRoute.value.path !== '/') {
+        router.push('/');
+      }
     } else {
-      console.log('📍 Rol desconocido - Redirigiendo a dashboard');
       router.push('/dashboard');
     }
     
   } catch (error: unknown) {
-    console.log('❌ Error en login:', error);
     setErrors({ apiError: error });
   }
 }
 </script>
 
 <template>
-  <v-btn block color="primary" variant="outlined" class="text-lightText googleBtn">
-    <img :src="Google" alt="google" />
-    <span class="ml-2">Inicia sesion con tu cuenta de Google</span></v-btn
-  >
-  <v-row>
-    <v-col class="d-flex align-center">
-      <v-divider class="custom-devider" />
-      <p rounded="md" size="small" class="orbtn"> O </p>
-      <v-divider class="custom-devider" />
-    </v-col>
-  </v-row>
-  <h5 class="text-h5 text-center my-4 mb-8">Iniciar sesión con dirección de correo electrónico</h5>
-  <Form @submit="validate" class="mt-7 loginForm" v-slot="{ errors, isSubmitting }">
-    <v-text-field
-      v-model="email"
-      :rules="emailRules"
-      label="Ingrese su correo electronico"
-      class="mt-4 mb-8"
-      required
-      density="comfortable"
-      hide-details="auto"
-      variant="outlined"
-      color="#ee6f38"
-    ></v-text-field>
-    <v-text-field
-      v-model="password"
-      :rules="passwordRules"
-      label="Ingrese su contraseña"
-      required
-      density="comfortable"
-      variant="outlined"
-      color="#ee6f38"
-      hide-details="auto"
-      :append-icon="show1 ? '$eye' : '$eyeOff'"
-      :type="show1 ? 'text' : 'password'"
-      @click:append="show1 = !show1"
-      class="pwdInput"
-    ></v-text-field>
+  <div class="auth-form-wrapper">
+    <v-btn block variant="outlined" class="google-btn mb-6" size="large">
+      <img :src="Google" alt="google" class="google-icon" />
+      <span>Continuar con Google</span>
+    </v-btn>
 
-    <div class="d-sm-flex align-center mt-2 mb-7 mb-sm-0">
-      <v-checkbox
-        v-model="checkbox"
-        :rules="[(v: any) => !!v || 'You must agree to continue!']"
-        label="¿Acuerdate de mi?"
+    <div class="divider-container mb-6">
+      <v-divider class="glass-divider"></v-divider>
+      <span class="divider-text">O EMAIL</span>
+      <v-divider class="glass-divider"></v-divider>
+    </div>
+
+    <Form @submit="validate" class="loginForm" v-slot="{ errors, isSubmitting }">
+      <v-text-field
+        v-model="email"
+        :rules="emailRules"
+        label="Correo electrónico"
+        placeholder="ejemplo@correo.com"
         required
+        density="comfortable"
+        hide-details="auto"
+        variant="outlined"
         color="#ee6f38"
-        class="ms-n2"
-        hide-details
-      ></v-checkbox>
-      <div class="ml-auto">
-        <a href="javascript:void(0)" class="text-primary text-decoration-none">¿Has olvidado tu contraseña?</a>
+        base-color="rgba(255,255,255,0.3)"
+        class="glass-input mb-4"
+      >
+        <template v-slot:prepend-inner>
+          <i class="fas fa-envelope input-icon"></i>
+        </template>
+      </v-text-field>
+
+      <v-text-field
+        v-model="password"
+        :rules="passwordRules"
+        label="Contraseña"
+        placeholder="••••••••"
+        required
+        density="comfortable"
+        variant="outlined"
+        color="#ee6f38"
+        base-color="rgba(255,255,255,0.3)"
+        hide-details="auto"
+        :append-inner-icon="show1 ? 'fa:fas fa-eye' : 'fa:fas fa-eye-slash'"
+        :type="show1 ? 'text' : 'password'"
+        @click:append-inner="show1 = !show1"
+        class="glass-input mb-2"
+      >
+        <template v-slot:prepend-inner>
+           <i class="fas fa-lock input-icon"></i>
+        </template>
+      </v-text-field>
+
+      <div class="d-flex align-center justify-space-between mb-6 auth-options">
+        <v-checkbox
+          v-model="checkbox"
+          label="Recordarme"
+          color="#ee6f38"
+          hide-details
+          density="compact"
+          class="glass-checkbox"
+        ></v-checkbox>
+        <a href="javascript:void(0)" class="forgot-link">¿Olvidaste tu contraseña?</a>
       </div>
-    </div>
-    <v-btn color="#ee6f38" :loading="isSubmitting" block class="mt-2" variant="flat" size="large" :disabled="valid" type="submit"> Iniciar sesion </v-btn>
-    <div v-if="errors.apiError" class="mt-2">
-      <v-alert color="error">{{ errors.apiError }}</v-alert>
-    </div>
-  </Form>
-  <div class="mt-5 text-right">
-    <v-divider />
-    <v-btn variant="plain" to="/register" class="mt-2 text-capitalize mr-n2">¿No tienes una cuenta?</v-btn>
+
+      <v-btn 
+        color="#ee6f38" 
+        :loading="isSubmitting" 
+        block 
+        size="x-large" 
+        :disabled="valid" 
+        type="submit"
+        class="btn-submit mb-4"
+        elevation="0"
+      >
+        INICIAR SESIÓN
+      </v-btn>
+
+      <v-expand-transition>
+        <div v-if="errors.apiError" class="mt-2">
+          <v-alert type="error" variant="tonal" class="glass-alert text-caption py-2" density="compact">
+            {{ errors.apiError }}
+          </v-alert>
+        </div>
+      </v-expand-transition>
+    </Form>
   </div>
 </template>
-<style lang="scss">
-  .custom-devider {
-    border-color: rgba(0, 0, 0, 0.08) !important;
-  }
-  .googleBtn {
-    border-color: rgba(0, 0, 0, 0.08);
-    margin: 30px 0 20px 0;
-  }
-  .outlinedInput .v-field {
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    box-shadow: none;
-  }
 
-  .orbtn {
-    padding: 2px 15px;
-  } 
+<style scoped>
+/* Glassmorphism auth form styles */
+.auth-form-wrapper {
+  color: white;
+  font-family: 'Inter', sans-serif;
+}
 
-  .pwdInput {
-    position: relative;
-    .v-input__append {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-    }
-  }
-  .loginForm {
-    .v-text-field .v-field--active input {
-      font-weight: 500;
-    }
-  }
+.google-btn {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+  text-transform: none;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  background: rgba(255, 255, 255, 0.03);
+  transition: all 0.3s ease;
+  border-radius: 12px;
+}
+
+.google-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.google-icon {
+  width: 20px;
+  margin-right: 12px;
+}
+
+.divider-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+
+.glass-divider {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  opacity: 1 !important;
+  flex: 1;
+}
+
+.divider-text {
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 600;
+}
+
+/* INPUTS */
+.glass-input :deep(.v-field) {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-radius: 12px;
+  box-shadow: none !important;
+}
+
+.glass-input :deep(input) {
+  color: white !important;
+  font-weight: 500;
+}
+
+.glass-input :deep(label) {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.glass-input :deep(.v-field:hover) {
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+.input-icon {
+  color: rgba(238, 111, 56, 0.8);
+  margin-right: 8px;
+  font-size: 14px;
+}
+
+/* Opciones (Recordarme, Olvido) */
+.auth-options {
+  font-size: 0.85rem;
+}
+
+.glass-checkbox :deep(.v-label) {
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-size: 0.85rem;
+  opacity: 1 !important;
+}
+
+.forgot-link {
+  color: rgba(255, 255, 255, 0.5);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.forgot-link:hover {
+  color: #ee6f38;
+}
+
+/* Submit Button */
+.btn-submit {
+  border-radius: 12px !important;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(238, 111, 56, 0.3) !important;
+}
+
+.btn-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(238, 111, 56, 0.5) !important;
+}
+
+/* Alert */
+.glass-alert {
+  background: rgba(211, 47, 47, 0.1) !important;
+  border: 1px solid rgba(211, 47, 47, 0.2) !important;
+  color: #ff5252 !important;
+  border-radius: 8px;
+}
 </style>

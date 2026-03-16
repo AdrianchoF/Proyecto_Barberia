@@ -1,121 +1,103 @@
 <template>
   <div style="height: 100%; display: flex; flex-direction: column;">
-    <v-card class="detalle-card" elevation="2">
-      <template v-slot:prepend>
-        <v-avatar size="75">
-          <v-img src="/public/imagenes/logo/logo2.png" alt="Logo"></v-img>
+    <!-- 🔹 La card SIEMPRE está visible con layout flex -->
+    <v-card class="detalle-card" elevation="0">
+      <div class="header-receipt">
+        <v-avatar size="100">
+          <v-img src="/imagenes/logo/logo2.png" alt="Logo"></v-img>
         </v-avatar>
-      </template>
+        <span class="shop-name">BARBERÍA STYLEHUB</span>
+        <span class="shop-address">Calle 25 # 12-34 Barrio El Recreo, Montería</span>
+      </div>
 
-      <template v-slot:title>
-        <span class="font-weight-black">Barberia StyleHub</span>
-      </template>
-
-      <template v-slot:subtitle>
-        <strong>Calle 30 Cr 4 - n° 3 - Local #5</strong>
-        <br>
-        Aqui tendras los detalles de tu cita
-      </template>
-
-      <v-divider class="my-3"></v-divider>
-
+      <!-- 🔹 Contenedor con scroll para el contenido -->
       <v-card-text class="contenido-scroll">
-        <!-- Sección de Servicios Seleccionados -->
-        <div class="mb-4">
-          <h4 class="text-h6 mb-2">
-            <i class="fa-solid fa-scissors mr-2"></i>
-            Servicios Seleccionados
-            <v-chip v-if="servicios && servicios.length > 0" size="small" color="#ee6f38" class="ml-2">
-              {{ servicios.length }}
-            </v-chip>
+        <!-- 🔹 Sección de Servicios Seleccionados -->
+        <div class="mb-8">
+          <h4 class="section-title">
+            <i class="fa-solid fa-scissors"></i>
+            Tus Servicios
           </h4>
           
           <div v-if="servicios && servicios.length > 0">
-            <v-list class="mt-3 servicios-list" density="compact">
+            <v-list class="servicios-list" density="compact">
               <v-list-item v-for="servicio in servicios" :key="servicio.id" class="servicio-item">
                 <template v-slot:prepend>
-                  <i class="fa-solid fa-circle-check" style="color: #ee6f38; font-size: 16px;"></i>
+                  <i class="fa-solid fa-check-circle text-orange mr-3" style="color: #ee6f38;"></i>
                 </template>
                 
-                <v-list-item-title class="text-body-2">
-                  <strong>{{ servicio.nombre }}</strong>
+                <v-list-item-title class="servicio-nombre-mini">
+                  {{ servicio.nombre }}
                 </v-list-item-title>
-                <v-list-item-subtitle class="text-caption">
-                  {{ servicio.precio }} - {{ servicio.duracionAprox}}
+                <v-list-item-subtitle class="servicio-meta-mini">
+                  {{ servicio.precio }} • {{ servicio.duracionAprox }}
                 </v-list-item-subtitle>
               </v-list-item>
             </v-list>
 
-            <v-divider class="my-3"></v-divider>
-            <div class="resumen-container">
-              <div class="resumen-item">
-                <i class="fa-regular fa-clock mr-1" style="font-size: 14px;"></i>
-                <span class="text-body-2">{{ calcularDuracionTotal }} Aprox</span>
+            <div class="resumen-total">
+              <div class="resumen-row">
+                <span class="resumen-label">Tiempo Total</span>
+                <span class="resumen-value">{{ calcularDuracionTotal }}</span>
               </div>
-              <div class="resumen-item precio-total">
-                <i class="fa-solid fa-money-bill-wave mr-1" style="font-size: 14px;"></i>
-                <span class="text-h6">{{ calcularPrecioTotal }}</span>
+              <div class="resumen-row mt-2 pt-2 border-top-dashed">
+                <span class="resumen-label">Total a Pagar</span>
+                <span class="total-value">{{ calcularPrecioTotal }}</span>
               </div>
             </div>
           </div>
 
-          <div v-else class="text-center py-4">
-            <i class="fa-regular fa-calendar" style="font-size: 48px; color: #bdbdbd;"></i>
-            <p class="text-body-2 text-grey mt-2">
-              No has seleccionado ningún servicio aún
-            </p>
+          <div v-else class="empty-state">
+            <i class="fa-solid fa-receipt" style="opacity: 0.4; color: white;"></i>
+            <p style="opacity: 0.4; color: white;">Selecciona tus servicios para ver el detalle aquí</p>
           </div>
         </div>
 
-        <v-divider class="my-4"></v-divider>
-
-        <!-- Sección de Barbero (siempre visible y pre-seleccionado) -->
-        <div class="mb-4">
-          <h4 class="text-h6 mb-2">
-            <i class="fa-solid fa-user mr-2"></i>
+        <!-- 🔹 Otras secciones (Barbero, Fecha, Hora) -->
+        <div class="mb-8">
+          <h4 class="section-title">
+            <i class="fa-solid fa-user"></i>
             Profesional
           </h4>
-          <div v-if="barbero" class="barbero-seleccionado">
-            <v-list-item class="px-0">
-              <template v-slot:prepend>
-                <v-avatar size="40">
-                  <v-img :src="barbero.foto" :alt="barbero.nombre"></v-img>
-                </v-avatar>
-              </template>
-              <v-list-item-title>
-                {{ barbero.nombre }} {{ barbero.apellido }}
-              </v-list-item-title>
-              <v-list-item-subtitle>
-                <v-chip size="x-small" color="success" variant="flat">
-                  Pre-seleccionado
-                </v-chip>
-              </v-list-item-subtitle>
-            </v-list-item>
+          <div v-if="barbero" class="info-summary-card">
+              <v-avatar size="45" class="border-orange-thin">
+                <v-img :src="barbero.foto || barbero.fotoUrl || '/placeholder-barber.jpg'" :alt="barbero.nombre"></v-img>
+              </v-avatar>
+              <div class="summary-text">
+                <span class="summary-label">Barbero</span>
+                <p class="summary-value ma-0">{{ barbero.nombre }} {{ barbero.apellido || '' }}</p>
+              </div>
+              <i class="fa-solid fa-check text-orange"></i>
           </div>
-          <p v-else class="text-body-2 text-grey">No hay barbero seleccionado</p>
+          <div v-else class="text-caption text-white pl-2">
+            Por seleccionar...
+          </div>
         </div>
 
-        <div class="mb-4">
-          <h4 class="text-h6 mb-2">
-            <i class="fa-regular fa-calendar-days mr-2"></i>
-            Fecha y Hora
+        <div class="mb-6">
+          <h4 class="section-title">
+            <i class="fa-solid fa-calendar-day"></i>
+            Cita
           </h4>
-          <div v-if="fecha && hora">
-            <p class="text-body-2">
-              <i class="fa-regular fa-calendar mr-2"></i>{{ fecha }}
-            </p>
-            <p class="text-body-2">
-              <i class="fa-regular fa-clock mr-2"></i>{{ hora }}
-            </p>
+          <div v-if="fecha && hora" class="info-summary-card">
+              <div class="summary-text">
+                <span class="summary-label">Fecha y Hora</span>
+                <p class="summary-value ma-0">{{ fecha }}</p>
+                <p class="summary-value text-orange ma-0">{{ hora }}</p>
+              </div>
+              <i class="fa-solid fa-clock text-orange"></i>
           </div>
-          <p v-else class="text-body-2 text-grey">Por seleccionar</p>
+          <div v-else class="text-caption text-white pl-2">
+            Por seleccionar...
+          </div>
         </div>
       </v-card-text>
 
+      <!-- 🔹 Botón FIJO en la parte inferior -->
       <v-card-actions class="acciones-fijas">
-        <v-btn block color="#ee6f38" size="large" :disabled="!habilitarBoton" elevation="2" @click="handleSiguiente" class="boton-accion">
-          {{ TextoBtn }}
-          <i :class="`fa-solid ${ IconoBtn } ml-2`"></i>
+        <v-btn block color="#ee6f38" size="x-large" :disabled="!habilitarBoton" @click="handleSiguiente" class="boton-accion">
+          {{  TextoBtn  }}
+          <i :class="`fa-solid ${ IconoBtn } ml-3`"></i>
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -126,171 +108,104 @@
   import { computed } from 'vue'
 
   const props = defineProps({
-    servicios: {
-      type: Array,
-      default: () => []
-    },
-    barbero: {
-      type: Object,
-      default: null
-    },
-    fecha: {
-      type: String,
-      default: null
-    },
-    hora: {
-      type: String,
-      default: null
-    },
-    habilitarBoton: {
-      type: Boolean,
-      default: false
-    },
-    ultimoTab: {
-      type: Boolean,
-      default: false
-    }
+    servicios: { type: Array, default: () => [] },
+    barbero: { type: Object, default: null },
+    fecha: { type: String, default: null },
+    hora: { type: String, default: null },
+    habilitarBoton: { type: Boolean, default: false },
+    ultimoTab: { type: Boolean, default: false }
   })
 
   const emit = defineEmits(['siguiente-tab'])
 
-  function handleSiguiente() {
-    emit('siguiente-tab')
-  }
+  function handleSiguiente() { emit('siguiente-tab') }
 
-  const TextoBtn = computed(() => {
-    return props.ultimoTab ? 'Agendar cita' : 'Siguiente'
-  })
-
-  const IconoBtn = computed(() => {
-    return props.ultimoTab ? 'fa-check' : 'fa-arrow-right'
-  })
+  const TextoBtn = computed(() => props.ultimoTab ? 'Agendar cita' : 'Siguiente')
+  const IconoBtn = computed(() => props.ultimoTab ? 'fa-check' : 'fa-arrow-right')
 
   const calcularPrecioTotal = computed(() => {
     if (!props.servicios || props.servicios.length === 0) return '$0.00'
-    
-    const total = props.servicios.reduce((sum, servicio) => {
-      const precio = parseFloat(servicio.precio.replace(/[^0-9.-]+/g, '')) || 0
-      return sum + precio
+    const total = props.servicios.reduce((sum, s) => {
+      const p = parseFloat(String(s.precio).replace(/[^0-9.-]+/g, '')) || 0
+      return sum + p
     }, 0)
-    
-    return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP'
-    }).format(total)
+    return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(total)
   })
 
   const calcularDuracionTotal = computed(() => {
     if (!props.servicios || props.servicios.length === 0) return '0 min'
-    
-    const totalMinutos = props.servicios.reduce((sum, servicio) => {
-      const match = servicio.duracionAprox.match(/(\d+):(\d+):(\d+)/)
-      if (match) {
-        const horas = parseInt(match[1])
-        const minutos = parseInt(match[2])
-        return sum + (horas * 60) + minutos
-      }
-      return sum
+    const totalMinutos = props.servicios.reduce((sum, s) => {
+      const match = String(s.duracionAprox || s.tiempo_estimado || '').match(/(\d+):(\d+):(\d+)/)
+      if (match) return sum + (parseInt(match[1]) * 60) + parseInt(match[2])
+      const mins = parseInt(s.tiempo_estimado || s.duracionAprox) || 0
+      return sum + mins
     }, 0)
-    
-    const horas = Math.floor(totalMinutos / 60)
-    const minutos = totalMinutos % 60
-    
-    if (horas > 0) {
-      return `${horas}h ${minutos}min`
-    }
-    return `${minutos}min`
+    const h = Math.floor(totalMinutos / 60)
+    const m = totalMinutos % 60
+    return h > 0 ? `${h}h ${m}min` : `${totalMinutos}min`
   })
 </script>
 
 <style scoped>
-  .detalle-card {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+  .detalle-card { height: 100%; display: flex; flex-direction: column; background: transparent !important; border: none !important; }
+  .header-receipt { padding: 30px; text-align: center; background: rgba(255, 255, 255, 0.02); border-bottom: 1px dashed rgba(255, 255, 255, 0.1); }
+  .shop-name { display: block; font-size: 1.4rem; font-weight: 800; color: white; letter-spacing: 2px; margin-top: 15px; }
+  .shop-address { font-size: 0.75rem; color: rgba(255, 255, 255, 0.4); letter-spacing: 1px; text-transform: uppercase; }
+
+  .contenido-scroll { flex: 1; overflow-y: auto; padding: 30px; }
+  .contenido-scroll::-webkit-scrollbar { width: 4px; }
+  .contenido-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
+
+  .section-title {
+    font-size: 0.8rem !important;
+    font-weight: 800;
+    color: #ee6f38;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 15px !important;
+    display: flex; align-items: center; gap: 10px;
   }
 
-  .contenido-scroll {
-    flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: 16px;
-  }
-
-  .contenido-scroll::-webkit-scrollbar {
-    width: 8px;
-  }
-
-  .contenido-scroll::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
-  }
-
-  .contenido-scroll::-webkit-scrollbar-thumb {
-    background: #1976d2;
-    border-radius: 10px;
-  }
-
-  .contenido-scroll::-webkit-scrollbar-thumb:hover {
-    background: #1565c0;
-  }
-
-  .acciones-fijas {
-    position: sticky;
-    bottom: 0;
-    background: white;
-    padding: 16px;
-    border-top: 1px solid #e0e0e0;
-    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
-    z-index: 10;
-  }
-
-  .boton-accion {
-    transition: all 0.3s ease;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-  }
-
-  .boton-accion:not(:disabled):hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(238, 111, 56, 0.4) !important;
-  }
-
-  .servicios-list {
-    background: transparent;
-    padding: 0;
-  }
-
+  .servicios-list { background: transparent; padding: 0; }
   .servicio-item {
-    border-left: 3px solid #ee6f38;
-    margin-bottom: 8px;
-    background-color: #f5f5f5;
-    border-radius: 4px;
-    padding: 8px !important;
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-radius: 12px !important;
+    margin-bottom: 10px;
+    padding: 12px 15px !important;
     min-height: auto !important;
   }
 
-  .servicio-item:hover {
-    background-color: #e3f2fd;
+  .servicio-nombre-mini { color: white !important; font-weight: 700 !important; font-size: 0.9rem !important; }
+  .servicio-meta-mini { color: rgba(255, 255, 255, 0.6) !important; font-size: 0.75rem !important; }
+
+  .resumen-total {
+    background: rgba(238, 111, 56, 0.05);
+    border-radius: 15px; padding: 20px;
+    margin-top: 20px; border: 1px solid rgba(238, 111, 56, 0.1);
   }
 
-  .resumen-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px;
-    background: rgb(231, 230, 230);
-    border-radius: 8px;
-    margin-top: 8px;
-  }
+  .resumen-row { display: flex; justify-content: space-between; align-items: center; }
+  .resumen-label { font-size: 0.8rem; color: rgba(255, 255, 255, 0.5); text-transform: uppercase; font-weight: 600; }
+  .resumen-value { color: white; font-weight: 700; }
+  .total-value { font-size: 1.4rem; color: #ee6f38; font-weight: 800; }
 
-  .resumen-item {
-    display: flex;
-    align-items: center;
-    gap: 4px;
+  .info-summary-card {
+    display: flex; align-items: center; gap: 15px; padding: 15px;
+    background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 15px;
   }
+  .summary-text { flex: 1; }
+  .summary-label { display: block; font-size: 0.7rem; color: rgba(255, 255, 255, 0.4); text-transform: uppercase; margin-bottom: 2px; }
+  .summary-value { display: block; font-size: 0.95rem; font-weight: 700; color: white; }
 
-  .precio-total {
-    font-weight: bold;
+  .empty-state { text-align: center; padding: 40px 20px; color: rgba(255, 255, 255, 0.2); }
+  .empty-state i { font-size: 40px; margin-bottom: 15px; opacity: 0.2; }
+
+  .acciones-fijas { padding: 30px; background: rgba(0, 0, 0, 0.2); border-top: 1px solid rgba(255, 255, 255, 0.05); }
+  .boton-accion {
+    background: #ee6f38 !important; color: white !important;
+    font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+    font-size: 1rem; height: 56px !important; border-radius: 15px !important;
+    box-shadow: 0 10px 20px rgba(238, 111, 56, 0.2) !important;
   }
 </style>

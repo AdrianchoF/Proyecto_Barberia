@@ -32,48 +32,44 @@
                 class="categoria-seccion"
                 :data-categoria-id="categoria.id"
             >
-                <h4 class="text-h4 mb-3 categoria-titulo">
+                <h4 class="categoria-titulo">
                     {{ categoria.nombre }}
                 </h4>
 
                 <div class="lista-servicios">
-                    <v-card
+                    <div
                         v-for="servicio in serviciosPorCategoria[categoria.id]"
                         :key="servicio.id"
-                        class="servicio-card mb-2"
+                        class="servicio-card"
                         :class="{ 'servicio-seleccionado': serviciosSeleccionados.includes(servicio.id) }"
-                        outlined
-                        @click="abrirDialog(servicio)"
+                        @click="toggleSeleccion(servicio.id)"
                     >
-                        <!-- 🔹 Botón de selección -->
-                        <v-btn
-                            icon
-                            size="small"
-                            class="btn-seleccionar"
-                            variant="outlined"
-                            @click.stop="toggleSeleccion(servicio.id)"
-                        >
-                            <i
-                                :class="[
-                                    'fa-solid',
-                                    serviciosSeleccionados.includes(servicio.id) ? 'fa-check' : 'fa-plus',
-                                    serviciosSeleccionados.includes(servicio.id) ? 'icono-seleccionado' : 'icono-normal'
-                                ]"
-                            ></i>
-                        </v-btn>
-
-                        <v-card-title class="text-h4">
-                            {{ servicio.nombre }}
-                        </v-card-title>
-
-                        <v-card-subtitle>
-                            <div>{{ servicio.descripcion }}</div>
-                            <div>
-                                <strong>Precio:</strong> {{ servicio.precio || 'No registrado' }}
-                                <strong> - Duración Aproximada:</strong> {{ servicio.duracionAprox }}
+                        <div class="card-content">
+                            <div class="card-info">
+                                <h5 class="servicio-nombre">{{ servicio.nombre }}</h5>
+                                <p class="servicio-descripcion">{{ servicio.descripcion }}</p>
+                                <div class="servicio-meta">
+                                    <span><i class="fas fa-tag"></i> {{ servicio.precio || 'Consultar' }}</span>
+                                    <span><i class="fas fa-clock"></i> {{ servicio.duracionAprox }}</span>
+                                </div>
                             </div>
-                        </v-card-subtitle>
-                    </v-card>
+
+                            <v-btn
+                                icon
+                                size="small"
+                                class="btn-seleccionar"
+                                @click.stop="toggleSeleccion(servicio.id)"
+                            >
+                                <i
+                                    :class="[
+                                        'fa-solid',
+                                        serviciosSeleccionados.includes(servicio.id) ? 'fa-check' : 'fa-plus',
+                                        serviciosSeleccionados.includes(servicio.id) ? 'icono-seleccionado' : 'icono-normal'
+                                    ]"
+                                ></i>
+                            </v-btn>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -223,121 +219,201 @@
 
 <style scoped>
     .servicios-container {
-        max-width: 500px;
-        margin-left: 40px;
-        text-align: left;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 40px;
+        color: white;
     }
 
     /* 🔹 Header con título y chips */
     .header-container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 16px;
-        gap: 12px;
+        margin-bottom: 40px;
     }
 
-    /* 🔹 Título más pequeño */
     .titulo-servicios {
-        font-size: 1.3rem !important;
-        font-weight: 600;
-        white-space: nowrap;
-        margin: 0 !important;
+        font-size: 1.8rem !important;
+        font-weight: 800;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 25px !important;
     }
 
     /* 🔹 Chips de categorías compactos */
     .categoria-chips-container {
-        display: flex;
-        gap: 4px;
-        flex-shrink: 0;
+        background: rgba(255, 255, 255, 0.03);
+        padding: 10px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
     .chip-categoria {
         cursor: pointer;
         transition: all 0.3s ease;
-        font-weight: 500;
-        font-size: 0.75rem !important;
-        padding: 4px 8px !important;
-        height: 24px !important;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.7rem !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
     }
 
     .chip-categoria:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 2px 8px rgba(238, 111, 56, 0.3);
+        border-color: #ee6f38 !important;
+        background: rgba(238, 111, 56, 0.1);
     }
 
     .scroll-servicios {
-        max-height: 450px;
+        max-height: calc(100vh - 380px);
         overflow-y: auto;
-        padding-right: 8px;
+        padding-right: 15px;
+        padding-bottom: 2px; /* Increased to ensure last item is fully visible */
     }
 
+    /* Scrollbar Styling */
     .scroll-servicios::-webkit-scrollbar {
-        width: 8px;
+        width: 6px;
+    }
+
+    .scroll-servicios::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 10px;
     }
 
     .scroll-servicios::-webkit-scrollbar-thumb {
-        background-color: #b0b0b0;
+        background: rgba(238, 111, 56, 0.3);
         border-radius: 10px;
     }
 
     .scroll-servicios::-webkit-scrollbar-thumb:hover {
-        background-color: #8c8c8c;
+        background: #ee6f38;
     }
 
     .categoria-seccion {
-        margin-bottom: 24px;
-        scroll-margin-top: 20px;
+        margin-bottom: 45px;
+        scroll-margin-top: 30px;
     }
 
     .categoria-titulo {
-        color: #000000;
-        font-weight: 600;
-        padding-bottom: 8px;
-        border-bottom: 2px solid #000000;
+        color: #ee6f38;
+        font-weight: 700;
+        font-size: 1.1rem !important;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 20px !important;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .categoria-titulo::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(90deg, rgba(238, 111, 56, 0.3), transparent);
     }
 
     .lista-servicios {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        margin-top: 12px;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 15px;
     }
 
     .servicio-card {
         position: relative;
-        transition: 0.2s ease;
+        background: rgba(255, 255, 255, 0.03) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 15px !important;
+        padding: 20px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         cursor: pointer;
+        overflow: hidden;
     }
 
     .servicio-card:hover {
-        transform: translateX(4px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        background: rgba(255, 255, 255, 0.07) !important;
+        border-color: rgba(238, 111, 56, 0.4) !important;
+        transform: translateX(8px);
     }
 
     .servicio-seleccionado {
-        border: 2px solid #ee6f38 !important;
+        background: rgba(238, 111, 56, 0.1) !important;
+        border-color: #ee6f38 !important;
+        box-shadow: 0 0 20px rgba(238, 111, 56, 0.15);
+    }
+
+    .card-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-info {
+        flex: 1;
+    }
+
+    .servicio-nombre {
+        font-size: 1.1rem !important;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 4px !important;
+        padding: 0 !important;
+    }
+
+    .servicio-descripcion {
+        font-size: 0.85rem !important;
+        color: rgba(255, 255, 255, 0.5) !important;
+        line-height: 1.4;
+        margin-bottom: 12px !important;
+        padding: 0 !important;
+    }
+
+    .servicio-meta {
+        display: flex;
+        gap: 20px;
+        font-size: 0.8rem;
+        color: #ee6f38 !important;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .servicio-meta i {
+        margin-right: 6px;
+        opacity: 0.8;
     }
 
     .btn-seleccionar {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        z-index: 2;
-        background-color: white;
-        border-radius: 8px;
-        transition: all 0.2s ease;
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        color: white !important;
+        border-radius: 10px !important;
+        width: 38px;
+        height: 38px;
+        transition: all 0.3s ease;
     }
 
-    .btn-seleccionar:hover {
-        background-color: #dddada;
+    .servicio-seleccionado .btn-seleccionar {
+        background: #ee6f38 !important;
+        border-color: #ee6f38 !important;
+        color: white !important;
     }
 
     .icono-seleccionado {
-        color: #ee6f38;
+        color: white;
     }
 
     .icono-normal {
-        color: #666;
+        color: rgba(255, 255, 255, 0.3);
     }
-</style>.
+
+    @media (max-width: 600px) {
+        .servicios-container {
+            padding: 20px;
+        }
+        .header-container {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+</style>
+.
