@@ -19,12 +19,24 @@ export const useCarritoStore = defineStore('carrito', {
         mostrarDetalles: false,
     }),
     actions: {
-        agregar(item: any) {
+        agregarProducto(item: any) {
             const existente = this.items.find(p => p.id === item.id);
             if (existente) {
                 existente.cantidad += 1;
             } else {
                 this.items.push({ ...item, cantidad: 1 });
+            }
+        },
+        eliminar(id: number) {
+            this.items = this.items.filter(item => item.id !== id);
+        },
+        cambiarCantidad(id: number, delta: number) {
+            const item = this.items.find(p => p.id === id);
+            if (item) {
+                item.cantidad += delta;
+                if (item.cantidad <= 0) {
+                    this.eliminar(id);
+                }
             }
         },
         vaciar() {

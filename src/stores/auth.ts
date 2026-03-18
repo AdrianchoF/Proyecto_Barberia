@@ -27,6 +27,8 @@ export const useAuthStore = defineStore('auth', {
   actions: {
     async login(credentials: { email: string; password: string }) {
       try {
+        // Normalizar email a minúsculas
+        credentials.email = credentials.email.toLowerCase().trim();
         const res = await api.post('/auth/login', credentials, { withCredentials: true });
         this.user = res.data.user;
         
@@ -55,6 +57,8 @@ export const useAuthStore = defineStore('auth', {
 
     async register(payload: { nombre: string; apellido: string; email: string; password: string; telefono?: string }) {
       try {
+        // Normalizar email a minúsculas
+        payload.email = payload.email.toLowerCase().trim();
         const res = await api.post('/auth/register', payload, { withCredentials: true });
         this.user = res.data.user; // si tu backend devuelve el usuario creado
         return res.data;
@@ -100,5 +104,10 @@ export const useAuthStore = defineStore('auth', {
       this.user = null;
       this.returnUrl = null;
     },
+
+    loginWithGoogle() {
+      // Redireccionar al endpoint de Google del backend
+      window.location.href = 'http://localhost:3000/auth/google';
+    }
   },
 });

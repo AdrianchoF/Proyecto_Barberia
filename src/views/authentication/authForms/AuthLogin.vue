@@ -32,7 +32,7 @@ async function validate(values: any, { setErrors }: any) {
   const authStore = useAuthStore();
   
   try {
-    const result = await authStore.login({ email: email.value, password: password.value });
+    const result = await authStore.login({ email: email.value.toLowerCase().trim(), password: password.value });
     
     // 🎯 FORZAR LA CARGA DEL USUARIO
     await authStore.loadUser();
@@ -78,7 +78,7 @@ async function validate(values: any, { setErrors }: any) {
 
 <template>
   <div class="auth-form-wrapper">
-    <v-btn block variant="outlined" class="google-btn mb-6" size="large">
+    <v-btn block variant="outlined" class="google-btn mb-6" size="large" @click="useAuthStore().loginWithGoogle()">
       <img :src="Google" alt="google" class="google-icon" />
       <span>Continuar con Google</span>
     </v-btn>

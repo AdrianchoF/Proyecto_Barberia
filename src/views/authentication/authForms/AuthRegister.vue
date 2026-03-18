@@ -49,7 +49,7 @@ async function handleRegister(values: any, { setErrors }: any) {
     await authStore.register({
       nombre: nombre.value,
       apellido: apellido.value,
-      email: email.value,
+      email: email.value.toLowerCase().trim(),
       password: password.value,
       telefono: telefono.value,
     });
@@ -69,7 +69,7 @@ async function handleRegister(values: any, { setErrors }: any) {
 
 <template>
   <div class="auth-form-wrapper">
-    <v-btn block variant="outlined" class="google-btn mb-6" size="large">
+    <v-btn block variant="outlined" class="google-btn mb-6" size="large" @click="useAuthStore().loginWithGoogle()">
       <img :src="Google" alt="google" class="google-icon" />
       <span>Registrarse con Google</span>
     </v-btn>
@@ -120,6 +120,8 @@ async function handleRegister(values: any, { setErrors }: any) {
         v-model="email"
         :rules="emailRules"
         label="Correo electrónico"
+        persistent-hint
+        hint="Usa tu correo personal para recibir tus citas"
         required
         density="comfortable"
         hide-details="auto"

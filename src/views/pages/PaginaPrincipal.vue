@@ -121,31 +121,23 @@
       </div>
     </header>
 
-    <!-- Hero Section -->
     <main class="hero-section">
-      <v-carousel 
-        height="100vh" 
-        show-arrows="hover" 
-        cycle 
-        hide-delimiters 
-        class="hero-carousel"
-        :interval="6000"
-      >
-        <v-carousel-item v-for="(image, i) in images" :key="i">
-          <div class="hero-slide">
-            <div class="overlay"></div>
-            <img :src="image" class="hero-bg-img" />
-          </div>
-        </v-carousel-item>
-      </v-carousel>
+      <div class="hero-background-wrapper">
+        <div class="overlay"></div>
+        <img 
+          src="/public/imagenes/banner_principal.webp" 
+          class="hero-static-img" 
+          alt="Premium Barber Experience"
+        />
+      </div>
 
       <div class="hero-content">
         <div class="hero-text-container">
-          <span class="hero-tagline">BIENVENIDO A STYLEHUB</span>
-          <h1 class="hero-main-title">ESTILO <span class="text-orange">SIN LÍMITES</span></h1>
-          <p class="hero-description">Transformamos tu imagen con precisión y actitud. El arte de la barbería elevado al siguiente nivel.</p>
+          <span class="hero-tagline reveal-tagline">BIENVENIDO A STYLEHUB</span>
+          <h1 class="hero-main-title reveal-title">ESTILO <span class="text-orange">SIN LÍMITES</span></h1>
+          <p class="hero-description reveal-desc">Transformamos tu imagen con precisión y actitud. El arte de la barbería elevado al siguiente nivel.</p>
           
-          <div class="hero-buttons">
+          <div class="hero-buttons reveal-btns">
             <v-btn class="btn-primary-hero" size="x-large" @click="abrirModal">
               <i class="fas fa-calendar-alt mr-2"></i> ¡AGENDA TU CITA YA!
             </v-btn>
@@ -227,13 +219,7 @@ const navLinks = [
   { text: '¿QUIÉNES SOMOS?', to: '#nosotros-section' }
 ];
 
-const images = [
-  'https://img.freepik.com/fotos-premium/hombre-sentado-silla-barbero-mientras-barbero-corta-cabello-precision-barbero-cortando-cuidadosamente-barba-cliente-precision_538213-114313.jpg?w=996',
-  'https://www.blac.media/wp-content/uploads/2022/11/pexels-rodnae-productions-7697394-scaled.jpg',
-  'https://wallpapers.com/images/hd/barber-shop-background-d8q2uecwheabpqj0.jpg',
-  'https://images.pexels.com/photos/1813272/pexels-photo-1813272.jpeg?cs=srgb&dl=pexels-thgusstavo-1813272.jpg&fm=jpg',
-  'https://s1.abcstatics.com/media/summum/2018/11/30/nathon-oski-546863-unsplash-k0MG--1248x698@abc.jpg',
-];
+// Hero images removed in favor of single impact image
 
 const handleScroll = () => {
   isScrolled.value = window.scrollY > 20;
@@ -558,10 +544,19 @@ onMounted(() => {
   overflow: hidden;
 }
 
-.hero-slide {
-  position: relative;
-  height: 100%;
+.hero-background-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.hero-static-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .overlay {
@@ -570,14 +565,13 @@ onMounted(() => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(to bottom, rgba(18, 18, 18, 0.4) 0%, rgba(18, 18, 18, 0.9) 100%);
+  background: linear-gradient(
+    to bottom, 
+    rgba(18, 18, 18, 0.4) 0%, 
+    rgba(18, 18, 18, 0.7) 50%, 
+    rgba(18, 18, 18, 0.95) 100%
+  );
   z-index: 1;
-}
-
-.hero-bg-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 
 .hero-content {
@@ -643,6 +637,64 @@ onMounted(() => {
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
+}
+
+/* 🎭 HERO TEXT ANIMATIONS */
+.reveal-tagline {
+  opacity: 0;
+  animation: fadeInDown 0.8s ease forwards;
+  animation-delay: 0.2s;
+}
+
+.reveal-title {
+  opacity: 0;
+  animation: slideInLeft 1s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+  animation-delay: 0.5s;
+}
+
+.reveal-desc {
+  opacity: 0;
+  animation: fadeInUp 0.8s ease forwards;
+  animation-delay: 1s;
+}
+
+.reveal-btns {
+  opacity: 0;
+  animation: fadeInUp 0.8s ease forwards;
+  animation-delay: 1.3s;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .scroll-indicator {
