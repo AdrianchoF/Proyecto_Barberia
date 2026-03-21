@@ -3,8 +3,6 @@ import CategoriasProducto from '@/views/dashboards/default/components/administra
 import CategoriasServicio from '@/views/dashboards/default/components/administrador/administracion/CategoriasServicio.vue';
 import CrearServicio from '@/views/dashboards/default/components/administrador/administracion/CrearServicio.vue';
 import ListaBarberos from '@/views/dashboards/default/components/administrador/administracion/ListaBarberos.vue';
-import ListaCategoriasproducto from '@/views/dashboards/default/components/administrador/administracion/ListaCategoriasproducto.vue';
-import ListaCategoriasservicio from '@/views/dashboards/default/components/administrador/administracion/ListaCategoriasservicio.vue';
 import ListaClientes from '@/views/dashboards/default/components/administrador/administracion/ListaClientes.vue';
 import ListaProductos from '@/views/dashboards/default/components/administrador/administracion/ListaProductos.vue';
 import ListaServicios from '@/views/dashboards/default/components/administrador/administracion/ListaServicios.vue';
@@ -126,36 +124,6 @@ const MainRoutes = {
       path: '/config/ubicacion',
       name: 'GestionUbicacion',
       component: GestionUbicacion
-    },
-    {
-      name: 'Starter',
-      path: '/starter',
-      component: () => import('@/views/StarterPage.vue')
-    },
-    {
-      name: 'Tabler Icons',
-      path: '/icons/tabler',
-      component: () => import('@/views/utilities/icons/TablerIcons.vue')
-    },
-    {
-      name: 'Material Icons',
-      path: '/icons/material',
-      component: () => import('@/views/utilities/icons/MaterialIcons.vue')
-    },
-    {
-      name: 'Typography',
-      path: '/utils/typography',
-      component: () => import('@/views/utilities/typography/TypographyPage.vue')
-    },
-    {
-      name: 'Shadows',
-      path: '/utils/shadows',
-      component: () => import('@/views/utilities/shadows/ShadowPage.vue')
-    },
-    {
-      name: 'Colors',
-      path: '/utils/colors',
-      component: () => import('@/views/utilities/colors/ColorPage.vue')
     },
     {
       path: '/modalseleccion-reserva',

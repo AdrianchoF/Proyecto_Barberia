@@ -140,11 +140,18 @@
         reservaStore.setCurrentTab(0)
       }
     } else {
-      // ✅ RESET AUTOMÁTICO AL CERRAR (incluso si dan clic fuera)
-      console.log('🧹 Limpiando reserva al cerrar...')
-      reservaStore.resetReserva()
-      currentIndex.value = 0
-      reservaStore.setCurrentTab(0)
+      // ✅ RESET AUTOMÁTICO AL CERRAR (solo si no estamos en proceso de login)
+      const isReturning = sessionStorage.getItem('returnToReserva') === 'true' || 
+                         sessionStorage.getItem('returnToReservaBarbero') === 'true';
+      
+      if (!isReturning) {
+        console.log('🧹 Limpiando reserva al cerrar (cierre definitivo)...')
+        reservaStore.resetReserva()
+        currentIndex.value = 0
+        reservaStore.setCurrentTab(0)
+      } else {
+        console.log('⏳ Manteniendo estado de reserva para el retorno tras login...')
+      }
     }
   })
 
@@ -216,11 +223,20 @@
   }
 
   // 🔥 LISTENER PARA REABRIR DIALOG DESPUÉS DEL LOGIN
-  const handleOpenReserva = () => {
+  const handleOpenReserva = (event) => {
     emit('update:modelValue', true)
     
-    // ✅ Restaurar el tab desde la store
-    currentIndex.value = reservaStore.currentTab
+    // ✅ Si viene un serviceId en el evento (desde HomeServicios), lo pre-seleccionamos
+    const serviceId = event?.detail?.serviceId;
+    if (serviceId) {
+       console.log('📦 Pre-seleccionando servicio desde evento:', serviceId)
+       reservaStore.setServicios([serviceId])
+       currentIndex.value = 0
+       reservaStore.setCurrentTab(0)
+    } else {
+       // ✅ Si no, restaurar el tab desde la store (útil para el retorno tras login)
+       currentIndex.value = reservaStore.currentTab
+    }
     
     // ✅ Verificar estado del botón
     nextTick(() => {
@@ -232,7 +248,15 @@
     console.log('👂 Listener de reserva montado')
     window.addEventListener('open-reserva-dialog', handleOpenReserva)
     
-    // ✅ Al montar, verificar estado del tab actual
+    // ✅ Al cargar, si estamos regresando de un login, recuperamos el tab
+    if (sessionStorage.getItem('returnToReserva') === 'true') {
+      currentIndex.value = reservaStore.currentTab
+      nextTick(() => {
+        handleOpenReserva()
+        sessionStorage.removeItem('returnToReserva')
+      })
+    }
+    
     verificarEstadoTabActual()
   })
 

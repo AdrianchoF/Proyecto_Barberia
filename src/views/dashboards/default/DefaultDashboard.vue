@@ -99,12 +99,12 @@
         </v-col>
       </v-row>
 
-      <!-- SEGUNDA FILA: QUICK ACTIONS & INVENTORY WARNINGS -->
+      <!-- SEGUNDA FILA: ACCESOS RAPIDOS Y ALERTAS DE INVENTARIO -->
       <v-row class="mt-4">
         
         <!-- Acciones Rápidas -->
         <v-col cols="12" md="6">
-          <v-card rounded="xl" elevation="2" class="h-100">
+          <v-card rounded="lg" elevation="2">
             <v-card-title class="section-title pa-5 pb-0">
               <i class="fas fa-bolt text-warning mr-2"></i> Accesos Rápidos
             </v-card-title>
@@ -137,7 +137,7 @@
 
         <!-- Alertas de Inventario -->
         <v-col cols="12" md="6">
-           <v-card rounded="xl" elevation="2" class="h-100">
+           <v-card rounded="lg" elevation="2">
             <v-card-title class="section-title pa-5 pb-0">
               <i class="fas fa-exclamation-triangle text-error mr-2"></i> Alertas de Inventario (Bajo Stock)
             </v-card-title>
@@ -359,7 +359,7 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   padding: 24px;
-  border: 1px solid #f0f0f0;
+  border: none !important;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   background: white;
@@ -368,7 +368,7 @@ onMounted(async () => {
 
 .kpi-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0,0,0,0.06) !important;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.05) !important;
   border-color: #ee6f38;
 }
 
@@ -428,10 +428,10 @@ onMounted(async () => {
 
 /* Stock Items */
 .stock-item {
-  border: 1px solid #f0f0f0;
   transition: background 0.2s;
+  border: none !important;
 }
-.stock-item:hover { background: #fafafa; }
+.stock-item:hover { background: rgba(0,0,0,0.02); }
 
 .empty-alerts {
   display: flex;

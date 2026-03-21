@@ -1,5 +1,5 @@
 <template>
-  <v-card class="crear-servicio-card" elevation="2" rounded="xl">
+  <v-card class="crear-servicio-card" elevation="2" rounded="lg">
 
     <!-- Header con gradiente naranja -->
     <div class="form-header">

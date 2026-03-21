@@ -214,6 +214,16 @@
   onMounted(() => {
     console.log('👂 Listener de reserva barbero montado')
     window.addEventListener('open-reserva-barbero-dialog', handleOpenReservaBarbero)
+    
+    // Al cargar, si estamos regresando de un login, recuperamos el tab
+    if (sessionStorage.getItem('returnToReservaBarbero') === 'true') {
+      currentIndex.value = reservaBarberoStore.currentTab
+      nextTick(() => {
+        handleOpenReservaBarbero()
+        sessionStorage.removeItem('returnToReservaBarbero')
+      })
+    }
+    
     verificarEstadoTabActual()
   })
 

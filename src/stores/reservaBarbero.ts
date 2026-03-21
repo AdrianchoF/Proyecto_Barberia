@@ -26,14 +26,17 @@ interface ReservaBarberoState {
 }
 
 export const useReservaBarberoStore = defineStore('reservaBarbero', {
-    state: (): ReservaBarberoState => ({
-        barberoPreseleccionado: null,
-        horariosBarbero: [],
-        serviciosSeleccionados: [],
-        fechaSeleccionada: null,
-        horaSeleccionada: null,
-        currentTab: 0
-    }),
+    state: (): ReservaBarberoState => {
+        const saved = localStorage.getItem('reserva_barbero_state')
+        return saved ? JSON.parse(saved) : {
+            barberoPreseleccionado: null,
+            horariosBarbero: [],
+            serviciosSeleccionados: [],
+            fechaSeleccionada: null,
+            horaSeleccionada: null,
+            currentTab: 0
+        }
+    },
 
     getters: {
         // Obtener el día de la semana en español (sin acentos)
@@ -104,6 +107,7 @@ export const useReservaBarberoStore = defineStore('reservaBarbero', {
             this.barberoPreseleccionado = barbero
             this.horariosBarbero = horarios
             this.currentTab = 0
+            this.persist()
 
             console.log('✅ Reserva iniciada con barbero:', barbero.nombre)
             console.log('📅 Horarios cargados:', horarios.length)
@@ -112,6 +116,7 @@ export const useReservaBarberoStore = defineStore('reservaBarbero', {
         // Actualizar servicios
         setServicios(serviciosIds: number[]) {
             this.serviciosSeleccionados = serviciosIds
+            this.persist()
         },
 
         // Actualizar fecha y hora
@@ -122,11 +127,13 @@ export const useReservaBarberoStore = defineStore('reservaBarbero', {
                 this.fechaSeleccionada = fecha
             }
             this.horaSeleccionada = hora
+            this.persist()
         },
 
         // Actualizar tab actual
         setCurrentTab(index: number) {
             this.currentTab = index
+            this.persist()
         },
 
         // Resetear toda la reserva
@@ -137,8 +144,13 @@ export const useReservaBarberoStore = defineStore('reservaBarbero', {
             this.fechaSeleccionada = null
             this.horaSeleccionada = null
             this.currentTab = 0
+            this.persist()
 
             console.log('🔄 Reserva de barbero reseteada')
+        },
+
+        persist() {
+            localStorage.setItem('reserva_barbero_state', JSON.stringify(this.$state))
         }
     }
 })

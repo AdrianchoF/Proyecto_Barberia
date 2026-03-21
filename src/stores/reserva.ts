@@ -16,13 +16,16 @@ interface ReservaState {
 }
 
 export const useReservaStore = defineStore('reserva', {
-  state: (): ReservaState => ({
-    fechaSeleccionada: null,
-    horaSeleccionada: null,
-    barberoSeleccionado: null,
-    serviciosSeleccionados: [],
-    currentTab: 0
-  }),
+  state: (): ReservaState => {
+    const saved = localStorage.getItem('reserva_state')
+    return saved ? JSON.parse(saved) : {
+      fechaSeleccionada: null,
+      horaSeleccionada: null,
+      barberoSeleccionado: null,
+      serviciosSeleccionados: [],
+      currentTab: 0
+    }
+  },
 
   getters: {
     // Obtener el día de la semana en español (sin acentos)
@@ -61,6 +64,7 @@ export const useReservaStore = defineStore('reserva', {
     // ✅ Actualizar servicios
     setServicios(serviciosIds: number[]) {
       this.serviciosSeleccionados = serviciosIds
+      this.persist()
     },
 
     // ✅ Actualizar fecha y hora
@@ -73,17 +77,20 @@ export const useReservaStore = defineStore('reserva', {
         this.fechaSeleccionada = fecha
       }
       this.horaSeleccionada = hora
+      this.persist()
     },
 
 
     // ✅ Actualizar barbero (ahora guarda el objeto completo)
     setBarbero(barbero: Barbero | null) {
       this.barberoSeleccionado = barbero
+      this.persist()
     },
 
     // ✅ Actualizar tab actual
     setCurrentTab(index: number) {
       this.currentTab = index
+      this.persist()
     },
 
     // ✅ Resetear toda la reserva
@@ -93,6 +100,11 @@ export const useReservaStore = defineStore('reserva', {
       this.fechaSeleccionada = null
       this.horaSeleccionada = null
       this.currentTab = 0
+      this.persist()
+    },
+
+    persist() {
+      localStorage.setItem('reserva_state', JSON.stringify(this.$state))
     }
   }
 })

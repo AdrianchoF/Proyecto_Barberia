@@ -23,7 +23,7 @@
     <!-- ══════════════════════════════ -->
     <!-- TABLA DE PRODUCTOS            -->
     <!-- ══════════════════════════════ -->
-    <v-card elevation="2" rounded="xl" v-if="!productoStore.loading">
+    <v-card elevation="2" rounded="lg" v-if="!productoStore.loading">
       <div class="table-header">
         <div class="table-title">
           <i class="fas fa-list mr-2"></i> Lista de Productos
@@ -156,7 +156,7 @@
     <!-- DIALOG: PUBLICAR PRODUCTO                 -->
     <!-- ══════════════════════════════════════════ -->
     <v-dialog v-model="dialogPublicar" max-width="620" scrollable>
-      <v-card rounded="xl" elevation="8">
+      <v-card rounded="lg" elevation="8">
         <div class="dialog-header">
           <i class="fas fa-upload mr-2"></i> Publicar Producto
         </div>
@@ -224,7 +224,7 @@
     <!-- DIALOG: EDITAR PRODUCTO                   -->
     <!-- ══════════════════════════════════════════ -->
     <v-dialog v-model="dialogEditar" max-width="620" scrollable persistent>
-      <v-card rounded="xl" elevation="8">
+      <v-card rounded="lg" elevation="8">
         <div class="dialog-header edit">
           <i class="fas fa-pen mr-2"></i> Editar Producto
         </div>
@@ -309,7 +309,7 @@
     <!-- DIALOG: CONFIRMAR ELIMINACIÓN             -->
     <!-- ══════════════════════════════════════════ -->
     <v-dialog v-model="dialogEliminar" max-width="420">
-      <v-card rounded="xl" elevation="10">
+      <v-card rounded="lg" elevation="10">
         <div class="dialog-header delete-real">
           <i class="fas fa-exclamation-triangle mr-2"></i> Eliminar Producto
         </div>

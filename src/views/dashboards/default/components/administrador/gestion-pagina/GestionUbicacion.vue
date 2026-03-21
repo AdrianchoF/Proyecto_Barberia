@@ -2,7 +2,7 @@
   <v-container>
     <v-row>
       <v-col cols="12">
-        <v-card rounded="xl" elevation="4">
+        <v-card rounded="lg" elevation="4">
           <v-card-title class="pa-6 pb-0 d-flex align-center">
             <div class="icon-box mr-4">
               <i class="fas fa-map-marked-alt text-white"></i>

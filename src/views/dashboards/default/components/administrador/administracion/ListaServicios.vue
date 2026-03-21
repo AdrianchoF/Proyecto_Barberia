@@ -26,7 +26,7 @@
     <!-- ══════════════════════════════ -->
     <!-- TABLA DE SERVICIOS            -->
     <!-- ══════════════════════════════ -->
-    <v-card elevation="2" rounded="xl" v-if="!servicioStore.loading">
+    <v-card elevation="2" rounded="lg" v-if="!servicioStore.loading">
       <div class="table-header">
         <div class="table-title">
           <i class="fas fa-list mr-2"></i> Lista de Servicios

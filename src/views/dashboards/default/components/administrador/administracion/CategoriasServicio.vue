@@ -4,7 +4,7 @@
     <!-- ══════════════════════════════ -->
     <!-- CARD: CREAR CATEGORÍA         -->
     <!-- ══════════════════════════════ -->
-    <v-card class="brand-card mb-6" elevation="2" rounded="xl">
+    <v-card class="brand-card mb-6" elevation="2" rounded="lg">
 
       <div class="form-header">
         <div class="header-icon"><i class="fas fa-concierge-bell"></i></div>
@@ -59,7 +59,7 @@
     <!-- ══════════════════════════════ -->
     <!-- CARD: TABLA DE CATEGORÍAS     -->
     <!-- ══════════════════════════════ -->
-    <v-card elevation="2" rounded="xl" class="brand-card">
+    <v-card elevation="2" rounded="lg" class="brand-card">
       <div class="table-header">
         <div class="table-title">
           <i class="fas fa-list mr-2"></i> Lista de Categorías
@@ -116,7 +116,7 @@
     <!-- DIALOG: EDITAR                -->
     <!-- ══════════════════════════════ -->
     <v-dialog v-model="dialogEditar" persistent max-width="460">
-      <v-card rounded="xl" elevation="8">
+      <v-card rounded="lg" elevation="8">
         <div class="dialog-header">
           <i class="fas fa-pen mr-2"></i> Editar Categoría
         </div>
@@ -150,7 +150,7 @@
     <!-- DIALOG: ELIMINAR              -->
     <!-- ══════════════════════════════ -->
     <v-dialog v-model="dialogEliminar" persistent max-width="400">
-      <v-card rounded="xl" elevation="8">
+      <v-card rounded="lg" elevation="8">
         <div class="dialog-header danger">
           <i class="fas fa-exclamation-triangle mr-2"></i> Confirmar Eliminación
         </div>

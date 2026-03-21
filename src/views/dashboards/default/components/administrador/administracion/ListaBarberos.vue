@@ -54,7 +54,7 @@
 
     <v-row v-else>
       <v-col v-for="barbero in filteredBarbers" :key="barbero.id" cols="12" sm="6" md="4" lg="3">
-        <v-card class="barber-card overflow-hidden" elevation="2" rounded="xl">
+        <v-card class="barber-card overflow-hidden" elevation="2" rounded="lg">
           <!-- Banner Superior -->
           <div class="card-banner"></div>
           

@@ -91,7 +91,6 @@
       </div>
     </v-container>
 
-    <VistareservaCita v-model="showModal" :initial-service-id="idPreseleccionado" />
   </section>
 </template>
 
@@ -99,13 +98,10 @@
 import { ref, computed, onMounted } from 'vue';
 import { useServiceStore } from '@/stores/services';
 import { useCintaStore } from '@/stores/cintas';
-import VistareservaCita from '@/views/pages/VistareservaCita.vue';
 
 const servicioStore = useServiceStore();
 const cintaStore = useCintaStore();
-const showModal = ref(false);
 const loading = ref(false);
-const idPreseleccionado = ref(null);
 
 const serviciosDestacados = computed(() => {
   return servicioStore.services.filter(s => s.esDestacado).slice(0, 3);
@@ -124,13 +120,11 @@ const formatDuration = (time) => {
 };
 
 const abrirModal = () => {
-  idPreseleccionado.value = null;
-  showModal.value = true;
+  window.dispatchEvent(new CustomEvent('open-reserva-dialog'));
 };
 
 const agendarServicio = (id) => {
-  idPreseleccionado.value = id;
-  showModal.value = true;
+  window.dispatchEvent(new CustomEvent('open-reserva-dialog', { detail: { serviceId: id } }));
 };
 
 onMounted(async () => {

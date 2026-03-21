@@ -4,7 +4,7 @@
     <!-- ══════════════════════════════ -->
     <!-- HEADER CARD + FILTROS         -->
     <!-- ══════════════════════════════ -->
-    <v-card class="brand-card mb-6" elevation="2" rounded="xl">
+    <v-card class="brand-card mb-6" elevation="2" rounded="lg">
       <div class="form-header">
         <div class="header-icon"><i class="fas fa-shopping-cart"></i></div>
         <div class="flex-grow-1">
@@ -70,7 +70,7 @@
     <!-- ══════════════════════════════ -->
     <!-- TABLA DE COMPRAS              -->
     <!-- ══════════════════════════════ -->
-    <v-card elevation="2" rounded="xl">
+    <v-card elevation="2" rounded="lg">
       <div class="table-header">
         <div class="table-title">
           <i class="fas fa-list mr-2"></i> Órdenes
@@ -147,7 +147,7 @@
                   </v-tooltip>
 
                   <!-- Eliminar orden (Solo si es pendiente) -->
-                  <v-tooltip v-if="compra.estado === 'pendiente'" text="Eliminar orden accidental" location="top">
+                  <v-tooltip v-if="compra.estado === 'pendiente'" text="Eliminar orden" location="top">
                     <template #activator="{ props }">
                       <button v-bind="props" type="button" class="action-btn delete-btn ml-1" @click="abrirConfirmarEliminarCompra(compra)">
                         <i class="fas fa-trash-alt"></i>
@@ -166,7 +166,7 @@
     <!-- DIALOG: VER DETALLES                      -->
     <!-- ══════════════════════════════════════════ -->
     <v-dialog v-model="dialogDetalles" max-width="700">
-      <v-card rounded="xl" elevation="8">
+      <v-card rounded="lg" elevation="8">
         <div class="dialog-header">
           <i class="fas fa-receipt mr-2"></i> Detalle de Compra #{{ detallesCompra?.id_compra }}
         </div>
@@ -242,7 +242,7 @@
     <!-- DIALOG: CARGA MANUAL DE PRODUCTOS         -->
     <!-- ══════════════════════════════════════════ -->
     <v-dialog v-model="dialogCarga" max-width="900" persistent>
-      <v-card rounded="xl" elevation="8">
+      <v-card rounded="lg" elevation="8">
         <div class="dialog-header">
           <i class="fas fa-boxes mr-2"></i> Carga de Productos — Compra #{{ detallesCompra?.id_compra }}
         </div>
@@ -390,7 +390,7 @@
     <!-- DIALOG: MARCAR ENTREGADA                  -->
     <!-- ══════════════════════════════════════════ -->
     <v-dialog v-model="dialogEntrega" max-width="460">
-      <v-card rounded="xl" elevation="8">
+      <v-card rounded="lg" elevation="8">
         <div class="dialog-header success">
           <i class="fas fa-check-circle mr-2"></i> Marcar como Entregada
         </div>
@@ -420,7 +420,7 @@
     <!-- DIALOG: CREAR PRODUCTO RÁPIDO             -->
     <!-- ══════════════════════════════════════════ -->
     <v-dialog v-model="dialogNuevoProducto" max-width="500">
-      <v-card rounded="xl" elevation="10" border="1px solid #ee6f38">
+      <v-card rounded="lg" elevation="10" border="1px solid #ee6f38">
         <div class="dialog-header accent">
           <i class="fas fa-plus-circle mr-2"></i> Nuevo Producto para Catálogo
         </div>
@@ -511,7 +511,7 @@
     <!-- DIALOG: CONFIRMAR ELIMINAR COMPRA         -->
     <!-- ══════════════════════════════════════════ -->
     <v-dialog v-model="dialogEliminarCompra" max-width="420">
-      <v-card rounded="xl" elevation="10" border="1px solid #ff5252">
+      <v-card rounded="lg" elevation="10" border="1px solid #ff5252">
         <div class="dialog-header error bg-red-darken-2" style="background: linear-gradient(135deg, #ff5252, #d32f2f) !important;">
           <i class="fas fa-exclamation-triangle mr-2"></i> Eliminar Orden de Compra
         </div>

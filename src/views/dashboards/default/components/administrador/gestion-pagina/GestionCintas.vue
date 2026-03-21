@@ -19,7 +19,7 @@
 
     <v-row v-else>
       <v-col v-for="cinta in cintaStore.cintas" :key="cinta.id" cols="12">
-        <v-card class="ribbon-card overflow-hidden" elevation="3" rounded="xl">
+        <v-card class="ribbon-card overflow-hidden" elevation="3" rounded="lg">
           <div class="ribbon-header pa-4 d-flex align-center">
             <div class="ribbon-loc-badge">
               <i :class="cinta.ubicacion === 'servicios' ? 'fas fa-concierge-bell' : 'fas fa-box-open'"></i>

@@ -27,7 +27,7 @@
     <!-- ══════════════════════════════ -->
     <!-- TABLA DE CLIENTES             -->
     <!-- ══════════════════════════════ -->
-    <v-card elevation="2" rounded="xl" v-if="!clientStore.loading">
+    <v-card elevation="2" rounded="lg" v-if="!clientStore.loading">
       <div class="table-header py-4 px-6 d-flex align-center gap-4">
         <div class="table-title flex-grow-1">
           <i class="fas fa-list mr-2"></i> Directorio de Clientes

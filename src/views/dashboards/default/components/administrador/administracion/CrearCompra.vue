@@ -4,7 +4,7 @@
     <!-- ══════════════════════════════ -->
     <!-- CARD PRINCIPAL                -->
     <!-- ══════════════════════════════ -->
-    <v-card class="brand-card" elevation="2" rounded="xl" style="max-width:760px; margin:auto">
+    <v-card class="brand-card" elevation="2" rounded="lg" style="max-width:760px; margin:auto">
 
       <div class="form-header">
         <div class="header-icon"><i class="fas fa-file-invoice"></i></div>

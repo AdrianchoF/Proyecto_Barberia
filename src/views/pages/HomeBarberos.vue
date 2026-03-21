@@ -110,7 +110,14 @@ const agendarCon = async (barbero) => {
 };
 
 watch(showModal, (val) => {
-  if (!val) reservaBarberoStore.resetReserva();
+  if (!val) {
+    // Solo resetear si no estamos en proceso de login
+    const isReturning = sessionStorage.getItem('returnToReserva') === 'true' || 
+                       sessionStorage.getItem('returnToReservaBarbero') === 'true';
+    if (!isReturning) {
+      reservaBarberoStore.resetReserva();
+    }
+  }
 });
 
 onMounted(async () => {
