@@ -11,6 +11,7 @@ const fontFamily = ref(['Roboto', 'Poppins', 'Inter']);
 function clearoptions() {
   customizer.inputBg = false;
   customizer.fontTheme = 'Roboto';
+  customizer.theme = 'PurpleTheme';
 }
 </script>
 
@@ -67,9 +68,30 @@ function clearoptions() {
                 </v-radio-group>
               </div>
             </div>
+            <!------------------------------------->
+            <!-- Theme Mode -->
+            <!------------------------------------->
+            <v-divider></v-divider>
+            <v-card-item class="py-5">
+              <v-card-title class="text-subtitle-1 font-weight-medium mb-4">Theme Mode</v-card-title>
+              <v-card-text class="pa-0">
+                <v-radio-group v-model="customizer.theme" hide-details class="custom-radio theme-radio ma-n2">
+                  <v-radio value="PurpleTheme" color="primary" class="ma-2">
+                    <template v-slot:label>
+                      <i class="fas fa-sun" style="font-size: 18px;"></i>
+                    </template>
+                  </v-radio>
+                  <v-radio value="DarkTheme" color="primary" class="ma-2">
+                    <template v-slot:label>
+                      <i class="fas fa-moon" style="font-size: 18px;"></i>
+                    </template>
+                  </v-radio>
+                </v-radio-group>
+              </v-card-text>
+            </v-card-item>
             <v-divider></v-divider>
             <!------------------------------------->
-            <!-- End Input Outlined With Filled -->
+            <!-- End Theme Mode -->
             <!------------------------------------->
           </v-col>
         </v-row>
@@ -96,7 +118,8 @@ function clearoptions() {
         .v-selection-control__input {
           opacity: 0;
         }
-        img {
+        img,
+        i {
           position: absolute;
         }
       }

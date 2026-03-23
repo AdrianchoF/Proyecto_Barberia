@@ -6,6 +6,7 @@ import { icons } from './mdi-icon' // si tienes íconos personalizados
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import { PurpleTheme } from '@/theme/LightTheme'
+import { DarkTheme } from '@/theme/DarkTheme'
 
 export default createVuetify({
   components,
@@ -27,7 +28,8 @@ export default createVuetify({
   theme: {
     defaultTheme: 'PurpleTheme',
     themes: {
-      PurpleTheme
+      PurpleTheme,
+      DarkTheme
     }
   },
   defaults: {

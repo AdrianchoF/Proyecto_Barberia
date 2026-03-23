@@ -37,7 +37,7 @@
         <!-- Tarjeta 1: Citas Hoy -->
         <v-col cols="12" sm="6" md="3">
           <v-card class="kpi-card" elevation="2" rounded="xl" @click="router.push('/gestion-citas')">
-            <div class="kpi-icon-wrap bg-orange-light">
+            <div class="kpi-icon-wrap" style="background-color: rgb(var(--v-theme-lightwarning))">
               <i class="fas fa-calendar-check text-orange"></i>
             </div>
             <div class="kpi-info">
@@ -53,7 +53,7 @@
         <!-- Tarjeta 2: Barberos -->
         <v-col cols="12" sm="6" md="3">
           <v-card class="kpi-card" elevation="2" rounded="xl" @click="router.push('/lista-barberos')">
-            <div class="kpi-icon-wrap bg-blue-light">
+            <div class="kpi-icon-wrap" style="background-color: rgb(var(--v-theme-lightprimary))">
               <i class="fas fa-cut text-blue"></i>
             </div>
             <div class="kpi-info">
@@ -69,7 +69,7 @@
         <!-- Tarjeta 3: Clientes -->
         <v-col cols="12" sm="6" md="3">
           <v-card class="kpi-card" elevation="2" rounded="xl" @click="router.push('/lista-clientes')">
-            <div class="kpi-icon-wrap bg-green-light">
+            <div class="kpi-icon-wrap" style="background-color: rgb(var(--v-theme-lightsuccess))">
               <i class="fas fa-users text-green"></i>
             </div>
             <div class="kpi-info">
@@ -85,7 +85,7 @@
         <!-- Tarjeta 4: Productos -->
         <v-col cols="12" sm="6" md="3">
           <v-card class="kpi-card" elevation="2" rounded="xl" @click="router.push('/lista-productos')">
-            <div class="kpi-icon-wrap bg-purple-light">
+            <div class="kpi-icon-wrap" style="background-color: rgb(var(--v-theme-lightsecondary))">
               <i class="fas fa-box-open text-purple"></i>
             </div>
             <div class="kpi-info">
@@ -150,7 +150,7 @@
                   rounded="lg"
                 >
                   <template #prepend>
-                    <v-avatar color="#ffebee" size="40" rounded="md">
+                    <v-avatar color="lighterror" size="40" rounded="md">
                       <i class="fas fa-cube text-error"></i>
                     </v-avatar>
                   </template>
@@ -362,7 +362,7 @@ onMounted(async () => {
   border: none !important;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  background: white;
+  background: rgb(var(--v-theme-surface));
   height: 100%;
 }
 
@@ -388,7 +388,7 @@ onMounted(async () => {
 
 .kpi-label {
   font-size: 0.85rem;
-  color: #777;
+  color: rgb(var(--v-theme-lightText));
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -398,7 +398,7 @@ onMounted(async () => {
 .kpi-value {
   font-size: 1.8rem;
   font-weight: 800;
-  color: #222;
+  color: rgb(var(--v-theme-darkText));
   margin: 0;
   line-height: 1.1;
 }
@@ -416,7 +416,7 @@ onMounted(async () => {
 .section-title {
   font-size: 1.15rem;
   font-weight: 700;
-  color: #333;
+  color: rgb(var(--v-theme-darkText));
 }
 
 .quick-btn {
@@ -431,7 +431,7 @@ onMounted(async () => {
   transition: background 0.2s;
   border: none !important;
 }
-.stock-item:hover { background: rgba(0,0,0,0.02); }
+.stock-item:hover { background: rgba(var(--v-theme-on-surface), 0.05); }
 
 .empty-alerts {
   display: flex;
@@ -440,7 +440,7 @@ onMounted(async () => {
   justify-content: center;
   padding: 40px 20px;
   text-align: center;
-  color: #999;
+  color: rgb(var(--v-theme-lightText));
 }
 .empty-alerts i { font-size: 48px; color: #4caf50; margin-bottom: 12px; opacity: 0.8; }
 .empty-alerts p { font-size: 0.95rem; margin: 0; }

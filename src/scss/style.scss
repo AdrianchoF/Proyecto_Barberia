@@ -17,3 +17,93 @@
 @import './pages/dashboards';
 
 @import 'vue3-perfect-scrollbar/style.css';
+
+// Global dark mode overrides for hardcoded template classes
+.v-theme--DarkTheme {
+  // Sidebar fixes
+  .brand-sidebar {
+    background-color: rgb(var(--v-theme-surface)) !important;
+    border-right-color: rgba(255, 255, 255, 0.05) !important;
+  }
+  .nav-item {
+    color: rgba(255, 255, 255, 0.7) !important;
+    &:hover:not(.active-nav-item) {
+      background: rgba(255, 255, 255, 0.05) !important;
+      color: #ee6f38 !important;
+    }
+  }
+  .nav-title { color: inherit !important; }
+  .icon-wrapper { 
+    background-color: rgba(255, 255, 255, 0.05) !important; 
+    color: rgba(255, 255, 255, 0.8) !important; 
+  }
+  .group-line { background: rgba(255, 255, 255, 0.1) !important; }
+  .sidebar-divider { border-color: rgba(255, 255, 255, 0.1) !important; }
+
+  // Tables / Lists fixes
+  .brand-table {
+    thead tr { background-color: rgba(255, 255, 255, 0.03) !important; }
+    th {
+      color: #ee6f38 !important; 
+      border-bottom: 2px solid rgba(255, 255, 255, 0.1) !important;
+    }
+    td {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+    .brand-row:hover { background: rgba(255, 255, 255, 0.05) !important; }
+    .row-featured { background: rgba(238, 111, 56, 0.15) !important; } 
+  }
+  
+  .serv-nombre, .barber-name, .header-title, .table-title, .prod-nombre { 
+    color: #ffffff !important; 
+  }
+  .serv-desc-text, .info-item, .header-subtitle, .text-muted, .prod-codigo { 
+    color: rgba(255, 255, 255, 0.6) !important; 
+  }
+  
+  .category-pill, .role-pill { 
+    background: rgba(255, 255, 255, 0.1) !important; 
+    border-color: rgba(255, 255, 255, 0.1) !important; 
+    color: rgba(255, 255, 255, 0.9) !important; 
+  }
+
+  // Stock Pills
+  .stock-pill {
+    &.stock-ok { background: rgba(76, 175, 80, 0.15) !important; color: #4caf50 !important; }
+    &.stock-low { background: rgba(255, 152, 0, 0.15) !important; color: #ff9800 !important; }
+    &.stock-out { background: rgba(244, 67, 54, 0.15) !important; color: #f44336 !important; }
+  }
+
+  // Generic Card and View fixes
+  .v-card:not(.admin-banner-card) {
+    background-color: rgb(var(--v-theme-surface)) !important;
+    color: rgb(var(--v-theme-darkText)) !important;
+  }
+  
+  .card-actions { 
+    background: rgba(0, 0, 0, 0.2) !important; 
+    border-top-color: rgba(255, 255, 255, 0.1) !important; 
+  }
+  
+  .card-banner { 
+    background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%) !important; 
+  }
+  
+  .barber-avatar { border-color: #1e1e1e !important; }
+  
+  .text-h1, .text-h2, .text-h3, .text-h4, .text-h5, .text-h6, 
+  .text-subtitle-1, .text-subtitle-2 {
+    color: rgb(var(--v-theme-darkText)) !important;
+  }
+
+  .text-medium-emphasis {
+    color: rgb(var(--v-theme-lightText)) !important;
+  }
+
+  // Hack for specific template classes
+  .bg-lightprimary { background-color: rgb(var(--v-theme-lightprimary)) !important; }
+  .bg-lightsecondary { background-color: rgb(var(--v-theme-lightsecondary)) !important; }
+  .bg-lightsuccess { background-color: rgb(var(--v-theme-lightsuccess)) !important; }
+  .bg-lighterror { background-color: rgb(var(--v-theme-lighterror)) !important; }
+  .bg-lightwarning { background-color: rgb(var(--v-theme-lightwarning)) !important; }
+}

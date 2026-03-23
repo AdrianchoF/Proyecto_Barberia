@@ -78,8 +78,8 @@ const sidebarMenu = computed(() => menu.value);
 
 <style scoped>
 .brand-sidebar {
-  background-color: #ffffff;
-  border-right: 1px solid #f0f0f0 !important;
+  background-color: rgb(var(--v-theme-surface));
+  border-right: 1px solid rgb(var(--v-theme-borderLight)) !important;
 }
 
 .logo-container {
@@ -93,7 +93,7 @@ const sidebarMenu = computed(() => menu.value);
 }
 
 .sidebar-divider {
-  border-color: #f0f0f0;
+  border-color: rgb(var(--v-theme-borderLight));
   opacity: 1;
 }
 

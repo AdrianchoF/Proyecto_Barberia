@@ -1,92 +1,182 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useRouter } from 'vue-router'; // 🎯 AGREGAR ESTO
-import { SettingsIcon, LogoutIcon, UserIcon } from 'vue-tabler-icons';
+import { computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 
-const swt1 = ref(true);
-const swt2 = ref(false);
 const authStore = useAuthStore();
-const router = useRouter(); // 🎯 AGREGAR ESTO
+const router = useRouter();
 
-// 🎯 NUEVA FUNCIÓN PARA MANEJAR LOGOUT
 const handleLogout = async () => {
   await authStore.logout();
-  router.push('/'); // Redirige a la página principal
+  router.push('/');
 };
+
+const user = computed(() => authStore.user as any);
+const userRole = computed(() => user.value?.Role || 'Usuario');
+const userName = computed(() => user.value?.nombre || 'Invitado');
+const userLastName = computed(() => user.value?.apellido || '');
+const userEmail = computed(() => user.value?.email || '');
+const userPhoto = computed(() => user.value?.foto || null);
+
+// Role Badge Style
+const roleTheme = computed(() => {
+  switch (userRole.value.toLowerCase()) {
+    case 'administrador': return { color: '#ee6f38', icon: 'fa-shield-halved' };
+    case 'barbero': return { color: '#3498db', icon: 'fa-cut' };
+    case 'cliente': return { color: '#2ecc71', icon: 'fa-user' };
+    default: return { color: '#95a5a6', icon: 'fa-circle-user' };
+  }
+});
 </script>
 
 <template>
-  <!-- ---------------------------------------------- -->
-  <!-- profile DD -->
-  <!-- ---------------------------------------------- -->
-  <div class="pa-4">
-    <h4 class="mb-n1">Good Morning, <span class="font-weight-regular">John Doe</span></h4>
-    <span class="text-subtitle-2 text-medium-emphasis">Project admin</span>
-
-    <v-text-field persistent-placeholder placeholder="Search" class="my-3" color="primary" variant="outlined" hide-details>
-      <template v-slot:prepend-inner>
-        <SearchIcon stroke-width="1.5" size="20" class="text-lightText SearchIcon" />
-      </template>
-    </v-text-field>
-
-    <v-divider></v-divider>
-    <perfect-scrollbar style="height: calc(100vh - 300px); max-height: 515px">
-      <div class="bg-lightwarning rounded-md pa-5 my-3 circle sm-circle lg-circle">
-        <h4>Upgrade your plan</h4>
-        <h6 class="text-subtitle-2 text-medium-emphasis mr-11 pr-11 mb-3 mt-2">70% discount for 1 years subscriptions.</h6>
-        <v-btn color="warning" variant="flat" target="_" href="https://codedthemes.com/item/berry-vue-admin-dashboard/"> Go Premium </v-btn>
-      </div>
-
-      <v-divider></v-divider>
-
-      <div class="bg-lightprimary rounded-md px-5 py-3 my-3">
-        <div class="d-flex align-center justify-space-between">
-          <h5 class="text-h5">Start DND Mode</h5>
-          <div>
-            <v-switch v-model="swt1" color="primary" hide-details></v-switch>
-          </div>
-        </div>
-        <div class="d-flex align-center justify-space-between">
-          <h5 class="text-h5">Allow Notifications</h5>
-          <div>
-            <v-switch v-model="swt2" color="primary" hide-details></v-switch>
-          </div>
+  <div class="pa-6 profile-container">
+    <!-- User Info Header -->
+    <div class="d-flex align-center mb-6">
+      <v-avatar size="60" class="profile-avatar-large mr-4">
+        <v-img v-if="userPhoto" :src="userPhoto" :alt="userName" cover />
+        <i v-else class="fas fa-user-circle" style="font-size: 50px; color: #ee6f38;"></i>
+      </v-avatar>
+      <div>
+        <h4 class="text-h6 font-weight-bold mb-0 text-themed">{{ userName }} {{ userLastName }}</h4>
+        <div class="d-flex align-center mt-1">
+          <v-chip size="x-small" :color="roleTheme.color" variant="flat" class="px-2 font-weight-black">
+            <i :class="['fas', roleTheme.icon, 'mr-1']"></i>
+            {{ userRole }}
+          </v-chip>
         </div>
       </div>
+    </div>
 
-      <v-divider></v-divider>
+    <!-- Contact Info -->
+    <div class="user-meta-info mb-6 pa-3 rounded-lg">
+      <div class="d-flex align-center mb-2">
+        <i class="fas fa-envelope mr-3 opacity-50 text-themed" style="width: 16px;"></i>
+        <span class="text-caption text-themed-secondary">{{ userEmail }}</span>
+      </div>
+      <div v-if="user?.telefono" class="d-flex align-center">
+        <i class="fas fa-phone mr-3 opacity-50 text-themed" style="width: 16px;"></i>
+        <span class="text-caption text-themed-secondary">{{ user.telefono }}</span>
+      </div>
+    </div>
 
-      <v-list class="mt-3">
-        <v-list-item color="secondary" rounded="md">
-          <template v-slot:prepend>
-            <SettingsIcon size="20" class="mr-2" />
-          </template>
+    <v-divider class="mb-4 theme-divider"></v-divider>
 
-          <v-list-item-title class="text-subtitle-2"> Account Settings</v-list-item-title>
-        </v-list-item>
+    <!-- Menu Actions -->
+    <v-list class="bg-transparent pa-0">
+      <v-list-item
+        rounded="lg"
+        class="mb-2 menu-item"
+        link
+      >
+        <template v-slot:prepend>
+          <div class="icon-box mr-4">
+            <i class="fas fa-user-gear"></i>
+          </div>
+        </template>
+        <v-list-item-title class="text-subtitle-2 font-weight-bold text-themed">Mi Perfil</v-list-item-title>
+        <v-list-item-subtitle class="text-caption text-themed-secondary">Ajustes de cuenta</v-list-item-subtitle>
+      </v-list-item>
 
-        <v-list-item color="secondary" rounded="md">
-          <template v-slot:prepend>
-            <UserIcon size="20" class="mr-2" />
-          </template>
+      <v-list-item
+        v-if="userRole.toLowerCase() === 'cliente'"
+        rounded="lg"
+        class="mb-2 menu-item"
+        link
+      >
+        <template v-slot:prepend>
+          <div class="icon-box mr-4">
+            <i class="fas fa-calendar-check"></i>
+          </div>
+        </template>
+        <v-list-item-title class="text-subtitle-2 font-weight-bold text-themed">Mis Citas</v-list-item-title>
+        <v-list-item-subtitle class="text-caption text-themed-secondary">Gestionar reservas</v-list-item-subtitle>
+      </v-list-item>
 
-          <v-list-item-title class="text-subtitle-2"> Social Profile</v-list-item-title>
+      <v-divider class="my-4 theme-divider"></v-divider>
 
-          <template v-slot:append>
-            <v-chip color="warning" class="text-white" text="02" variant="flat" size="small" />
-          </template>
-        </v-list-item>
-
-        <!-- 🎯 CAMBIAR AQUÍ: usar handleLogout en lugar de authStore.logout() directamente -->
-        <v-list-item @click="handleLogout" color="secondary" rounded="md">
-          <template v-slot:prepend>
-            <LogoutIcon size="20" class="mr-2" />
-          </template>
-
-          <v-list-item-title class="text-subtitle-2"> Logout</v-list-item-title>
-        </v-list-item>
-      </v-list>
-    </perfect-scrollbar>
+      <v-list-item
+        @click="handleLogout"
+        rounded="lg"
+        class="logout-item"
+        link
+      >
+        <template v-slot:prepend>
+          <div class="icon-box logout-icon-box mr-4">
+            <i class="fas fa-arrow-right-from-bracket"></i>
+          </div>
+        </template>
+        <v-list-item-title class="text-subtitle-2 font-weight-black text-error">CERRAR SESIÓN</v-list-item-title>
+      </v-list-item>
+    </v-list>
   </div>
 </template>
+
+<style scoped lang="scss">
+.profile-container {
+  background: transparent;
+}
+
+.text-themed {
+  color: rgb(var(--v-theme-on-surface));
+}
+
+.text-themed-secondary {
+  color: rgb(var(--v-theme-on-surface));
+  opacity: 0.7;
+}
+
+.theme-divider {
+  border-color: rgba(var(--v-border-color), 0.1) !important;
+}
+
+.profile-avatar-large {
+  border: 3px solid #ee6f38;
+  padding: 3px;
+  background: rgba(var(--v-theme-on-surface), 0.05) !important;
+}
+
+.user-meta-info {
+  background: rgba(var(--v-theme-on-surface), 0.03);
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.05);
+}
+
+.menu-item {
+  transition: all 0.2s ease;
+  color: rgb(var(--v-theme-on-surface)) !important;
+  &:hover {
+    background: rgba(var(--v-theme-on-surface), 0.05) !important;
+    .icon-box {
+      color: #ee6f38;
+      background: rgba(238, 111, 56, 0.1);
+    }
+  }
+}
+
+.icon-box {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(var(--v-theme-on-surface), 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(var(--v-theme-on-surface), 0.6);
+  transition: all 0.2s ease;
+  font-size: 16px;
+}
+
+.logout-item {
+  &:hover {
+    background: rgba(244, 67, 54, 0.05) !important;
+    .logout-icon-box {
+      color: #f44336;
+      background: rgba(244, 67, 54, 0.1);
+    }
+  }
+}
+
+.logout-icon-box {
+  color: #f44336;
+}
+</style>

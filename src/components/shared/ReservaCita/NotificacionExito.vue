@@ -14,6 +14,21 @@
             <i class="fa-solid fa-paper-plane mb-3"></i>
             <p class="text-body-1 opacity-70">Enviamos una confirmación por correo electrónico y SMS con todos los detalles de tu cita.</p>
         </div>
+
+        <div v-if="fecha && hora" class="mb-8">
+            <v-btn
+                block
+                variant="outlined"
+                color="#ee6f38"
+                size="large"
+                :href="googleCalendarUrl"
+                target="_blank"
+                class="btn-calendar mb-4"
+            >
+                <i class="fa-solid fa-calendar-plus mr-3"></i>
+                AÑADIR A GOOGLE CALENDAR
+            </v-btn>
+        </div>
         
         <v-btn block color="#4caf50" size="x-large" @click="handleClose" class="btn-action">
           ENTENDIDO
@@ -25,12 +40,56 @@
 </template>
 
 <script setup>
-  defineProps({
+  import { computed } from 'vue';
+
+  const props = defineProps({
     modelValue: Boolean,
-    mensaje: String
+    mensaje: String,
+    // Nuevas props para el calendario
+    fecha: String,
+    hora: String,
+    barbero: Object,
+    servicios: Array
   })
 
   const emit = defineEmits(['update:modelValue', 'cerrar-todo'])
+
+  const googleCalendarUrl = computed(() => {
+    if (!props.fecha || !props.hora) return '#'
+
+    const baseUrl = 'https://www.google.com/calendar/render?action=TEMPLATE';
+    const title = encodeURIComponent(`Cita en StyleHub Barbería`);
+    
+    // Formatear fechas para Google (YYYYMMDDTHHmmSS)
+    const cleanFecha = props.fecha.replace(/-/g, '');
+    const cleanHoraInicio = props.hora.replace(/:/g, '');
+    
+    const start = `${cleanFecha}T${cleanHoraInicio}`;
+    
+    // Calcular hora fin (asumimos 30 min por defecto si no hay duración, o sumamos duraciones)
+    let totalMinutos = 30;
+    if (props.servicios && props.servicios.length > 0) {
+      totalMinutos = props.servicios.reduce((sum, s) => {
+        const duracion = s.duracionAprox || '00:30:00';
+        const match = duracion.match(/(\d+):(\d+):(\d+)/);
+        if (match) return sum + (parseInt(match[1]) * 60) + parseInt(match[2]);
+        return sum + 30;
+      }, 0);
+    }
+
+    const [h, m] = props.hora.split(':').map(Number);
+    const endDate = new Date(2000, 0, 1, h, m);
+    endDate.setMinutes(endDate.getMinutes() + totalMinutos);
+    const cleanHoraFin = endDate.toTimeString().split(' ')[0].replace(/:/g, '');
+    const end = `${cleanFecha}T${cleanHoraFin}`;
+
+    const serviciosText = props.servicios ? props.servicios.map(s => s.nombre).join(', ') : '';
+    const barberoText = props.barbero ? `${props.barbero.nombre} ${props.barbero.apellido}` : 'No asignado';
+    const details = encodeURIComponent(`Barbero: ${barberoText}\nServicios: ${serviciosText}`);
+    const location = encodeURIComponent('StyleHub Barbería');
+
+    return `${baseUrl}&text=${title}&dates=${start}/${end}&details=${details}&location=${location}`;
+  });
 
   function handleClose() {
     emit('update:modelValue', false)

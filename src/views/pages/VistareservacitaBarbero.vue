@@ -79,6 +79,10 @@
     <NotificacionExito
       v-model="mostrarNotificacionExito"
       :mensaje="mensajeNotificacion"
+      :fecha="detallesUltimaReserva.fecha"
+      :hora="detallesUltimaReserva.hora"
+      :barbero="detallesUltimaReserva.barbero"
+      :servicios="detallesUltimaReserva.servicios"
       @cerrar-todo="closeDialog"
     />
 
@@ -132,6 +136,12 @@
   const mensajeNotificacion = ref('')
   const horariosAlternativos = ref([])
   const barberosAlternativos = ref([])
+  const detallesUltimaReserva = ref({
+    fecha: null,
+    hora: null,
+    barbero: null,
+    servicios: []
+  })
 
   const currentTab = computed({
     get: () => items[currentIndex.value],
@@ -305,6 +315,15 @@
 
       if (resultado.success) {
         mensajeNotificacion.value = resultado.mensaje
+
+        // ⭐ IMPORTANTE: Guardar detalles para el calendario antes de limpiar la reserva
+        detallesUltimaReserva.value = {
+          fecha: reservaBarberoStore.fechaSeleccionada,
+          hora: reservaBarberoStore.horaSeleccionada + ':00',
+          barbero: reservaBarberoStore.barberoPreseleccionado,
+          servicios: serviciosSeleccionados.value
+        }
+
         mostrarModalConfirmacion.value = false
         await nextTick()
         reservaBarberoStore.resetReserva()

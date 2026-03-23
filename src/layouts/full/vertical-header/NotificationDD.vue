@@ -1,124 +1,122 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { BuildingStoreIcon, SendIcon, MailboxIcon, PhotoIcon } from 'vue-tabler-icons';
+import { useAuthStore } from '@/stores/auth';
 
-const notificationDD = ref(['All Notifications', 'New', 'Unread', 'Other']);
-const selectNotify = ref<string>('All Notifications');
+const authStore = useAuthStore();
+const userName = authStore.user?.nombre || 'Barber';
+
+const notifications = ref([
+  {
+    title: `¡Bienvenido, ${userName}!`,
+    time: 'Ahora',
+    description: 'Gracias por usar StyleHub. Tu panel de control está listo.',
+    icon: 'fa-star',
+    color: '#ee6f38',
+    isNew: true
+  }
+]);
 </script>
 
 <template>
-  <!-- ---------------------------------------------- -->
-  <!-- notifications DD -->
-  <!-- ---------------------------------------------- -->
-  <div class="pa-4">
-    <div class="d-flex align-center justify-space-between mb-3">
-      <h6 class="text-subtitle-1">
-        All Notifications
-        <v-chip color="warning" variant="flat" size="small" class="ml-2 text-white">01</v-chip>
+  <div class="notification-container pa-6">
+    <div class="d-flex align-center justify-space-between mb-6">
+      <h6 class="text-h6 font-weight-bold text-themed">
+        Notificaciones
+        <v-chip color="orange" variant="flat" size="x-small" class="ml-2 font-weight-black">01</v-chip>
       </h6>
-      <a href="#" class="text-decoration-underline text-primary text-subtitle-2">Mark as all read</a>
+      <span class="text-caption text-orange clickable-link">Marcar todas como leídas</span>
     </div>
-    <v-select :items="notificationDD" v-model="selectNotify" color="primary" variant="outlined" density="default" hide-details></v-select>
-  </div>
-  <v-divider></v-divider>
-  <perfect-scrollbar style="height: calc(100vh - 300px); max-height: 650px">
-    <v-list class="py-0" lines="three">
-      <v-list-item value="" color="secondary" class="no-spacer">
-        <template v-slot:prepend>
-          <v-avatar size="40" class="mr-3 py-2">
-            <img src="@/assets/images/profile/user-round.svg" width="40" alt="Julia" />
-          </v-avatar>
-        </template>
-        <div class="d-inline-flex align-center justify-space-between w-100">
-          <h6 class="text-subtitle-1 font-weight-regular">John Deo</h6>
-          <span class="text-subtitle-2 text-medium-emphasis">2 mins ago</span>
-        </div>
 
-        <p class="text-subtitle-2 text-medium-emphasis mt-1">It is a long established fact that a reader will be distracted</p>
-        <div class="mt-3">
-          <v-chip size="small" text="Unread" color="error" variant="tonal" class="mr-2" />
-          <v-chip size="small" text="New" color="warning" variant="tonal" />
-        </div>
-      </v-list-item>
-      <v-divider></v-divider>
-      <v-list-item value="" color="secondary" class="no-spacer">
-        <template v-slot:prepend>
-          <v-avatar size="40" variant="flat" color="lightsuccess" class="mr-3 py-2 text-success">
-            <BuildingStoreIcon size="20" />
-          </v-avatar>
-        </template>
-        <div class="d-inline-flex align-center justify-space-between w-100">
-          <h6 class="text-subtitle-1">Store Verification Done</h6>
-          <span class="text-subtitle-2 text-medium-emphasis">2 mins ago</span>
-        </div>
+    <v-divider class="mb-4 opacity-10"></v-divider>
 
-        <p class="text-subtitle-2 text-medium-emphasis mt-1">We have successfully received your request.</p>
-        <div class="mt-3">
-          <v-chip size="small" color="error" text="Unread" variant="tonal" />
-        </div>
-      </v-list-item>
-      <v-divider></v-divider>
-      <v-list-item value="" color="secondary" class="no-spacer">
-        <template v-slot:prepend>
-          <v-avatar size="40" variant="flat" color="lightprimary" class="mr-3 py-2 text-primary">
-            <MailboxIcon size="20" />
-          </v-avatar>
-        </template>
-        <div class="d-inline-flex align-center justify-space-between w-100">
-          <h6 class="text-subtitle-1">Check your Mail.</h6>
-          <span class="text-subtitle-2 text-medium-emphasis">2 mins ago</span>
-        </div>
+    <perfect-scrollbar style="max-height: 400px">
+      <v-list class="bg-transparent pa-0">
+        <v-list-item
+          v-for="(item, i) in notifications"
+          :key="i"
+          class="notification-item mb-3 pa-4 rounded-xl"
+          link
+        >
+          <template v-slot:prepend>
+            <div class="icon-circle mr-4" :style="{ background: item.color + '20', color: item.color }">
+              <i :class="['fas', item.icon]"></i>
+            </div>
+          </template>
 
-        <p class="text-subtitle-2 text-medium-emphasis mt-1">All done! Now check your inbox as you're in for a sweet treat!</p>
-        <div class="mt-3">
-          <v-btn color="primary" variant="flat">
-            <template v-slot:append>
-              <SendIcon size="20" />
-            </template>
-            Mail
-          </v-btn>
-        </div>
-      </v-list-item>
-      <v-divider></v-divider>
-      <v-list-item value="" color="secondary" class="no-spacer">
-        <template v-slot:prepend>
-          <v-avatar size="40" class="mr-3 py-2">
-            <img src="@/assets/images/profile/user-round.svg" width="40" alt="Julia" />
-          </v-avatar>
-        </template>
-        <div class="d-inline-flex align-center justify-space-between w-100">
-          <h6 class="text-subtitle-1">John Deo</h6>
-          <span class="text-subtitle-2 text-medium-emphasis">2 mins ago</span>
-        </div>
+          <div class="d-flex justify-space-between align-center mb-1">
+            <h6 class="text-subtitle-2 font-weight-bold text-themed line-height-1">{{ item.title }}</h6>
+            <span class="text-tiny text-themed-secondary">{{ item.time }}</span>
+          </div>
+          
+          <p class="text-caption text-themed-secondary line-height-1-2">{{ item.description }}</p>
 
-        <p class="text-subtitle-2 mt-1">
-          <span class="text-medium-emphasis">Uploaded two file on </span>
-          <span class="font-weight-medium">21 Jan 2020</span>
-        </p>
-        <div class="mt-3 bg-lightsecondary rounded pa-5 d-flex align-center">
-          <PhotoIcon size="20" stroke-width="1.5" />
-          <span class="ml-2 text-subtitle-1">demo.jpg</span>
-        </div>
-      </v-list-item>
-      <v-divider></v-divider>
-      <v-list-item value="" color="secondary" class="no-spacer">
-        <template v-slot:prepend>
-          <v-avatar size="40" class="mr-3 py-2">
-            <img src="@/assets/images/profile/user-round.svg" width="40" alt="Julia" />
-          </v-avatar>
-        </template>
-        <div class="d-inline-flex align-center justify-space-between w-100">
-          <h6 class="text-subtitle-1">John Deo</h6>
-          <span class="text-subtitle-2 text-medium-emphasis">2 mins ago</span>
-        </div>
+          <div v-if="item.isNew" class="mt-2">
+            <v-chip size="x-small" color="orange" variant="tonal" class="font-weight-black">NUEVO</v-chip>
+          </div>
+        </v-list-item>
+      </v-list>
+    </perfect-scrollbar>
 
-        <p class="text-subtitle-2 mt-1 text-medium-emphasis mb-3">It is a long established fact that a reader will be distracted</p>
-        <v-chip size="small" color="success" text="Confirmation of Account." />
-      </v-list-item>
-    </v-list>
-  </perfect-scrollbar>
-  <v-divider></v-divider>
-  <div class="pa-2 text-center">
-    <v-btn color="primary" variant="text">View All</v-btn>
+    <v-divider class="my-4 opacity-10"></v-divider>
+
+    <div class="text-center">
+      <v-btn variant="text" color="orange" size="small" class="font-weight-black">VER TODAS LAS NOTIFICACIONES</v-btn>
+    </div>
   </div>
 </template>
+
+<style scoped lang="scss">
+.notification-container {
+  background: transparent;
+}
+
+.text-themed {
+  color: rgb(var(--v-theme-on-surface));
+}
+
+.text-themed-secondary {
+  color: rgb(var(--v-theme-on-surface));
+  opacity: 0.7;
+}
+
+.clickable-link {
+  cursor: pointer;
+  font-weight: 700;
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.notification-item {
+  background: rgba(var(--v-theme-on-surface), 0.03);
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.05);
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(var(--v-theme-on-surface), 0.06) !important;
+    border-color: #ee6f38;
+  }
+}
+
+.icon-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.text-tiny {
+  font-size: 10px;
+}
+
+.line-height-1 {
+  line-height: 1.2;
+}
+
+.line-height-1-2 {
+  line-height: 1.4;
+}
+</style>
