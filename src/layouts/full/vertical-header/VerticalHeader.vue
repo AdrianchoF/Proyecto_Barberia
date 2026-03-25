@@ -85,7 +85,7 @@ const roleColor = computed(() => {
             </v-badge>
           </v-btn>
         </template>
-        <v-sheet rounded="xl" width="350" elevation="24" class="dropdown-sheet mt-2">
+        <v-sheet rounded="lg" width="350" elevation="24" class="dropdown-sheet mt-2">
           <NotificationDD />
         </v-sheet>
       </v-menu>
@@ -106,7 +106,7 @@ const roleColor = computed(() => {
             </div>
           </v-btn>
         </template>
-        <v-sheet rounded="xl" width="330" elevation="24" class="dropdown-sheet mt-2">
+        <v-sheet rounded="lg" width="330" elevation="24" class="dropdown-sheet mt-2">
           <ProfileDD />
         </v-sheet>
       </v-menu>

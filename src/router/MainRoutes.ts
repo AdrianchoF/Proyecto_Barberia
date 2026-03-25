@@ -29,6 +29,7 @@ const MainRoutes = {
   redirect: '/dashboard/default',
   component: () => import('@/layouts/full/FullLayout.vue'),
   children: [
+    // ─── COMPARTIDAS (todos los roles autenticados) ───────────────────────────
     {
       name: 'LandingPage',
       path: '/dashboard',
@@ -49,108 +50,132 @@ const MainRoutes = {
       name: 'DefaultDashboard',
       component: DefaultDashboard
     },
+
+    // ─── ADMINISTRADOR ────────────────────────────────────────────────────────
     {
       path: '/crear-barbero',
       name: 'CrearBarbero',
-      component: CrearBarbero
+      component: CrearBarbero,
+      meta: { requiresAuth: true, roles: ['administrador'] }
     },
     {
       path: '/crear-servicio',
       name: 'CrearServicio',
-      component: CrearServicio
+      component: CrearServicio,
+      meta: { requiresAuth: true, roles: ['administrador'] }
     },
     {
       path: '/categorias-productos',
       name: 'CategoriasProducto',
-      component: CategoriasProducto
+      component: CategoriasProducto,
+      meta: { requiresAuth: true, roles: ['administrador'] }
     },
     {
       path: '/categorias-servicios',
       name: 'CategoriasServicio',
-      component: CategoriasServicio
+      component: CategoriasServicio,
+      meta: { requiresAuth: true, roles: ['administrador'] }
     },
     {
       path: '/lista-barberos',
       name: 'ListaBarberos',
-      component: ListaBarberos
+      component: ListaBarberos,
+      meta: { requiresAuth: true, roles: ['administrador'] }
     },
     {
       path: '/lista-clientes',
       name: 'ListaClientes',
-      component: ListaClientes
+      component: ListaClientes,
+      meta: { requiresAuth: true, roles: ['administrador'] }
     },
     {
       path: '/lista-servicios',
       name: 'ListaServicios',
-      component: ListaServicios
+      component: ListaServicios,
+      meta: { requiresAuth: true, roles: ['administrador'] }
     },
     {
       path: '/lista-productos',
       name: 'ListaProductos',
-      component: ListaProductos
+      component: ListaProductos,
+      meta: { requiresAuth: true, roles: ['administrador'] }
     },
-
     {
       path: '/proveedores',
       name: 'Proveedores',
-      component: Proveedores
+      component: Proveedores,
+      meta: { requiresAuth: true, roles: ['administrador'] }
     },
     {
       path: '/lista-compras',
       name: 'ListaCompras',
-      component: ListaCompras
+      component: ListaCompras,
+      meta: { requiresAuth: true, roles: ['administrador'] }
     },
     {
       path: '/crear-compra',
       name: 'CrearCompra',
-      component: CrearCompra
+      component: CrearCompra,
+      meta: { requiresAuth: true, roles: ['administrador'] }
     },
     {
       path: '/dashboard-citas',
       name: 'DashboardCitas',
-      component: DashboardCitas
+      component: DashboardCitas,
+      meta: { requiresAuth: true, roles: ['administrador'] }
     },
     {
       path: '/gestion-citas',
       name: 'GestionarCitas',
-      component: GestionarCitas
+      component: GestionarCitas,
+      meta: { requiresAuth: true, roles: ['administrador'] }
     },
     {
       path: '/config/cintas',
       name: 'GestionCintas',
-      component: GestionCintas
+      component: GestionCintas,
+      meta: { requiresAuth: true, roles: ['administrador'] }
     },
     {
       path: '/config/ubicacion',
       name: 'GestionUbicacion',
-      component: GestionUbicacion
+      component: GestionUbicacion,
+      meta: { requiresAuth: true, roles: ['administrador'] }
     },
+
+    // ─── BARBERO ──────────────────────────────────────────────────────────────
+    {
+      path: '/agenda-citas',
+      name: 'VistaAgenda',
+      component: VistaAgenda,
+      meta: { requiresAuth: true, roles: ['barbero'] }
+    },
+
+    // ─── CLIENTE ──────────────────────────────────────────────────────────────
     {
       path: '/modalseleccion-reserva',
       name: 'ModalseleccionReserva',
       component: ModalseleccionReserva,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, roles: ['cliente'] }
     },
     {
       path: '/reservar-cita',
       name: 'ReservarCita',
-      component: ReservarCita
+      component: ReservarCita,
+      meta: { requiresAuth: true, roles: ['cliente'] }
     },
     {
       path: '/mis-citas',
       name: 'VistaCitasActuales',
-      component: VistaCitasActuales
+      component: VistaCitasActuales,
+      meta: { requiresAuth: true, roles: ['cliente'] }
     },
     {
       path: '/historial-citas',
       name: 'VistaHistorialCitas',
-      component: VistaHistorialCitas
+      component: VistaHistorialCitas,
+      meta: { requiresAuth: true, roles: ['cliente'] }
     },
-    {
-      path: '/agenda-citas',
-      name: 'VistaAgenda',
-      component: VistaAgenda
-    }
   ],
 };
 

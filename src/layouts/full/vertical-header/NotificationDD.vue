@@ -34,7 +34,7 @@ const notifications = ref([
         <v-list-item
           v-for="(item, i) in notifications"
           :key="i"
-          class="notification-item mb-3 pa-4 rounded-xl"
+          class="notification-item mb-3 pa-4 rounded-lg"
           link
         >
           <template v-slot:prepend>

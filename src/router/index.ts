@@ -10,6 +10,11 @@ export const router = createRouter({
       path: '/:pathMatch(.*)*',
       component: () => import('@/views/pages/maintenance/error/Error404Page.vue')
     },
+    {
+      path: '/403',
+      name: 'Forbidden',
+      component: () => import('@/views/pages/maintenance/error/Error403Page.vue')
+    },
     MainRoutes,
     PublicRoutes
   ]
@@ -17,17 +22,8 @@ export const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
   const auth = useAuthStore();
-  console.log('Usuario en auth:', auth.user);
 
-  console.log('ROUTER GUARD EJECUTADO');
-  console.log('De:', from.path);
-  console.log('A:', to.path);
-  
-  console.log('🛡️ Middleware - Going to:', to.path);
-  console.log('👤 User in middleware:', auth.user);
-  console.log('🔐 Is authenticated:', auth.isAuthenticated);
-
-  // 👇 NUEVO: Siempre intentar cargar usuario si no existe en memoria
+  // Siempre intentar cargar usuario si no existe en memoria
   if (!auth.user) {
     try {
       await auth.loadUser();
@@ -36,35 +32,44 @@ router.beforeEach(async (to, from, next) => {
     }
   }
 
-  // páginas públicas (no requieren login)
-  const publicPages = ['/login', '/login1', '/register']; // 👈 ajusta según lo que tengas
+  // Páginas públicas (no requieren login)
+  const publicPages = ['/login', '/login1', '/register'];
   const isPublicPage = publicPages.includes(to.path);
 
-  // 🎯 NUEVA LÓGICA: Si viene del dashboard y tiene usuario, bloquear ir a login
+  // Si viene del dashboard y tiene usuario, bloquear ir a login
   if (auth.user && (to.path === '/login' || to.path === '/login1') && from.path.startsWith('/dashboard')) {
-    console.log('Bloqueando navegación desde dashboard a login');
-    return next(false); // Bloquea la navegación
+    return next(false);
   }
 
-  // la ruta requiere autenticación si tiene `meta.requiresAuth`
+  // La ruta requiere autenticación si tiene `meta.requiresAuth`
   const authRequired = !isPublicPage && to.matched.some(record => record.meta.requiresAuth);
 
-  // 🎯 NUEVA LÓGICA: Si requiere auth y no hay usuario, intentar cargar desde cookies
+  // Si requiere auth y no hay usuario, redirigir a login
   if (authRequired && !auth.user) {
     try {
-      console.log('Intentando cargar usuario desde cookies...');
       await auth.loadUser();
-      console.log('Usuario cargado correctamente desde cookies');
     } catch (error) {
-      console.log('No se pudo cargar usuario - redirigiendo a login');
       auth.returnUrl = to.fullPath;
       return next('/login');
     }
   }
 
-  // si ya está logueado e intenta entrar a /login -> lo mando al home o returnUrl
+  // Si ya está autenticado e intenta entrar a /login → redirigir
   if (auth.user && to.path === '/login') {
     return next(auth.returnUrl || '/');
+  }
+
+  // 🔒 VERIFICACIÓN DE ROL
+  const requiredRoles = to.meta.roles as string[] | undefined;
+  if (requiredRoles && requiredRoles.length > 0 && auth.user) {
+    // Normalizar el rol del usuario (puede venir como 'Role' o 'role')
+    const userRole = ((auth.user as any).Role || (auth.user as any).role || '').toLowerCase();
+    const hasPermission = requiredRoles.includes(userRole);
+
+    if (!hasPermission) {
+      console.warn(`🚫 Acceso denegado: ${userRole} intentó acceder a ${to.path} (requiere: ${requiredRoles.join(', ')})`);
+      return next('/403');
+    }
   }
 
   next();

@@ -1,8 +1,6 @@
-// stores/citaStore.js
 import { defineStore } from 'pinia';
+import api from '@/plugins/axios';
 import axios from 'axios';
-
-const API_URL = 'http://localhost:3000/cita';
 
 export const useCitaStore = defineStore('cita', {
   state: () => ({
@@ -47,7 +45,7 @@ export const useCitaStore = defineStore('cita', {
           estado: 'agendada'
         };
 
-        const response = await axios.post(API_URL, citaData);
+        const response = await api.post('/cita', citaData);
 
         // Verificar si hubo conflictos
         if (response.data.disponible === false) {
@@ -94,7 +92,7 @@ export const useCitaStore = defineStore('cita', {
       this.error = null;
 
       try {
-        const response = await axios.get(`${API_URL}/${fecha}/${hora}/${servicioId}`);
+        const response = await api.get(`/cita/${fecha}/${hora}/${servicioId}`);
         this.barberosDisponibles = response.data.barberos_disponibles || [];
         return response.data;
       } catch (error: any) {
@@ -109,7 +107,7 @@ export const useCitaStore = defineStore('cita', {
     async obtenerHorasOcupadasBarbero(barberoId: number, fecha: string) {
       this.cargando = true
       try {
-        const response = await axios.get(`${API_URL}/barbero/${barberoId}/ocupadas/${fecha}`)
+        const response = await api.get(`/cita/barbero/${barberoId}/ocupadas/${fecha}`)
         return response.data
       } catch (error: any) {
         console.error('Error al obtener horas ocupadas:', error)
@@ -126,7 +124,7 @@ export const useCitaStore = defineStore('cita', {
     async obtenerCitas() {
       this.cargando = true;
       try {
-        const response = await axios.get(API_URL);
+        const response = await api.get('/cita');
         
         console.log('📡 Respuesta del backend:', response.data);
         
@@ -165,7 +163,7 @@ export const useCitaStore = defineStore('cita', {
     async obtenerCita(id: any) {
       this.cargando = true;
       try {
-        const response = await axios.get(`${API_URL}/${id}`);
+        const response = await api.get(`/cita/${id}`);
         this.citaActual = response.data;
         return response.data;
       } catch (error: any) {
@@ -184,7 +182,7 @@ export const useCitaStore = defineStore('cita', {
       this.error = null;
       
       try {
-        const response = await axios.patch(`${API_URL}/${id}/cancelar`);
+        const response = await api.patch(`/cita/${id}/cancelar`);
         
         // Actualizar la cita en el array local
         const index = this.citas.findIndex(cita => cita.id_cita === id);
@@ -216,7 +214,7 @@ export const useCitaStore = defineStore('cita', {
     async eliminarCita(id: any) {
       this.cargando = true;
       try {
-        await axios.delete(`${API_URL}/${id}`);
+        await api.delete(`/cita/${id}`);
         this.citas = this.citas.filter(cita => cita.id_cita !== id);
         
         if (this.citaActual?.id_cita === id) {

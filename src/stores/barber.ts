@@ -39,8 +39,8 @@ export const useBarberStore = defineStore('barber', {
     async getBarbers() {
       this.loading = true
       try {
-        const { data } = await api.get('/auth', { withCredentials: true })
-        this.barbers = data.filter((u: any) => u.role === 'barbero')
+        const { data } = await api.get('/auth/barberos', { withCredentials: true })
+        this.barbers = data
         return data;
       } catch (err: unknown) {
         if (axios.isAxiosError(err) && err.response?.data?.message) {
