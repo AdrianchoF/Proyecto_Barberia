@@ -54,6 +54,24 @@ export const useBarberStore = defineStore('barber', {
       }
     },
 
+    async getBarbersAdmin() {
+      this.loading = true
+      try {
+        const { data } = await api.get('/auth/barberos-admin', { withCredentials: true })
+        this.barbers = data
+        return data;
+      } catch (err: unknown) {
+        if (axios.isAxiosError(err) && err.response?.data?.message) {
+          this.error = err.response.data.message
+        } else {
+          this.error = 'Error cargando barberos (Admin)'
+        }
+        return [];
+      } finally {
+        this.loading = false
+      }
+    },
+
     async createBarber(payload: Barber) {
       this.loading = true
       try {
@@ -154,7 +172,9 @@ export const useBarberStore = defineStore('barber', {
         const { data } = await api.patch(`/auth/${id}`, payload, { withCredentials: true })
         const index = this.barbers.findIndex(b => b.id === id)
         if (index !== -1) {
-          this.barbers[index] = { ...this.barbers[index], ...data }
+          // Extraemos el usuario del objeto devuelto { user, message }
+          const updatedUser = data.user || data; 
+          this.barbers[index] = { ...this.barbers[index], ...updatedUser }
         }
         return data
       } catch (err: unknown) {

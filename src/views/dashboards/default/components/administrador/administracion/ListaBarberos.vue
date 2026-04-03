@@ -54,9 +54,19 @@
 
     <v-row v-else>
       <v-col v-for="barbero in filteredBarbers" :key="barbero.id" cols="12" sm="6" md="4" lg="3">
-        <v-card class="barber-card overflow-hidden" elevation="2" rounded="lg">
+        <v-card :class="['barber-card overflow-hidden', !barbero.activo ? 'barber-inactive' : '']" elevation="2" rounded="lg">
           <!-- Banner Superior -->
-          <div class="card-banner"></div>
+          <div :class="['card-banner', !barbero.activo ? 'banner-inactive' : '']">
+            <v-chip
+              v-if="!barbero.activo"
+              color="error"
+              size="x-small"
+              class="status-chip-floating font-weight-bold"
+              variant="flat"
+            >
+              INACTIVO
+            </v-chip>
+          </div>
           
           <v-card-text class="text-center pt-0 px-4 pb-6">
             <!-- Avatar -->
@@ -74,7 +84,17 @@
 
             <!-- Info -->
             <h3 class="barber-name">{{ barbero.nombre }} {{ barbero.apellido }}</h3>
-            <div class="barber-role mb-4"><span class="role-pill">Barbero Profesional</span></div>
+            <div class="barber-role mb-4">
+              <span class="role-pill mr-2">Barbero</span>
+              <v-chip 
+                :color="barbero.activo ? 'success' : 'grey'" 
+                size="x-small" 
+                variant="tonal" 
+                class="font-weight-bold"
+              >
+                {{ barbero.activo ? 'ACTIVO' : 'INACTIVO' }}
+              </v-chip>
+            </div>
 
             <v-divider class="mb-4 opacity-10" />
 
@@ -101,9 +121,17 @@
               <v-tooltip activator="parent" location="top">Ver Horarios</v-tooltip>
             </v-btn>
             <v-spacer></v-spacer>
-            <v-btn icon variant="text" size="small" color="error" @click="openDeleteDialog(barbero)">
-              <i class="fas fa-trash-alt"></i>
-              <v-tooltip activator="parent" location="top">Eliminar barbero</v-tooltip>
+            <v-btn 
+              icon 
+              variant="text" 
+              size="small" 
+              :color="barbero.activo ? 'error' : 'success'" 
+              @click="openToggleStatusDialog(barbero)"
+            >
+              <i :class="['fas', barbero.activo ? 'fa-user-slash' : 'fa-user-check']"></i>
+              <v-tooltip activator="parent" location="top">
+                {{ barbero.activo ? 'Desactivar' : 'Activar' }} barbero
+              </v-tooltip>
             </v-btn>
           </div>
         </v-card>
@@ -194,23 +222,33 @@
     <!-- ══════════════════════════════ -->
     <!-- DIALOG: CONFIRMAR ELIMINACIÓN  -->
     <!-- ══════════════════════════════ -->
-    <v-dialog v-model="dialogDelete" max-width="400" rounded="xl">
+    <v-dialog v-model="dialogToggleStatus" max-width="400" rounded="xl">
       <v-card class="text-center pa-6">
         <div class="mb-4">
-          <v-avatar color="error" variant="tonal" size="70">
-            <i class="fas fa-trash-alt fa-2x"></i>
+          <v-avatar :color="selectedBarber?.activo ? 'error' : 'success'" variant="tonal" size="70">
+            <i :class="['fas', selectedBarber?.activo ? 'fa-user-slash' : 'fa-user-check', 'fa-2x']"></i>
           </v-avatar>
         </div>
-        <h3 class="text-h5 font-weight-bold mb-2">¿Eliminar Barbero?</h3>
+        <h3 class="text-h5 font-weight-bold mb-2">
+          ¿{{ selectedBarber?.activo ? 'Desactivar' : 'Activar' }} Barbero?
+        </h3>
         <p class="text-body-2 text-grey-darken-1 mb-6">
-          Estás a punto de eliminar a <strong class="text-black">{{ selectedBarber?.nombre }}</strong>. <br>
-          Esta acción no se puede deshacer.
+          Estás a punto de <strong>{{ selectedBarber?.activo ? 'desactivar' : 'activar' }}</strong> a 
+          <strong class="text-black">{{ selectedBarber?.nombre }}</strong>. <br>
+          {{ selectedBarber?.activo ? 'Ya no podrá agendar citas ni aparecerá en la página principal.' : 'Volverá a estar disponible para agendar citas.' }}
         </p>
         <div class="d-flex gap-3 justify-center">
-          <v-btn variant="tonal" color="grey" rounded="xl" @click="dialogDelete = false" class="px-6">
+          <v-btn variant="tonal" color="grey" rounded="xl" @click="dialogToggleStatus = false" class="px-6">
             Cancelar
           </v-btn>
-          <v-btn color="error" variant="flat" rounded="xl" @click="handleDelete" :loading="isDeleting" class="px-6">
+          <v-btn 
+            :color="selectedBarber?.activo ? 'error' : 'success'" 
+            variant="flat" 
+            rounded="xl" 
+            @click="handleToggleStatus" 
+            :loading="isStatusLoading" 
+            class="px-6 text-white"
+          >
             Confirmar
           </v-btn>
         </div>
@@ -229,10 +267,10 @@ const barberStore = useBarberStore()
 const router = useRouter()
 
 const search = ref('')
-const dialogDelete = ref(false)
+const dialogToggleStatus = ref(false)
 const dialogEdit = ref(false)
 const selectedBarber = ref(null)
-const isDeleting = ref(false)
+const isStatusLoading = ref(false)
 const isSaving = ref(false)
 
 const editForm = ref({
@@ -280,26 +318,27 @@ const viewSchedule = (barbero) => {
   console.log('Ver horarios de:', barbero.id)
 }
 
-const openDeleteDialog = (barbero) => {
+const openToggleStatusDialog = (barbero) => {
   selectedBarber.value = barbero
-  dialogDelete.value = true
+  dialogToggleStatus.value = true
 }
-
-const handleDelete = async () => {
+ 
+const handleToggleStatus = async () => {
   if (!selectedBarber.value) return
-  isDeleting.value = true
+  isStatusLoading.value = true
   try {
-    await barberStore.deleteBarber(selectedBarber.value.id)
-    dialogDelete.value = false
+    const newStatus = !selectedBarber.value.activo
+    await barberStore.updateBarber(selectedBarber.value.id, { activo: newStatus })
+    dialogToggleStatus.value = false
   } catch (error) {
-    console.error('Error al eliminar barbero:', error)
+    console.error('Error al cambiar estado del barbero:', error)
   } finally {
-    isDeleting.value = false
+    isStatusLoading.value = false
   }
 }
 
 onMounted(() => {
-  barberStore.getBarbers()
+  barberStore.getBarbersAdmin()
 })
 </script>
 
@@ -347,9 +386,28 @@ onMounted(() => {
   background: linear-gradient(135deg, #f5f5f5 0%, #eeeeee 100%);
 }
 
+.barber-inactive {
+  opacity: 0.7;
+  filter: grayscale(0.5);
+  border-color: #ffcdd2 !important;
+}
+
+.banner-inactive {
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%) !important;
+}
+
+.status-chip-floating {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+}
+
 .avatar-container {
   margin-top: -50px;
   margin-bottom: 12px;
+  position: relative;
+  z-index: 1;
 }
 
 .barber-avatar {
