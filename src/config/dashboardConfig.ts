@@ -8,7 +8,7 @@ const commonItems = {
   PaginaPrincipal: {
     title: 'Página Principal',
     icon: 'fas fa-home',
-    to: '/pages/pagina-principal'
+    to: '/'
   },
   administrador: {
     clientes: {
@@ -214,17 +214,5 @@ export default {
     { header: 'Servicios' },
     commonItems.cliente.agendarCita,
     commonItems.cliente.citas,
-    {
-      title: "Historial",
-      icon: "fas fa-history",
-      to: "/historial"
-    },
-    { divider: true },
-    { header: 'Cuenta' },
-    {
-      title: "Mi Perfil",
-      icon: "fas fa-user-circle",
-      to: "/perfil"
-    }
   ]
 };
