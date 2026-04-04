@@ -9,6 +9,9 @@ interface Client {
     email: string
     telefono?: string
     foto?: string
+    activo?: boolean
+    penalizadoHasta?: Date
+    motivoPenalizacion?: string
 }
 
 interface ClientState {
@@ -50,7 +53,10 @@ export const useClientStore = defineStore('client', {
                 const { data } = await api.patch(`/auth/${id}`, payload, { withCredentials: true })
                 const index = this.clients.findIndex(c => c.id === id)
                 if (index !== -1) {
-                    this.clients[index] = { ...this.clients[index], ...data }
+                    // Actualizamos con splice para asegurar reactividad total en Vue 3
+                    // Extraemos 'user' de la respuesta si el backend lo devuelve así
+                    const updatedUser = data.user || data;
+                    this.clients.splice(index, 1, { ...this.clients[index], ...updatedUser })
                 }
                 return data
             } catch (err: unknown) {
@@ -81,6 +87,29 @@ export const useClientStore = defineStore('client', {
             } finally {
                 this.loading = false
             }
-        }
+        },
+
+        async createClient(payload: any) {
+            this.loading = true
+            try {
+                // Usamos el endpoint de registro general
+                // Forzamos el rol de cliente para seguridad
+                const finalPayload = { ...payload, role: 'cliente' }
+                const { data } = await api.post('/auth/register', finalPayload, { withCredentials: true })
+                
+                // Agregamos el nuevo cliente al estado local si la carga fue exitosa
+                this.clients.unshift(data)
+                return data
+            } catch (err: unknown) {
+                if (axios.isAxiosError(err) && err.response?.data?.message) {
+                    this.error = err.response.data.message
+                } else {
+                    this.error = 'Error creando cliente'
+                }
+                throw this.error
+            } finally {
+                this.loading = false
+            }
+        },
     },
 })

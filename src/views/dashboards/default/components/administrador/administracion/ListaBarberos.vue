@@ -143,18 +143,20 @@
     <!-- ══════════════════════════════ -->
     <v-dialog v-model="dialogEdit" max-width="600" persistent rounded="xl">
       <v-card class="dialog-card overflow-hidden">
-        <div class="dialog-header">
+        <div class="dialog-header bg-orange-gradient">
           <div class="d-flex align-center">
-            <div class="dialog-icon"><i class="fas fa-user-edit text-orange"></i></div>
+            <div class="dialog-icon-box shadow-sm">
+              <i class="fas fa-user-edit text-orange"></i>
+            </div>
             <div>
-              <h3 class="text-h6 font-weight-bold mb-0">Editar Barbero</h3>
+              <h3 class="text-h6 font-weight-bold mb-0 text-white">Editar Barbero</h3>
               <p class="text-caption mb-0 text-white opacity-80">Actualiza la información del profesional</p>
             </div>
           </div>
           <v-btn icon="mdi-close" variant="text" color="white" @click="dialogEdit = false"></v-btn>
         </div>
 
-        <v-card-text class="pa-6">
+        <v-card-text class="pa-6 pt-8">
           <v-row>
             <v-col cols="12" sm="6">
               <v-text-field
@@ -222,36 +224,52 @@
     <!-- ══════════════════════════════ -->
     <!-- DIALOG: CONFIRMAR ELIMINACIÓN  -->
     <!-- ══════════════════════════════ -->
-    <v-dialog v-model="dialogToggleStatus" max-width="400" rounded="xl">
-      <v-card class="text-center pa-6">
-        <div class="mb-4">
-          <v-avatar :color="selectedBarber?.activo ? 'error' : 'success'" variant="tonal" size="70">
-            <i :class="['fas', selectedBarber?.activo ? 'fa-user-slash' : 'fa-user-check', 'fa-2x']"></i>
-          </v-avatar>
+    <v-dialog v-model="dialogToggleStatus" max-width="450" persistent rounded="xl">
+      <v-card class="dialog-card overflow-hidden">
+        <div :class="['dialog-header', selectedBarber?.activo ? 'bg-red-gradient' : 'bg-green-gradient']">
+          <div class="d-flex align-center">
+             <div class="dialog-icon-box shadow-sm">
+                <i :class="['fas', selectedBarber?.activo ? 'fa-user-slash text-error' : 'fa-user-check text-success']"></i>
+             </div>
+             <div>
+                <h3 class="text-h6 font-weight-bold mb-0 text-white">
+                   {{ selectedBarber?.activo ? 'Desactivar Barbero' : 'Reactivar Barbero' }}
+                </h3>
+                <p class="text-caption mb-0 text-white opacity-80">
+                   {{ selectedBarber?.activo ? 'Restringir acceso al profesional' : 'Habilitar acceso al profesional' }}
+                </p>
+             </div>
+          </div>
+          <v-btn icon="mdi-close" variant="text" color="white" @click="dialogToggleStatus = false"></v-btn>
         </div>
-        <h3 class="text-h5 font-weight-bold mb-2">
-          ¿{{ selectedBarber?.activo ? 'Desactivar' : 'Activar' }} Barbero?
-        </h3>
-        <p class="text-body-2 text-grey-darken-1 mb-6">
-          Estás a punto de <strong>{{ selectedBarber?.activo ? 'desactivar' : 'activar' }}</strong> a 
-          <strong class="text-black">{{ selectedBarber?.nombre }}</strong>. <br>
-          {{ selectedBarber?.activo ? 'Ya no podrá agendar citas ni aparecerá en la página principal.' : 'Volverá a estar disponible para agendar citas.' }}
-        </p>
-        <div class="d-flex gap-3 justify-center">
-          <v-btn variant="tonal" color="grey" rounded="xl" @click="dialogToggleStatus = false" class="px-6">
-            Cancelar
-          </v-btn>
+
+        <v-card-text class="pa-8 text-center pt-10 pb-8">
+            <div class="mb-4">
+              <p class="text-body-1">
+                Estás a punto de <strong>{{ selectedBarber?.activo ? 'desactivar' : 'activar' }}</strong> a 
+                <strong class="text-black">{{ selectedBarber?.nombre }} {{ selectedBarber?.apellido }}</strong>.
+              </p>
+              <p class="text-body-2 text-grey-darken-1 mt-2">
+                {{ selectedBarber?.activo ? 'Ya no podrá agendar citas ni aparecerá en la página principal.' : 'Volverá a estar disponible para agendar citas.' }}
+              </p>
+            </div>
+        </v-card-text>
+
+        <v-divider></v-divider>
+        <v-card-actions class="pa-4 bg-grey-lighten-5">
+          <v-spacer></v-spacer>
+          <v-btn color="grey-darken-1" variant="text" rounded="lg" @click="dialogToggleStatus = false">Cancelar</v-btn>
           <v-btn 
             :color="selectedBarber?.activo ? 'error' : 'success'" 
             variant="flat" 
-            rounded="xl" 
+            rounded="lg" 
             @click="handleToggleStatus" 
             :loading="isStatusLoading" 
-            class="px-6 text-white"
+            class="px-8 text-white font-weight-bold"
           >
             Confirmar
           </v-btn>
-        </div>
+        </v-card-actions>
       </v-card>
     </v-dialog>
 
@@ -364,6 +382,46 @@ onMounted(() => {
   font-weight: 700 !important; text-transform: none;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
+
+/* ── Dialog Styling (Premium) ── */
+.dialog-card { border: none; }
+.dialog-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 24px 28px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Red / Green / Orange Gradients */
+.bg-orange-gradient {
+  background: linear-gradient(135deg, #ee6f38 0%, #d45a22 100%);
+}
+.bg-red-gradient {
+  background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+}
+.bg-green-gradient {
+  background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+}
+
+.dialog-header::after {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+  opacity: 0.05; pointer-events: none;
+}
+
+.dialog-icon-box {
+  width: 48px; height: 48px; min-width: 48px;
+  background: white;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  margin-right: 18px;
+  position: relative;
+  z-index: 1;
+}
+
+.text-orange { color: #ee6f38 !important; }
+.shadow-sm { box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 
 /* ── Search Bar ── */
 .search-bar { max-width: 400px; box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important; }

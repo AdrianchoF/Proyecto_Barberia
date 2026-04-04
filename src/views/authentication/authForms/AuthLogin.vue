@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import Google from '@/assets/images/auth/social-google.svg';
 import { useAuthStore } from '@/stores/auth';
 import { Form } from 'vee-validate';
@@ -14,11 +14,27 @@ const props = defineProps({
 const emit = defineEmits(['auth-success', 'change-view']);
 
 const router = useRouter();
+const route = useRoute();
 const checkbox = ref(false);
 const valid = ref(false);
 const show1 = ref(false);
 const password = ref('');
 const email = ref('');
+
+// Control de errores de penalización
+const showPenaltyModal = ref(false);
+const penaltyMessage = ref('');
+
+onMounted(() => {
+  // Verificar si venimos redirigidos por una cuenta desactivada (Google Auth)
+  if (route.query.error === 'account_deactivated') {
+    penaltyMessage.value = route.query.message as string || 'Tu cuenta ha sido desactivada temporalmente.';
+    showPenaltyModal.value = true;
+    
+    // Limpiar query params sin recargar para que no reaparezca el modal al refrescar
+    router.replace({ query: {} });
+  }
+});
 const passwordRules = ref([
   (v: string) => !!v || 'La contraseña es obligatoria',
 ]);
@@ -70,8 +86,15 @@ async function validate(values: any, { setErrors }: any) {
       router.push('/dashboard');
     }
     
-  } catch (error: unknown) {
-    setErrors({ apiError: error });
+  } catch (error: any) {
+    // Si es un error de cuenta suspendida/desactivada, lo mostramos en el modal premium
+    const msg = error.response?.data?.message || error.message || error;
+    if (msg.includes('Cuenta suspendida') || msg.includes('cuenta ha sido desactivada')) {
+      penaltyMessage.value = msg;
+      showPenaltyModal.value = true;
+    } else {
+      setErrors({ apiError: msg });
+    }
   }
 }
 </script>
@@ -162,6 +185,51 @@ async function validate(values: any, { setErrors }: any) {
         </div>
       </v-expand-transition>
     </Form>
+
+    <!-- ══════════════════════════════ -->
+    <!-- MODAL PREMIUM: CUENTA PENALIZADA -->
+    <!-- ══════════════════════════════ -->
+    <v-dialog v-model="showPenaltyModal" max-width="450" persistent rounded="xl">
+      <v-card class="penalty-modal overflow-hidden">
+        <div class="penalty-header">
+          <v-avatar color="rgba(255, 255, 255, 0.1)" size="80" class="mb-4">
+             <i class="mdi mdi-account-cancel text-h3 text-white"></i>
+          </v-avatar>
+          <h2 class="text-h5 font-weight-bold text-white mb-1">Acceso Restringido</h2>
+          <p class="text-caption text-white opacity-70">Tu seguridad y el cumplimiento de normas es lo primero</p>
+        </div>
+        
+        <v-card-text class="pa-8 text-center bg-dark">
+          <div class="penalty-message-box mb-6">
+             <i class="fas fa-exclamation-triangle mr-2 text-warning"></i>
+             <p class="penalty-text">{{ penaltyMessage }}</p>
+          </div>
+          
+          <p class="text-body-2 text-white mb-6">
+            Si consideras que esto es un error o deseas resolver tu situación actual, 
+            por favor comunícate con la administración de la barbería.
+          </p>
+          
+          <v-btn 
+            block 
+            variant="flat" 
+            color="#ee6f38" 
+            rounded="lg" 
+            size="large"
+            @click="showPenaltyModal = false"
+            class="font-weight-bold"
+          >
+            ENTENDIDO
+          </v-btn>
+          
+          <div class="mt-4">
+            <a href="https://wa.me/573216549870" target="_blank" class="contact-admin-link">
+              <i class="fab fa-whatsapp mr-1"></i> Contactar Administrador
+            </a>
+          </div>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -282,5 +350,67 @@ async function validate(values: any, { setErrors }: any) {
   border: 1px solid rgba(211, 47, 47, 0.2) !important;
   color: #ff5252 !important;
   border-radius: 8px;
+}
+
+/* Penalty Modal */
+.penalty-modal {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  background: #121212 !important;
+}
+
+.penalty-header {
+  background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+  padding: 40px 20px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.penalty-header::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+  opacity: 0.1;
+}
+
+.bg-dark {
+  background: #121212 !important;
+}
+
+.penalty-message-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(238, 111, 56, 0.2);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.penalty-text {
+  color: #ffffff;
+  font-weight: 500;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.contact-admin-link {
+  color: rgba(255, 255, 255, 0.4);
+  text-decoration: none;
+  font-size: 0.8rem;
+  transition: all 0.3s ease;
+}
+
+.contact-admin-link:hover {
+  color: #ee6f38;
+}
+
+.text-warning {
+  color: #ee6f38 !important;
 }
 </style>
