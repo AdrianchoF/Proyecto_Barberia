@@ -61,37 +61,44 @@
       <v-card class="time-section" elevation="0">
         <v-label class="text-subtitle-1 mb-4 text-white font-weight-bold">
             <i class="fas fa-clock mr-2 text-orange"></i>
-            Elegir Hora
+            Selecciona una Hora
         </v-label>
         
         <div v-if="!fechaSeleccionada" class="text-center py-8 text-white">
           <i class="fas fa-calendar-day mb-3 d-block" style="font-size: 40px; opacity: 0.2;"></i>
-          Selecciona una fecha para ver los horarios del barbero
+          Selecciona una fecha para ver disponibilidad del barbero {{ reservaBarberoStore.barberoPreseleccionado.nombre }}
         </div>
         
         <div v-else>
-           <div v-if="cargandoFranjas" class="text-center py-8">
-              <v-progress-circular indeterminate color="orange" size="40"></v-progress-circular>
-              <p class="mt-4 text-white opacity-60">Consultando disponibilidad...</p>
-           </div>
-           
-           <div v-else-if="franjasDisponibles.length === 0" class="error-box text-center py-4">
-              <i class="fas fa-calendar-times mr-2" style="font-size: 24px;"></i>
-              <p class="mt-2 mb-0">El profesional no tiene horarios disponibles para este día o duración.</p>
-           </div>
-           
-           <div v-else class="franjas-grid">
-               <div
-                  v-for="franja in franjasDisponibles"
-                  :key="franja.id_franja"
-                  class="time-chip-wrapper"
-                  :class="horaSeleccionada === franja.hora_inicio ? 'time-chip-selected' : 'time-chip'"
-                  @click="seleccionarHora(franja.hora_inicio)"
-                >
-                  <i class="fas fa-clock mr-2" :class="horaSeleccionada === franja.hora_inicio ? 'text-white' : 'text-orange'"></i>
-                  {{ formatearHora(franja.hora_inicio) }}
-               </div>
-           </div>
+            <div v-if="cargandoFranjas" class="text-center py-12">
+               <v-progress-circular indeterminate color="orange" size="40"></v-progress-circular>
+               <p class="mt-4 text-grey">Consultando agenda del barbero...</p>
+            </div>
+            
+            <div v-else-if="franjasDisponibles.length === 0" class="error-box text-center py-8">
+               <v-icon size="48" color="rgba(255,255,255,0.2)" class="mb-3">mdi-calendar-remove</v-icon>
+               <p class="text-h6 mb-1">Sin disponibilidad</p>
+               <p class="text-caption opacity-60">No hay horarios disponibles para la duración seleccionada.</p>
+            </div>
+            
+            <div v-else class="horarios-grupos">
+              <div v-for="(grupo, nombreGrupo) in horariosAgrupados" :key="nombreGrupo" class="grupo-container mb-6">
+                <div v-if="grupo.length > 0">
+                  <h4 class="grupo-titulo shadow-text">{{ nombreGrupo }}</h4>
+                  <div class="franjas-grid">
+                    <div
+                      v-for="franja in grupo"
+                      :key="franja.id_franja"
+                      class="time-chip-wrapper"
+                      :class="horaSeleccionada === franja.hora_inicio ? 'time-chip-selected' : 'time-chip'"
+                      @click="seleccionarHora(franja.hora_inicio)"
+                    >
+                      {{ formatearHora(franja.hora_inicio) }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
         </div>
       </v-card>
 
@@ -196,53 +203,78 @@
 
   // 🔥 ALGORITMO DE GENERACIÓN DE FRANJAS
   const franjasDisponibles = computed(() => {
-      if (!fechaSeleccionada.value) return [];
-      const diaStore = obtenerDiaStoreName(fechaSeleccionada.value);
-      const jornadas = reservaBarberoStore.horariosBarbero.filter(h => h.Dia_semana === diaStore);
-      
-      if (jornadas.length === 0) return [];
+    if (!fechaSeleccionada.value) return [];
+    const diaStore = obtenerDiaStoreName(fechaSeleccionada.value);
+    const jornadas = reservaBarberoStore.horariosBarbero.filter(h => h.Dia_semana === diaStore);
+    
+    if (jornadas.length === 0) return [];
 
-      const franjas = [];
-      const duracionMinutos = duracionTotal.value;
-      const gap = 0; // Podría añadirse un gap entre citas si se requiere
+    const franjas = [];
+    const duracionMinutos = duracionTotal.value;
+    const LIMITE_NOCHE_MINS = 21 * 60; // 9:00 PM
+    const MARGEN_MINUTOS = 15; // 15 minutos de margen
+    const BUFFER_MINUTOS = 10;
 
-      jornadas.forEach(jornada => {
-          let actual = timeToMinutes(jornada.hora_inicio);
-          const fin = timeToMinutes(jornada.hora_fin);
+    jornadas.forEach(jornada => {
+        let actual = timeToMinutes(jornada.hora_inicio);
+        const finJornada = timeToMinutes(jornada.hora_fin);
+        const finReal = Math.min(finJornada, LIMITE_NOCHE_MINS);
 
-          while (actual + duracionMinutos <= fin) {
-              const inicioStr = minutesToTime(actual);
-              const finStr = minutesToTime(actual + duracionMinutos);
+        while (actual + duracionMinutos <= finReal) {
+            const inicioStr = minutesToTime(actual);
+            
+            // Validar si choca con alguna cita existente (incluyendo el buffer de 10 min)
+            const citaQueChoca = horasOcupadas.value.find(ocupada => {
+                const oInicio = timeToMinutes(ocupada.hora_inicio);
+                const oFin = timeToMinutes(ocupada.hora_fin);
+                // Una cita choca si el nuevo rango [actual, actual + duracion + 10] se solapa con [oInicio, oFin + 10]
+                // (inicio1 < fin2 + 10) && (inicio2 < fin1 + 10)
+                return (actual < oFin + BUFFER_MINUTOS) && (oInicio < actual + duracionMinutos + BUFFER_MINUTOS);
+            });
 
-              // Validar contra horas ocupadas
-              const estaOcupada = horasOcupadas.value.some(ocupada => {
-                  const oInicio = timeToMinutes(ocupada.hora_inicio);
-                  const oFin = timeToMinutes(ocupada.hora_fin);
-                  // Hay solapamiento si:
-                  return (actual < oFin && actual + duracionMinutos > oInicio);
-              });
+            // Validar contra hora actual si es hoy (con margen de 15 min de adelanto)
+            let esPasada = false;
+            if (esHoy(fechaSeleccionada.value)) {
+                const ahoraMins = (horaActual.value.getHours() * 60) + horaActual.value.getMinutes();
+                if (actual <= ahoraMins + MARGEN_MINUTOS) esPasada = true;
+            }
 
-              // Validar contra hora actual si es hoy
-              let esPasada = false;
-              if (esHoy(fechaSeleccionada.value)) {
-                  const ahoraMins = (horaActual.value.getHours() * 60) + horaActual.value.getMinutes();
-                  if (actual <= ahoraMins) esPasada = true;
-              }
+            if (!citaQueChoca && !esPasada) {
+                franjas.push({
+                    id_franja: `${inicioStr}-${minutesToTime(actual + duracionMinutos)}`,
+                    hora_inicio: inicioStr,
+                    hora_fin: minutesToTime(actual + duracionMinutos)
+                });
+                // Si el slot es válido, el siguiente intento será 30 min después o según la duración
+                actual += 30; 
+            } else if (citaQueChoca) {
+                // Si choca con una cita, saltamos justo al final de esa cita + el buffer de 10 min
+                actual = timeToMinutes(citaQueChoca.hora_fin) + BUFFER_MINUTOS;
+            } else {
+                // Si es pasada por el margen de hoy, simplemente avanzamos
+                actual += 30;
+            }
+        }
+    });
 
-              if (!estaOcupada && !esPasada) {
-                  franjas.push({
-                      id_franja: `${inicioStr}-${finStr}`,
-                      hora_inicio: inicioStr,
-                      hora_fin: finStr
-                  });
-              }
+    return franjas;
+  })
 
-              // Incrementar por la duración del servicio (o por un bloque fijo si se prefiere)
-              actual += duracionMinutos; 
-          }
-      });
+  const horariosAgrupados = computed(() => {
+    const grupos = {
+      'MAÑANA': [],
+      'TARDE': [],
+      'NOCHE': []
+    }
 
-      return franjas;
+    franjasDisponibles.value.forEach(franja => {
+      const h = parseInt(franja.hora_inicio.split(':')[0])
+      if (h < 12) grupos['MAÑANA'].push(franja)
+      else if (h < 18) grupos['TARDE'].push(franja)
+      else grupos['NOCHE'].push(franja)
+    })
+
+    return grupos
   })
 
   // Helpers para conversión de tiempo
@@ -358,9 +390,17 @@
     horaSeleccionada.value = hora
   }
 
+  const obtenerFechaISOLocal = (fecha) => {
+    if (!(fecha instanceof Date)) return fecha
+    const anio = fecha.getFullYear()
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0')
+    const dia = String(fecha.getDate()).padStart(2, '0')
+    return `${anio}-${mes}-${dia}`
+  }
+
   const actualizarFechayHora = () => {
     if (!fechaSeleccionada.value || !horaSeleccionada.value) return
-    const fechaISO = fechaSeleccionada.value.toISOString().split('T')[0]
+    const fechaISO = obtenerFechaISOLocal(fechaSeleccionada.value)
     reservaBarberoStore.setFechaHora(fechaISO, horaSeleccionada.value)
     emit('emit-fechay-hora', { fecha: fechaISO, hora: horaSeleccionada.value })
   }
@@ -533,6 +573,35 @@
     background: rgba(238, 111, 56, 0.05) !important;
     border: 1px solid rgba(238, 111, 56, 0.2) !important;
     border-radius: 15px !important;
+  }
+
+  /* Estilos Grupos Horarios */
+  .grupo-titulo {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: #ee6f38;
+      letter-spacing: 1.5px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+  }
+  
+  .grupo-titulo::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(238, 111, 56, 0.3), transparent);
+      margin-left: 15px;
+  }
+
+  .shadow-text {
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+
+  .glass-placeholder {
+      background: rgba(255,255,255,0.01);
+      border-radius: 15px;
+      border: 1px dashed rgba(255,255,255,0.05);
   }
 
   :deep(.v-date-picker) { background: #1a1a1a !important; color: white !important; }

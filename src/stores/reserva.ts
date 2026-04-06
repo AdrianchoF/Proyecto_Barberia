@@ -69,10 +69,12 @@ export const useReservaStore = defineStore('reserva', {
 
     // ✅ Actualizar fecha y hora
     setFechaHora(fecha: Date | string, hora: string) {
-      // Asegúrate de guardar una fecha válida en formato ISO
+      // Asegúrate de guardar una fecha válida en formato ISO local (YYYY-MM-DD)
       if (fecha instanceof Date) {
-        // Guarda como YYYY-MM-DD local
-        this.fechaSeleccionada = fecha.toISOString().split('T')[0]
+        const year = fecha.getFullYear()
+        const month = String(fecha.getMonth() + 1).padStart(2, '0')
+        const day = String(fecha.getDate()).padStart(2, '0')
+        this.fechaSeleccionada = `${year}-${month}-${day}`
       } else {
         this.fechaSeleccionada = fecha
       }

@@ -107,7 +107,7 @@
 
     // 🔹 Cargar barberos cuando haya fecha y hora
     const cargarBarberosDisponibles = async () => {
-        if (!reservaStore.tieneFechaYHora) {
+        if (!reservaStore.tieneFechaYHora || reservaStore.serviciosSeleccionados.length === 0) {
             barberosDisponibles.value = [];
             return;
         }
@@ -115,11 +115,12 @@
         loading.value = true;
         try {
             const barberos = await barberoStore.getBarberosDisponibles(
-                reservaStore.diaSemana,
-                reservaStore.horaSeleccionada
+                reservaStore.fechaSeleccionada, // ✅ Enviar fecha YYYY-MM-DD
+                reservaStore.horaSeleccionada,
+                reservaStore.serviciosSeleccionados // ✅ Enviar lista de servicios
             );
             
-            console.log('✅ Barberos encontrados:', barberos);
+            console.log('✅ Barberos encontrados en agenda:', barberos);
             barberosDisponibles.value = barberos;
         } catch (error) {
             console.error('❌ Error cargando barberos:', error);

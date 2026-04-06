@@ -91,12 +91,7 @@
         @cerrar-todo="closeDialog"
       />
 
-      <NotificacionError
-        v-model="mostrarNotificacionError"
-        :mensaje="mensajeNotificacion"
-        :horarios-alternativos="horariosAlternativos"
-        :barberos-alternativos="barberosAlternativos"
-      />
+
   </v-dialog>
 </template>
 
@@ -113,7 +108,6 @@
   import DetalleReserva from '@/components/shared/ReservaCita/DetalleReserva.vue'
   import ModalConfirmacionCita from '@/components/shared/ReservaCita/ModalConfirmacionCita.vue'
   import NotificacionExito from '@/components/shared/ReservaCita/NotificacionExito.vue'
-  import NotificacionError from '@/components/shared/ReservaCita/NotificacionError.vue'
 
   const ServicioStore = useServiceStore()
   const reservaStore = useReservaStore()
@@ -166,10 +160,7 @@
   // Estados para los modales
   const mostrarModalConfirmacion = ref(false)
   const mostrarNotificacionExito = ref(false)
-  const mostrarNotificacionError = ref(false)
   const mensajeNotificacion = ref('')
-  const horariosAlternativos = ref([])
-  const barberosAlternativos = ref([])
   const detallesUltimaReserva = ref({
     fecha: null,
     hora: null,
@@ -382,19 +373,17 @@
         console.log('✅ Citas creadas:', resultado.citas)
 
       } else {
-        // ❌ ERROR
+        // ❌ ERROR (General)
         mensajeNotificacion.value = resultado.mensaje
-        horariosAlternativos.value = resultado.horariosAlternativos || []
-        barberosAlternativos.value = resultado.barberosAlternativos || []
         
         // Cerrar modal de confirmación
         mostrarModalConfirmacion.value = false
         
-        // Mostrar notificación de error
-        mostrarNotificacionError.value = true
+        // Usar una alerta simple o un snackbar si existiera, 
+        // pero por ahora solo log y limpiar para evitar el modal gigante
+        alert(mensajeNotificacion.value)
         
-        console.log('🕐 Horarios alternativos:', resultado.horariosAlternativos)
-        console.log('💈 Barberos alternativos:', resultado.barberosAlternativos)
+        console.log('❌ Error al agendar:', resultado.mensaje)
       }
 
     } catch (error) {

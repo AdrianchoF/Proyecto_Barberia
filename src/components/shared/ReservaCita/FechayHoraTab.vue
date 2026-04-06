@@ -50,44 +50,41 @@
         </div>
       </v-card>
 
-      <!-- 🔹 Selector de hora con input type="time" -->
+      <!-- 🔹 Selector de hora con Grid de Chips Moderno -->
       <v-card class="time-section" elevation="0">
         <v-label class="text-subtitle-1 mb-4 text-white font-weight-bold">
             <i class="fas fa-clock mr-2 text-orange"></i>
-            Elegir Hora
+            Selecciona una Hora
         </v-label>
         
         <div v-if="!fechaSeleccionada" class="text-center py-8 text-white">
           <i class="fas fa-calendar-day mb-3 d-block" style="font-size: 40px; opacity: 0.2;"></i>
-          Selecciona una fecha para ver horarios
+          Selecciona una fecha para ver horarios disponibles
         </div>
         
-        <div v-else class="hora-selector">
-          <v-text-field 
-            v-model="horaSeleccionada" 
-            type="time" 
-            variant="flat" 
-            density="comfortable" 
-            hide-details
-            class="time-input"
-            :min="horaMinima"
-            :class="{ 'hora-invalida': esHoraInvalida }"
-            @blur="validarHora"
-          >
-            <template v-slot:prepend-inner>
-              <i class="fas fa-clock text-orange mr-2"></i>
-            </template>
-          </v-text-field>
-          
-          <!-- Mensaje de ayuda/error -->
-          <div v-if="esHoy(fechaSeleccionada)" class="mt-4">
-            <div v-if="esHoraInvalida" class="error-box">
-              <i class="fas fa-exclamation-circle mr-2"></i>
-              Hora no disponible. Mínimo: {{ formatearHoraMinima }}
-            </div>
-            <div v-else class="info-box">
-              <i class="fas fa-info-circle mr-2 text-orange"></i>
-              Horarios disponibles desde las {{ formatearHoraMinima }}
+        <div v-else>
+          <!-- Mensaje si no hay horas disponibles para hoy -->
+          <div v-if="horariosDisponibles.length === 0" class="no-availability-box">
+             <i class="fas fa-moon mb-2 d-block" style="font-size: 30px;"></i>
+             <p class="ma-0">No hay más citas disponibles para hoy.</p>
+             <p class="text-caption opacity-70">Por favor, selecciona otro día.</p>
+          </div>
+
+          <div v-else>
+            <!-- Grupos de horarios (Mañana, Tarde, Noche) -->
+            <div v-for="(grupo, nombre) in horariosAgrupados" :key="nombre" class="mb-4">
+              <span class="grupo-label">{{ nombre }}</span>
+              <div class="time-grid">
+                <div 
+                  v-for="slot in grupo" 
+                  :key="slot.hora"
+                  class="time-chip"
+                  :class="{ 'chip-seleccionado': horaSeleccionada === slot.hora }"
+                  @click="seleccionarHora(slot.hora)"
+                >
+                  {{ slot.formato12 }}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -149,47 +146,86 @@
     }
   }
 
-  // 🆕 Computed reactivo que usa horaActual en lugar de new Date()
-  const horaMinima = computed(() => {
-    if (!fechaSeleccionada.value) return '00:00'
+  // 🆕 Computed para los horarios disponibles filtrados
+  const horariosDisponibles = computed(() => {
+    if (!fechaSeleccionada.value) return []
     
-    if (esHoy(fechaSeleccionada.value)) {
-      const horas = String(horaActual.value.getHours()).padStart(2, '0')
-      const minutos = String(horaActual.value.getMinutes()).padStart(2, '0')
-      return `${horas}:${minutos}`
+    const slots = []
+    const inicio = 8 // 8:00 AM
+    const fin = 21   // 9:00 PM
+    const intervalo = 30 // Minutos
+    
+    // Si es hoy, calcular el tiempo mínimo (ahora + 15 minutos)
+    let minHoras = 0
+    let minMinutos = 0
+    const esDiaHoy = esHoy(fechaSeleccionada.value)
+    
+    if (esDiaHoy) {
+      const ahora = new Date()
+      // Añadir 15 minutos de margen
+      const margen = new Date(ahora.getTime() + 15 * 60000)
+      minHoras = margen.getHours()
+      minMinutos = margen.getMinutes()
     }
     
-    return '00:00'
+    for (let h = inicio; h <= fin; h++) {
+      for (let m = 0; m < 60; m += intervalo) {
+        // No pasar de las 21:00
+        if (h === 21 && m > 0) break
+        
+        const horaStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+        
+        // Filtrar si es hoy y la hora ya pasó (o está dentro del margen)
+        if (esDiaHoy) {
+          if (h < minHoras || (h === minHoras && m < minMinutos)) {
+            continue
+          }
+        }
+        
+        // Formato 12h para mostrar
+        const ampm = h >= 12 ? 'PM' : 'AM'
+        const h12 = h % 12 || 12
+        const formato12 = `${h12}:${String(m).padStart(2, '0')} ${ampm}`
+        
+        slots.push({ hora: horaStr, formato12 })
+      }
+    }
+    
+    return slots
   })
 
-  // Computed para formatear la hora mínima en formato legible
-  const formatearHoraMinima = computed(() => {
-    if (!horaMinima.value) return ''
-    const [h, m] = horaMinima.value.split(':').map(Number)
-    const ampm = h >= 12 ? 'PM' : 'AM'
-    const h12 = h % 12 || 12
-    return `${h12}:${m.toString().padStart(2, '0')} ${ampm}`
+  // Agrupar horarios por periodo
+  const horariosAgrupados = computed(() => {
+    const grupos = {
+      'Mañana': [],
+      'Tarde': [],
+      'Noche': []
+    }
+    
+    horariosDisponibles.value.forEach(slot => {
+      const [h] = slot.hora.split(':').map(Number)
+      if (h < 12) grupos['Mañana'].push(slot)
+      else if (h < 18) grupos['Tarde'].push(slot)
+      else grupos['Noche'].push(slot)
+    })
+    
+    // Eliminar grupos vacíos
+    return Object.fromEntries(Object.entries(grupos).filter(([_, v]) => v.length > 0))
   })
 
-  // Computed para verificar si la hora seleccionada es inválida
+  const seleccionarHora = (hora) => {
+    horaSeleccionada.value = hora
+  }
+
+  // Comprobar si la hora seleccionada sigue siendo válida al actualizar
   const esHoraInvalida = computed(() => {
     if (!fechaSeleccionada.value || !horaSeleccionada.value) return false
     
-    // Solo validar si es hoy
-    if (esHoy(fechaSeleccionada.value)) {
-      return horaSeleccionada.value < horaMinima.value
-    }
-    
-    return false
+    // Verificar si la hora seleccionada está en los horarios disponibles
+    return !horariosDisponibles.value.some(h => h.hora === horaSeleccionada.value)
   })
 
-  // Función para validar la hora cuando el usuario termina de editarla
-  const validarHora = () => {
-    if (esHoraInvalida.value) {
-      // Limpiar la hora si es inválida
-      horaSeleccionada.value = null
-    }
-  }
+
 
   // Función para verificar si un día ya pasó
   const esDiaPasado = (fecha) => {
@@ -294,7 +330,8 @@
   // Watch para limpiar hora si cambia la fecha y la hora ya no es válida
   watch(fechaSeleccionada, (nuevaFecha) => {
     if (nuevaFecha && horaSeleccionada.value) {
-      if (esHoy(nuevaFecha) && horaSeleccionada.value < horaMinima.value) {
+      // Si la hora ya no está disponible en la nueva fecha, limpiarla
+      if (!horariosDisponibles.value.some(h => h.hora === horaSeleccionada.value)) {
         horaSeleccionada.value = null
       }
     }
@@ -342,24 +379,32 @@
     fechaSeleccionada.value = fecha
   }
 
+  const obtenerFechaISOLocal = (fecha) => {
+    if (!(fecha instanceof Date)) return fecha
+    const anio = fecha.getFullYear()
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0')
+    const dia = String(fecha.getDate()).padStart(2, '0')
+    return `${anio}-${mes}-${dia}`
+  }
+
   const actualizarFechayHora = () => {
     if (!fechaSeleccionada.value || !horaSeleccionada.value) return
 
     let fechaISO = ''
 
     if (fechaSeleccionada.value instanceof Date && !isNaN(fechaSeleccionada.value)) {
-      fechaISO = fechaSeleccionada.value.toISOString().split('T')[0]
+      fechaISO = obtenerFechaISOLocal(fechaSeleccionada.value)
     } 
     else if (typeof fechaSeleccionada.value === 'string') {
       const partes = fechaSeleccionada.value.match(/(\d{1,2}) de (\w+) de (\d{4})/)
       if (partes) {
-        const [_, dia, mesTexto, año] = partes
+        const [_, diaNum, mesTexto, año] = partes
         const meses = {
           enero: 0, febrero: 1, marzo: 2, abril: 3, mayo: 4, junio: 5,
           julio: 6, agosto: 7, septiembre: 8, octubre: 9, noviembre: 10, diciembre: 11
         }
-        const fecha = new Date(año, meses[mesTexto.toLowerCase()], dia)
-        fechaISO = fecha.toISOString().split('T')[0]
+        const fecha = new Date(Number(año), meses[mesTexto.toLowerCase()], Number(diaNum))
+        fechaISO = obtenerFechaISOLocal(fecha)
       }
     }
     reservaStore.setFechaHora(fechaISO, horaSeleccionada.value)
@@ -556,35 +601,61 @@
     color: white; /* Changed for better contrast */
   }
 
-  /* Selector de hora */
-  .time-input {
-    max-width: 300px;
-    margin-bottom: 10px;
+  /* Selector de hora Grid */
+  .time-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
   }
 
-  .time-input :deep(.v-field) {
-    background: rgba(255, 255, 255, 0.03) !important;
-    border-radius: 12px !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    color: white !important;
-  }
-
-  .time-input :deep(.v-field--focused) {
-    border-color: #ee6f38 !important;
-    box-shadow: 0 0 15px rgba(238, 111, 56, 0.2);
-  }
-
-  .time-input :deep(input[type="time"]) {
-    font-family: 'Outfit', sans-serif;
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: white !important;
-  }
-
-  .time-input :deep(input[type="time"]::-webkit-calendar-picker-indicator) {
-    filter: invert(1) brightness(0.8) sepia(1) saturate(5) hue-rotate(-30deg);
+  .time-chip {
+    padding: 10px 5px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.8);
     cursor: pointer;
-    transform: scale(1.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+  }
+
+  .time-chip:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    color: white;
+  }
+
+  .chip-seleccionado {
+    background: linear-gradient(135deg, #ee6f38 0%, #fe9037 100%) !important;
+    color: white !important;
+    border-color: #ee6f38 !important;
+    box-shadow: 0 5px 15px rgba(238, 111, 56, 0.4);
+    transform: scale(1.05);
+  }
+
+  .grupo-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #ee6f38;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+    opacity: 0.8;
+  }
+
+  .no-availability-box {
+    text-align: center;
+    padding: 30px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 20px;
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.5);
   }
 
   .error-box {

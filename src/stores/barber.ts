@@ -128,12 +128,16 @@ export const useBarberStore = defineStore('barber', {
       }
     },
 
-    // Metodo para traer barberos disponibles segun fecha y hora escogido
-    async getBarberosDisponibles(dia: string, hora: string) {
+    // Metodo para traer barberos disponibles segun fecha y hora escogido (revisando citas reales)
+    async getBarberosDisponibles(fecha: string, hora: string, serviciosIds: number[]) {
       this.loading = true
       try {
-        const { data } = await api.get(`/horario-barbero/${dia}/${hora}`, { withCredentials: true })
-        return data || []
+        const serviciosStr = serviciosIds.join(',')
+        const { data } = await api.get(`/cita/disponibles/${fecha}/${hora}/${serviciosStr}`, { withCredentials: true })
+        
+        // El backend ahora devuelve un objeto con { disponible, barberos_disponibles, ... }
+        // retornamos directamente el array de barberos (objetos completos)
+        return data.barberos_disponibles || []
       } catch (err: unknown) {
         if (axios.isAxiosError(err) && err.response?.data?.message) {
           this.error = err.response.data.message
