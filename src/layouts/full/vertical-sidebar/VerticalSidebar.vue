@@ -26,9 +26,21 @@ onMounted(() => {
   const role = (authStore.user && typeof authStore.user === 'object' && typeof (authStore.user as any).Role === 'string')
     ? ((authStore.user as any).Role as string).toLowerCase()
     : '';
+  const esBarbero = authStore.user && (authStore.user as any).esBarbero === true;
+
   switch (role) {
+    case 'super-administrador':
+      menu.value = menus.menusuperadmin;
+      break;
     case 'administrador':
-      menu.value = menus.menuadministrador;
+      // Si el Admin es también Barbero, le añadimos su sección de agenda al menú
+      const adminMenu = [...menus.menuadministrador];
+      if (esBarbero) {
+        adminMenu.push({ divider: true });
+        adminMenu.push({ header: 'Agenda Personal' });
+        adminMenu.push((menus.menubarbero as any[]).find((item) => item.title === 'Mi agenda') || menus.menubarbero[5]); 
+      }
+      menu.value = adminMenu;
       break;
     case 'barbero':
       menu.value = menus.menubarbero;
@@ -42,6 +54,9 @@ onMounted(() => {
 });
 
 const sidebarMenu = computed(() => menu.value);
+const isSuperAdmin = computed(() => {
+  return (authStore.user as any)?.Role?.toLowerCase() === 'super-administrador';
+});
 </script>
 
 <template>
@@ -59,7 +74,16 @@ const sidebarMenu = computed(() => menu.value);
   >
     <!-- Logo -->
     <div class="d-flex justify-center align-center my-6 logo-container">
-      <img src="/imagenes/logo/logo2.png" alt="Logo" class="sidebar-logo" />
+      <div v-if="isSuperAdmin" class="saas-branding d-flex align-center">
+        <div class="saas-logo-icon mr-2">
+          <i class="fas fa-server"></i>
+        </div>
+        <div class="saas-text">
+          <div class="saas-name">SaaS CONTROL</div>
+          <div class="saas-status">DEV OPS</div>
+        </div>
+      </div>
+      <img v-else src="/imagenes/logo/logo2.png" alt="Logo" class="sidebar-logo" />
     </div>
     
     <!-- Menu -->
@@ -100,5 +124,31 @@ const sidebarMenu = computed(() => menu.value);
 /* Customize the scrollbar padding */
 .scrollnavbar {
   height: calc(100vh - 90px);
+}
+
+/* SaaS Branding Styles */
+.saas-branding {
+  padding: 10px 15px;
+  background: linear-gradient(135deg, #1a237e 0%, #311b92 100%);
+  border-radius: 12px;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.saas-logo-icon {
+  font-size: 24px;
+}
+
+.saas-name {
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.saas-status {
+  font-size: 0.6rem;
+  opacity: 0.7;
+  font-weight: 700;
+  text-transform: uppercase;
 }
 </style>

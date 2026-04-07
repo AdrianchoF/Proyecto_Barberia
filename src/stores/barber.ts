@@ -209,6 +209,40 @@ export const useBarberStore = defineStore('barber', {
       } finally {
         this.loading = false
       }
+    },
+
+    async addHorario(payload: any) {
+      this.loading = true
+      try {
+        const { data } = await api.post('/horario-barbero', payload, { withCredentials: true })
+        return data
+      } catch (err: unknown) {
+        if (axios.isAxiosError(err) && err.response?.data?.message) {
+          this.error = err.response.data.message
+        } else {
+          this.error = 'Error creando horario'
+        }
+        throw this.error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async removeHorario(id: number) {
+      this.loading = true
+      try {
+        await api.delete(`/horario-barbero/${id}`, { withCredentials: true })
+        return true
+      } catch (err: unknown) {
+        if (axios.isAxiosError(err) && err.response?.data?.message) {
+          this.error = err.response.data.message
+        } else {
+          this.error = 'Error eliminando horario'
+        }
+        throw this.error
+      } finally {
+        this.loading = false
+      }
     }
   },
 })

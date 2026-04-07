@@ -2,9 +2,106 @@
   <v-container fluid class="pt-2">
 
     <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- PANEL DE SUPER ADMINISTRADOR (SaaS)                    -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <div v-if="userRole === 'super-administrador'">
+      <v-row>
+        <v-col cols="12">
+          <v-card class="saas-banner-card mb-4" elevation="4" rounded="xl">
+            <div class="banner-content">
+              <div class="banner-text">
+                <div class="saas-badge">
+                  <i class="fas fa-terminal mr-2"></i> Console Access: v1.0.4
+                </div>
+                <h1 class="welcome-title">Control Center, {{ authStore.user?.nombre }}</h1>
+                <p class="welcome-subtitle">
+                  Gestión global del ecosistema de barberías. Supervisa suscripciones, 
+                  rendimiento del sistema y despliegues.
+                </p>
+              </div>
+              <div class="banner-illustration d-none d-md-flex">
+                <i class="fas fa-microchip display-icon"></i>
+              </div>
+            </div>
+          </v-card>
+        </v-col>
+      </v-row>
+
+      <v-row>
+        <v-col cols="12" sm="6" md="4">
+          <v-card class="saas-kpi" elevation="2" rounded="xl">
+            <div class="kpi-icon-wrap bg-indigo-lighten-4">
+              <i class="fas fa-store text-indigo"></i>
+            </div>
+            <div class="kpi-info">
+              <p class="kpi-label">Barberías Activas</p>
+              <h3 class="kpi-value text-indigo">{{ superStore.admins.length }}</h3>
+            </div>
+          </v-card>
+        </v-col>
+        <v-col cols="12" sm="6" md="4">
+          <v-card class="saas-kpi" elevation="2" rounded="xl">
+            <div class="kpi-icon-wrap bg-green-lighten-4">
+              <i class="fas fa-dollar-sign text-green"></i>
+            </div>
+            <div class="kpi-info">
+              <p class="kpi-label">Ingresos SaaS (Est.)</p>
+              <h3 class="kpi-value text-green">$ {{ (superStore.admins.length * 50).toLocaleString() }}</h3>
+            </div>
+          </v-card>
+        </v-col>
+        <v-col cols="12" sm="6" md="4">
+          <v-card class="saas-kpi" elevation="2" rounded="xl">
+            <div class="kpi-icon-wrap bg-red-lighten-4">
+              <i class="fas fa-heartbeat text-red"></i>
+            </div>
+            <div class="kpi-info">
+              <p class="kpi-label">Estado del Servidor</p>
+              <h3 class="kpi-value text-red">ONLINE</h3>
+            </div>
+          </v-card>
+        </v-col>
+      </v-row>
+
+      <v-row class="mt-4">
+        <v-col cols="12" md="8">
+           <v-card rounded="xl" elevation="2">
+             <v-card-title class="pa-5">
+               <i class="fas fa-history mr-2"></i> Registro de Actividad SaaS
+             </v-card-title>
+             <v-card-text class="pa-5">
+                <v-list lines="two">
+                  <v-list-item v-for="n in 3" :key="n" class="mb-2 border rounded-lg">
+                    <template v-slot:prepend>
+                       <v-avatar color="indigo-lighten-5">
+                          <i class="fas fa-info-circle text-indigo"></i>
+                       </v-avatar>
+                    </template>
+                    <v-list-item-title class="font-weight-bold">Nueva Instancia Creada</v-list-item-title>
+                    <v-list-item-subtitle>Un nuevo usuario administrador ha sido registrado y activado.</v-list-item-subtitle>
+                  </v-list-item>
+                </v-list>
+             </v-card-text>
+           </v-card>
+        </v-col>
+        <v-col cols="12" md="4">
+           <v-card rounded="xl" elevation="2" class="bg-indigo-darken-4 text-white pa-4">
+              <h3 class="text-h6 font-weight-bold mb-4">Quick SaaS Access</h3>
+              <v-btn block color="white" class="text-indigo mb-3" rounded="lg" to="/gestion-barberias">
+                <i class="fas fa-users-cog mr-2"></i> Gestionar Barberías
+              </v-btn>
+              <v-btn block variant="outlined" color="white" rounded="lg">
+                <i class="fas fa-database mr-2"></i> Backups
+              </v-btn>
+           </v-card>
+        </v-col>
+      </v-row>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
     <!-- PANEL DE ADMINISTRADOR                                  -->
     <!-- ═══════════════════════════════════════════════════════ -->
-    <div v-if="userRole === 'administrador'">
+    <div v-else-if="userRole === 'administrador'">
       
       <!-- HERO BANNER -->
       <v-row>
@@ -214,6 +311,7 @@ import { useBarberStore } from '@/stores/barber';
 import { useClientStore } from '@/stores/client';
 import { useProductoStore } from '@/stores/producto';
 import { useServiceStore } from '@/stores/services';
+import { useSuperAdminStore } from '@/stores/superadmin';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -222,6 +320,7 @@ const barberStore = useBarberStore();
 const clientStore = useClientStore();
 const productoStore = useProductoStore();
 const serviceStore = useServiceStore();
+const superStore = useSuperAdminStore();
 
 // UI Loaders
 const loadingCitas = ref(false);
@@ -265,7 +364,6 @@ onMounted(async () => {
     loadingProducts.value = true;
     loadingServices.value = true;
 
-    // Ejecuta las peticiones concurrentemente para cargar más rápido
     Promise.allSettled([
       citaStore.obtenerCitas().finally(() => loadingCitas.value = false),
       barberStore.getBarbers().finally(() => loadingBarbers.value = false),
@@ -273,6 +371,10 @@ onMounted(async () => {
       productoStore.getProductos(false).finally(() => loadingProducts.value = false),
       serviceStore.getServices().finally(() => loadingServices.value = false),
     ]);
+  }
+  
+  if (userRole.value === 'super-administrador') {
+    superStore.getAdmins();
   }
 });
 </script>
@@ -448,5 +550,28 @@ onMounted(async () => {
 @media (max-width: 600px) {
   .banner-content { padding: 24px; text-align: center; justify-content: center; }
   .welcome-title { font-size: 1.7rem; }
+}
+
+/* SaaS Specific Styles */
+.saas-banner-card {
+  background: linear-gradient(135deg, #1a237e 0%, #311b92 100%);
+  color: white;
+  border-radius: 24px;
+}
+.saas-badge {
+  display: inline-block;
+  background: rgba(255,255,255,0.1);
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.75rem;
+  margin-bottom: 15px;
+}
+.saas-kpi {
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  background: white;
+  border: 1px solid rgba(0,0,0,0.05);
 }
 </style>

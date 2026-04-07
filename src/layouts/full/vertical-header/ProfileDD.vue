@@ -7,8 +7,13 @@ const authStore = useAuthStore();
 const router = useRouter();
 
 const handleLogout = async () => {
+  const isSuperAdmin = userRole.value.toLowerCase() === 'super-administrador';
   await authStore.logout();
-  router.push('/');
+  if (isSuperAdmin) {
+    router.push('/saas/login');
+  } else {
+    router.push('/');
+  }
 };
 
 const user = computed(() => authStore.user as any);
@@ -94,6 +99,31 @@ const roleTheme = computed(() => {
       </v-list-item>
 
       <v-divider class="my-4 theme-divider"></v-divider>
+
+      <!-- Administrador - Toggle Modo Barbero -->
+      <v-list-item
+        v-if="userRole.toLowerCase() === 'administrador'"
+        rounded="lg"
+        class="mb-2 menu-item"
+        @click.stop
+      >
+        <template v-slot:prepend>
+          <div class="icon-box mr-4">
+            <i class="fas fa-cut"></i>
+          </div>
+        </template>
+        <v-list-item-title class="text-subtitle-2 font-weight-bold text-themed">Modo Barbero</v-list-item-title>
+        <v-list-item-subtitle class="text-caption text-themed-secondary">Activar mis funciones de barbero</v-list-item-subtitle>
+        <template v-slot:append>
+          <v-switch
+            v-model="user.esBarbero"
+            color="#ee6f38"
+            hide-details
+            density="compact"
+            @change="authStore.updateProfile({ esBarbero: user.esBarbero })"
+          ></v-switch>
+        </template>
+      </v-list-item>
 
       <v-list-item
         @click="handleLogout"

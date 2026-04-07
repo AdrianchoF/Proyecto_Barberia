@@ -273,6 +273,144 @@
       </v-card>
     </v-dialog>
 
+    <!-- ══════════════════════════════ -->
+    <!-- DIALOG: GESTIONAR HORARIOS      -->
+    <!-- ══════════════════════════════ -->
+    <v-dialog v-model="dialogHorario" max-width="700" persistent rounded="xl">
+      <v-card class="dialog-card overflow-hidden">
+        <div class="dialog-header bg-primary">
+          <div class="d-flex align-center w-100">
+            <div class="dialog-icon-box shadow-sm">
+                <i class="fas fa-calendar-alt text-primary"></i>
+            </div>
+            <div class="flex-grow-1">
+                <h3 class="text-h6 font-weight-bold mb-0 text-white">Gestionar Horarios</h3>
+                <p class="text-caption mb-0 text-white opacity-80">
+                  Definiendo la jornada laboral de <strong>{{ selectedBarber?.nombre }}</strong>
+                </p>
+            </div>
+            <v-btn icon="mdi-close" variant="text" color="white" @click="dialogHorario = false"></v-btn>
+          </div>
+        </div>
+
+        <v-card-text class="pa-6 pt-8">
+          <!-- Listado de Horarios Existentes -->
+          <div v-if="loadingHorarios" class="text-center py-8">
+            <v-progress-circular indeterminate color="primary"></v-progress-circular>
+            <p class="mt-4 text-grey">Cargando jornadas...</p>
+          </div>
+
+          <div v-else>
+            <h4 class="text-subtitle-1 font-weight-bold mb-4 d-flex align-center">
+              <i class="fas fa-clock mr-2 text-primary"></i> Horarios Actuales
+            </h4>
+            
+            <div v-if="horariosBarbero.length === 0" class="empty-horarios pa-6 text-center rounded-lg border-dashed mb-6">
+              <i class="fas fa-calendar-times mb-3 opacity-30 fa-2x"></i>
+              <p class="text-body-1 font-weight-medium text-grey-darken-1">No hay horarios configurados</p>
+              <p class="text-caption text-grey">Agregue un día de trabajo abajo para comenzar</p>
+            </div>
+
+            <v-table v-else class="mb-6 rounded-lg border overflow-hidden">
+              <thead class="bg-grey-lighten-4">
+                <tr>
+                  <th class="text-left font-weight-bold">Día</th>
+                  <th class="text-left font-weight-bold">Entrada</th>
+                  <th class="text-left font-weight-bold">Salida</th>
+                  <th class="text-center font-weight-bold">Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="h in horariosBarbero" :key="h.id">
+                  <td class="text-capitalize font-weight-medium">{{ h.Dia_semana }}</td>
+                  <td>{{ h.hora_inicio }}</td>
+                  <td>{{ h.hora_fin }}</td>
+                  <td class="text-center">
+                    <v-btn
+                      icon
+                      size="small"
+                      color="error"
+                      @click="eliminarHorario(h.id)"
+                      variant="tonal"
+                      class="rounded-lg"
+                    >
+                      <i class="fas fa-trash-alt"></i>
+                    </v-btn>
+                  </td>
+                </tr>
+              </tbody>
+            </v-table>
+
+            <v-divider class="mb-6"></v-divider>
+
+            <!-- Formulario para Nuevo Horario -->
+            <h4 class="text-subtitle-1 font-weight-bold mb-4 d-flex align-center">
+              <i class="fas fa-plus-circle mr-2 text-primary"></i> Agregar Nuevo Jornada
+            </h4>
+            
+            <v-form ref="formHorario" v-model="formHorarioValid">
+              <v-row>
+                <v-col cols="12" sm="4">
+                  <v-select
+                    v-model="nuevoHorario.diasemana"
+                    :items="['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo']"
+                    label="Día"
+                    variant="outlined"
+                    rounded="lg"
+                    density="comfortable"
+                    color="primary"
+                    :rules="[v => !!v || 'Campo requerido']"
+                  ></v-select>
+                </v-col>
+                <v-col cols="6" sm="4">
+                  <v-text-field
+                    v-model="nuevoHorario.hora_inicio"
+                    type="time"
+                    label="Hora Inicio"
+                    variant="outlined"
+                    rounded="lg"
+                    density="comfortable"
+                    color="primary"
+                    :rules="[v => !!v || 'Campo requerido']"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="6" sm="4">
+                  <v-text-field
+                    v-model="nuevoHorario.hora_fin"
+                    type="time"
+                    label="Hora Fin"
+                    variant="outlined"
+                    rounded="lg"
+                    density="comfortable"
+                    color="primary"
+                    :rules="[v => !!v || 'Campo requerido']"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+              <div class="text-right">
+                <v-btn
+                  color="primary"
+                  variant="flat"
+                  rounded="lg"
+                  class="px-6"
+                  :disabled="!formHorarioValid"
+                  :loading="isAddingHorario"
+                  @click="agregarHorario"
+                >
+                  <i class="fas fa-save mr-2"></i> Agregar Horario
+                </v-btn>
+              </div>
+            </v-form>
+          </div>
+        </v-card-text>
+
+        <v-card-actions class="pa-4 bg-grey-lighten-5">
+          <v-spacer></v-spacer>
+          <v-btn color="grey-darken-1" variant="text" rounded="lg" @click="dialogHorario = false">Cerrar</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
   </v-container>
 </template>
 
@@ -287,9 +425,21 @@ const router = useRouter()
 const search = ref('')
 const dialogToggleStatus = ref(false)
 const dialogEdit = ref(false)
+const dialogHorario = ref(false)
 const selectedBarber = ref(null)
 const isStatusLoading = ref(false)
 const isSaving = ref(false)
+const loadingHorarios = ref(false)
+const isAddingHorario = ref(false)
+const horariosBarbero = ref([])
+const formHorarioValid = ref(false)
+const formHorario = ref(null)
+
+const nuevoHorario = ref({
+  diasemana: '',
+  hora_inicio: '',
+  hora_fin: ''
+})
 
 const editForm = ref({
   id: null,
@@ -331,9 +481,56 @@ const saveBarberEdit = async () => {
   }
 }
 
-const viewSchedule = (barbero) => {
-  // Aquí podrías redirigir a la vista de horarios
-  console.log('Ver horarios de:', barbero.id)
+const viewSchedule = async (barbero) => {
+  selectedBarber.value = barbero
+  dialogHorario.value = true
+  fetchHorarios()
+}
+
+const fetchHorarios = async () => {
+    if (!selectedBarber.value) return
+    loadingHorarios.value = true
+    try {
+        horariosBarbero.value = await barberStore.getHorariosBarbero(selectedBarber.value.id)
+    } catch (error) {
+        console.error('Error cargando horarios:', error)
+        horariosBarbero.value = []
+    } finally {
+        loadingHorarios.value = false
+    }
+}
+
+const agregarHorario = async () => {
+    if (!selectedBarber.value || !formHorarioValid.value) return
+    isAddingHorario.value = true
+    try {
+        const payload = {
+            barberoId: selectedBarber.value.id,
+            diasemana: nuevoHorario.value.diasemana,
+            hora_inicio: nuevoHorario.value.hora_inicio,
+            hora_fin: nuevoHorario.value.hora_fin
+        }
+        await barberStore.addHorario(payload)
+        // Limpiar form y recargar
+        nuevoHorario.value = { diasemana: '', hora_inicio: '', hora_fin: '' }
+        if (formHorario.value) formHorario.value.resetValidation()
+        await fetchHorarios()
+    } catch (error) {
+        alert(error || 'Error al agregar horario. Verifique que las horas no se crucen.')
+        console.error('Error al agregar:', error)
+    } finally {
+        isAddingHorario.value = false
+    }
+}
+
+const eliminarHorario = async (horarioId) => {
+    if (!confirm('¿Estás seguro de eliminar esta jornada laboral?')) return
+    try {
+        await barberStore.removeHorario(horarioId)
+        await fetchHorarios()
+    } catch (error) {
+        console.error('Error al eliminar:', error)
+    }
 }
 
 const openToggleStatusDialog = (barbero) => {
@@ -506,6 +703,20 @@ onMounted(() => {
 }
 .empty-state i { font-size: 4rem; color: #fde8d8; margin-bottom: 20px; display: block; }
 .empty-state p { font-size: 1.1rem; color: #777; font-weight: 500; }
+
+.empty-horarios {
+    border: 2px dashed #f0f0f0;
+    transition: all 0.3s ease;
+}
+.empty-horarios:hover {
+    border-color: #ee6f38;
+    background: #fff8f5;
+}
+.border-dashed {
+    border: 2px dashed #e0e0e0;
+}
+.text-error { color: #d32f2f !important; }
+.text-success { color: #2e7d32 !important; }
 
 @media (max-width: 600px) {
   .form-header { flex-direction: column; text-align: center; }

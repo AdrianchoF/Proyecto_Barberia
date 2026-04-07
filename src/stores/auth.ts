@@ -34,12 +34,12 @@ export const useAuthStore = defineStore('auth', {
         
         if (this.user && (this.user as any).Role == 'cliente') {
           this.menu = 2;
-        }
-        if (this.user && (this.user as any).Role == 'administrador') {
+        } else if (this.user && (this.user as any).Role == 'administrador') {
           this.menu = 0;
-        }
-        if (this.user && (this.user as any).Role == 'barbero') {
+        } else if (this.user && (this.user as any).Role == 'barbero') {
           this.menu = 1;
+        } else if (this.user && (this.user as any).Role == 'super-administrador') {
+          this.menu = 3; // Nuevo índice para super-admin
         }
         
         // 🎯 RETORNAR EL ROL
@@ -81,12 +81,12 @@ export const useAuthStore = defineStore('auth', {
         // También debes setear el menu según el rol
         if (this.user && (this.user as any).Role == 'cliente') {
           this.menu = 2
-        }
-        if (this.user && (this.user as any).Role == 'barbero') {
+        } else if (this.user && (this.user as any).Role == 'barbero') {
           this.menu = 1
-        }
-        if (this.user && (this.user as any).Role == 'administrador') {
+        } else if (this.user && (this.user as any).Role == 'administrador') {
           this.menu = 0
+        } else if (this.user && (this.user as any).Role == 'super-administrador') {
+          this.menu = 3
         }
 
       } catch (error) {
@@ -108,6 +108,19 @@ export const useAuthStore = defineStore('auth', {
     loginWithGoogle() {
       // Redireccionar al endpoint de Google del backend
       window.location.href = 'http://localhost:3000/auth/google';
+    },
+
+    async updateProfile(payload: any) {
+      try {
+        const { data } = await api.patch(`/auth/${(this.user as any).id}`, payload, { withCredentials: true });
+        this.user = { ...this.user, ...data.user };
+        return data;
+      } catch (err: unknown) {
+        if (axios.isAxiosError(err) && err.response?.data?.message) {
+          throw err.response.data.message;
+        }
+        throw 'Error al actualizar perfil';
+      }
     }
   },
 });

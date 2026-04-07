@@ -214,5 +214,33 @@ export default {
     { header: 'Servicios' },
     commonItems.cliente.agendarCita,
     commonItems.cliente.citas,
+  ],
+
+  "menusuperadmin": [
+    { header: 'Dev Team Dashboard' },
+    {
+      title: "Resumen SaaS",
+      icon: "fas fa-chart-pie",
+      to: "/inicio-dashboard"
+    },
+    { divider: true },
+    { header: 'Control de suscripciones' },
+    {
+      title: "Gestión de Barberías",
+      icon: "fas fa-store",
+      to: "/gestion-barberias"
+    },
+    {
+      title: "Configuración Global",
+      icon: "fas fa-cogs",
+      to: "/config-global"
+    },
+    { divider: true },
+    { header: 'Soporte' },
+    {
+      title: "Documentación API",
+      icon: "fas fa-book",
+      to: "/docs"
+    }
   ]
 };

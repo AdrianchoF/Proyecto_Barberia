@@ -54,9 +54,18 @@ router.beforeEach(async (to, from, next) => {
     }
   }
 
+  // 🔒 AISLAMIENTO SUPER-ADMIN
+  // Si es Super-Admin y trata de ir a la landing page o login común, mandarlo a su dashboard
+  if (auth.user) {
+    const userRole = ((auth.user as any).Role || (auth.user as any).role || '').toLowerCase();
+    if (userRole === 'super-administrador' && (to.path === '/' || to.path === '/login' || to.path === '/register')) {
+      return next('/dashboard/default');
+    }
+  }
+
   // Si ya está autenticado e intenta entrar a /login → redirigir
-  if (auth.user && to.path === '/login') {
-    return next(auth.returnUrl || '/');
+  if (auth.user && (to.path === '/login' || to.path === '/saas/login')) {
+    return next(auth.returnUrl || '/dashboard/default');
   }
 
   // 🔒 VERIFICACIÓN DE ROL
@@ -64,7 +73,12 @@ router.beforeEach(async (to, from, next) => {
   if (requiredRoles && requiredRoles.length > 0 && auth.user) {
     // Normalizar el rol del usuario (puede venir como 'Role' o 'role')
     const userRole = ((auth.user as any).Role || (auth.user as any).role || '').toLowerCase();
-    const hasPermission = requiredRoles.includes(userRole);
+    
+    // El usuario tiene permiso si:
+    // 1. Su rol está en la lista de permitidos.
+    // 2. Es administrador y tiene el flag 'esBarbero' activo en una ruta de barbero.
+    const hasPermission = requiredRoles.includes(userRole) || 
+                          (userRole === 'administrador' && requiredRoles.includes('barbero') && (auth.user as any).esBarbero);
 
     if (!hasPermission) {
       console.warn(`🚫 Acceso denegado: ${userRole} intentó acceder a ${to.path} (requiere: ${requiredRoles.join(', ')})`);

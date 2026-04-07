@@ -26,6 +26,11 @@ const PublicRoutes = {
       component: () => import('@/views/authentication/auth/RegisterPage.vue')
     },
     {
+      name: 'SaaSLogin',
+      path: '/saas/login',
+      component: () => import('@/views/authentication/SaaSLogin.vue')
+    },
+    {
       name: 'Error 404',
       path: '/error',
       component: () => import('@/views/pages/maintenance/error/Error404Page.vue')

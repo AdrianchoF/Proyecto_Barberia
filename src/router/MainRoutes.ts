@@ -138,6 +138,14 @@ const MainRoutes = {
       meta: { requiresAuth: true, roles: ['administrador'] }
     },
 
+    // ─── SUPER ADMINISTRADOR (Dev Team) ─────────────────────────────────────
+    {
+      path: '/gestion-barberias',
+      name: 'GestionAdministradores',
+      component: () => import('@/views/dashboards/default/components/superadmin/GestionAdministradores.vue'),
+      meta: { requiresAuth: true, roles: ['super-administrador'] }
+    },
+
     // ─── BARBERO ──────────────────────────────────────────────────────────────
     {
       path: '/agenda-citas',
