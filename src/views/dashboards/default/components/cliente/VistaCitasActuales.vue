@@ -165,6 +165,23 @@
               <strong>Servicio:</strong> {{ getNombreServicio(citaSeleccionada.servicio) }}
             </div>
           </div>
+
+          <!-- Motivo Obligatorio -->
+          <div class="mt-4">
+            <v-textarea
+              v-model="motivoCancelacion"
+              label="Motivo de la cancelación"
+              placeholder="Ej: Me surgió un inconveniente, tuve una emergencia, etc."
+              variant="outlined"
+              color="error"
+              auto-grow
+              rows="3"
+              clearable
+              hint="Requerido para cancelar la cita"
+              persistent-hint
+              :rules="[v => !!v || 'Debes explicar el motivo']"
+            ></v-textarea>
+          </div>
         </v-card-text>
 
         <v-card-actions class="pa-6 pt-0">
@@ -181,6 +198,7 @@
             variant="flat"
             @click="confirmarCancelacion"
             :loading="cargandoCancelacion"
+            :disabled="!motivoCancelacion || motivoCancelacion.trim() === ''"
           >
             <i class="fas fa-times mr-2"></i>
             Sí, cancelar
@@ -224,6 +242,7 @@ const cargando = ref(false)
 const cargandoCancelacion = ref(false)
 const modalCancelar = ref(false)
 const citaSeleccionada = ref(null)
+const motivoCancelacion = ref('')
 
 // Snackbar
 const snackbar = ref(false)
@@ -352,14 +371,19 @@ const abrirModalCancelar = (cita) => {
 const cerrarModalCancelar = () => {
   modalCancelar.value = false
   citaSeleccionada.value = null
+  motivoCancelacion.value = ''
 }
 
 const confirmarCancelacion = async () => {
   if (!citaSeleccionada.value) return
+  if (!motivoCancelacion.value || motivoCancelacion.value.trim() === '') {
+    mostrarNotificacion('Debes proporcionar un motivo de cancelación', 'error')
+    return
+  }
 
   cargandoCancelacion.value = true
   try {
-    const resultado = await citaStore.cancelarCita(citaSeleccionada.value.id_cita)
+    const resultado = await citaStore.cancelarCita(citaSeleccionada.value.id_cita, motivoCancelacion.value)
     
     if (resultado.success) {
       mostrarNotificacion('Cita cancelada exitosamente', 'success')

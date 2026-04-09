@@ -139,12 +139,16 @@
                       </v-col>
                     </v-row>
 
-                    <!-- Botón completar -->
-                    <v-btn
-                      v-if="cita.estado === 'agendada'" block size="large" color="success" variant="flat" @click="abrirModalCompletar(cita)" :loading="cargandoAccion">
-                      <i class="fas fa-check-circle mr-2"></i>
-                      Marcar como Completada
-                    </v-btn>
+                    <!-- Botón completar y cancelar -->
+                    <div v-if="cita.estado === 'agendada'" class="d-flex gap-2">
+                      <v-btn class="flex-grow-1" size="large" color="success" variant="flat" @click="abrirModalCompletar(cita)" :loading="cargandoAccion">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        Completar
+                      </v-btn>
+                      <v-btn color="error" variant="tonal" size="large" @click="abrirModalCancelar(cita)" :loading="cargandoAccion" title="Cancelar Cita">
+                        <i class="fas fa-times"></i>
+                      </v-btn>
+                    </div>
 
                     <v-alert v-else :type="cita.estado === 'completada' ? 'success' : 'error'" variant="tonal">
                       <i :class="getIconoEstado(cita.estado)" class="mr-2"></i>
@@ -195,6 +199,11 @@
                       <i class="fas fa-dollar-sign text-success mr-2"></i>
                       <span class="font-weight-bold text-success">${{ getPrecioServicio(cita.servicio) }}</span>
                     </div>
+
+                    <v-divider class="my-3"></v-divider>
+                    <v-btn block color="error" variant="tonal" size="small" @click="abrirModalCancelar(cita)" :loading="cargandoAccion">
+                      <i class="fas fa-times-circle mr-2"></i> Cancelar Cita
+                    </v-btn>
                   </v-card-text>
                 </v-card>
               </v-col>
@@ -342,6 +351,66 @@
       </v-card>
     </v-dialog>
 
+    <!-- Modal Cancelar Cita -->
+    <v-dialog v-model="modalCancelar" max-width="500" persistent>
+      <v-card rounded="lg">
+        <v-card-title class="pa-6" style="background-color: #f44336; color: white;">
+          <i class="fas fa-exclamation-triangle mr-2"></i>
+          Confirmar Cancelación
+        </v-card-title>
+        
+        <v-card-text class="pa-6">
+          <p class="text-body-1 mb-4">
+            ¿Estás seguro de que deseas cancelar esta cita?
+          </p>
+          
+          <v-alert type="warning" variant="tonal" class="mb-4">
+            Esta acción no se puede deshacer y notificará al cliente
+          </v-alert>
+
+          <div v-if="citaSeleccionada" class="pa-4 bg-grey-lighten-4 rounded">
+            <div class="mb-2"><strong>Cliente:</strong> {{ getNombreCliente(citaSeleccionada.cliente) }}</div>
+            <div class="mb-2"><strong>Servicio:</strong> {{ getNombreServicio(citaSeleccionada.servicio) }}</div>
+            <div class="mb-2"><strong>Hora:</strong> {{ formatearHora(citaSeleccionada.hora) }}</div>
+          </div>
+
+          <!-- Motivo Obligatorio -->
+          <div class="mt-4">
+            <v-textarea
+              v-model="motivoCancelacion"
+              label="Motivo de la cancelación"
+              placeholder="Ej: Máquina dañada, falta de luz, emergencia personal..."
+              variant="outlined"
+              color="error"
+              auto-grow
+              rows="3"
+              clearable
+              hint="Requerido para cancelar y notificar al cliente"
+              persistent-hint
+              :rules="[v => !!v || 'Debes explicar el motivo']"
+            ></v-textarea>
+          </div>
+        </v-card-text>
+
+        <v-card-actions class="pa-6 pt-0">
+          <v-btn variant="text" @click="cerrarModalCancelar" :disabled="cargandoAccion">
+            Mantener Cita
+          </v-btn>
+          <v-spacer></v-spacer>
+          <v-btn 
+            color="error" 
+            variant="flat" 
+            size="large" 
+            @click="confirmarCancelar" 
+            :loading="cargandoAccion"
+            :disabled="!motivoCancelacion || motivoCancelacion.trim() === ''"
+          >
+            <i class="fas fa-times mr-2"></i> Sí, cancelar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <!-- Snackbar -->
     <v-snackbar v-model="snackbar" :color="snackbarColor" :timeout="3000" location="top">
       <i :class="snackbarIcon" class="mr-2"></i>
@@ -366,7 +435,9 @@
   const cargando = ref(false)
   const cargandoAccion = ref(false)
   const modalCompletar = ref(false)
+  const modalCancelar = ref(false)
   const citaSeleccionada = ref(null)
+  const motivoCancelacion = ref('')
   const filtroHistorial = ref('todas')
 
   // Snackbar
@@ -622,6 +693,42 @@
       await citaStore.obtenerCitas()
     } catch (error) {
       mostrarNotificacion('Error al completar el servicio', 'error')
+    } finally {
+      cargandoAccion.value = false
+    }
+  }
+
+  const abrirModalCancelar = (cita) => {
+    citaSeleccionada.value = cita
+    modalCancelar.value = true
+  }
+
+  const cerrarModalCancelar = () => {
+    modalCancelar.value = false
+    citaSeleccionada.value = null
+    motivoCancelacion.value = ''
+  }
+
+  const confirmarCancelar = async () => {
+    if (!citaSeleccionada.value) return
+    if (!motivoCancelacion.value || motivoCancelacion.value.trim() === '') {
+      mostrarNotificacion('Debes proporcionar un motivo de cancelación', 'error')
+      return
+    }
+
+    cargandoAccion.value = true
+    try {
+      const resultado = await citaStore.cancelarCita(citaSeleccionada.value.id_cita, motivoCancelacion.value)
+      
+      if (resultado.success) {
+        mostrarNotificacion('Cita cancelada exitosamente', 'success')
+        cerrarModalCancelar()
+        await citaStore.obtenerCitas()
+      } else {
+        throw new Error(resultado.mensaje || 'Error al cancelar la cita')
+      }
+    } catch (error) {
+      mostrarNotificacion(error.message || 'Error al cancelar la cita', 'error')
     } finally {
       cargandoAccion.value = false
     }

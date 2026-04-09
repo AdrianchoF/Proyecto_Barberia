@@ -287,7 +287,10 @@ const cargarDatos = async () => {
 }
 
 const formatearFecha = (fecha: string) => {
-  const date = new Date(fecha)
+  // Extraer solo YYYY-MM-DD para evitar conversión de zona horaria (UTC → local)
+  const fechaSinHora = fecha.split('T')[0]
+  const [year, month, day] = fechaSinHora.split('-').map(Number)
+  const date = new Date(year, month - 1, day) // Sin UTC, sin desfase
   const opciones: Intl.DateTimeFormatOptions = { 
     weekday: 'long', 
     year: 'numeric', 

@@ -421,6 +421,13 @@ const saveServiceEdit = async () => {
   isSaving.value = true;
   try {
     const payload = { ...editForm };
+    payload.precio = parseFloat(payload.precio) || 0;
+    
+    // Asegurar que la duración tenga el formato correcto (HH:mm:ss) si solo se envían HH:mm
+    if (/^\d{2}:\d{2}$/.test(payload.duracionAprox)) {
+      payload.duracionAprox = payload.duracionAprox + ':00';
+    }
+
     delete payload.id;
     await servicioStore.updateService(editForm.id, payload);
     dialogEdit.value = false;

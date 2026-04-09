@@ -177,12 +177,12 @@ export const useCitaStore = defineStore('cita', {
     /**
      * Cancelar cita (cambia el estado a 'cancelada')
      */
-    async cancelarCita(id: any) {
+    async cancelarCita(id: any, motivo: string) {
       this.cargando = true;
       this.error = null;
       
       try {
-        const response = await api.patch(`/cita/${id}/cancelar`);
+        const response = await api.patch(`/cita/${id}/cancelar`, { motivo });
         
         // Actualizar la cita en el array local
         const index = this.citas.findIndex(cita => cita.id_cita === id);
