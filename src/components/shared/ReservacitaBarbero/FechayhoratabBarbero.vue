@@ -137,6 +137,14 @@
   const fechaCalendario = ref(null)
   const horasOcupadas = ref([])
   const cargandoFranjas = ref(false)
+
+  const horasOcupadasOrdenadas = computed(() => {
+    return [...horasOcupadas.value].sort((a, b) => {
+      const inicioA = timeToMinutes(a.hora_inicio)
+      const inicioB = timeToMinutes(b.hora_inicio)
+      return inicioA - inicioB
+    })
+  })
   
   const nombresMeses = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -224,7 +232,7 @@
             const inicioStr = minutesToTime(actual);
             
             // Validar si choca con alguna cita existente (incluyendo el buffer de 10 min)
-            const citaQueChoca = horasOcupadas.value.find(ocupada => {
+            const citaQueChoca = horasOcupadasOrdenadas.value.find(ocupada => {
                 const oInicio = timeToMinutes(ocupada.hora_inicio);
                 const oFin = timeToMinutes(ocupada.hora_fin);
                 // Una cita choca si el nuevo rango [actual, actual + duracion + 10] se solapa con [oInicio, oFin + 10]

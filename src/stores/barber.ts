@@ -243,6 +243,94 @@ export const useBarberStore = defineStore('barber', {
       } finally {
         this.loading = false
       }
+    },
+
+    // Métodos para gestionar pausas
+    async addPausa(horarioId: number, payload: any) {
+      this.loading = true
+      try {
+        const { data } = await api.post(`/horario-barbero/${horarioId}/pausas`, payload, { withCredentials: true })
+        return data
+      } catch (err: unknown) {
+        if (axios.isAxiosError(err) && err.response?.data?.message) {
+          this.error = err.response.data.message
+        } else {
+          this.error = 'Error creando pausa'
+        }
+        throw this.error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async updatePausa(horarioId: number, pausaId: string, payload: any) {
+      this.loading = true
+      try {
+        const { data } = await api.patch(`/horario-barbero/${horarioId}/pausas/${pausaId}`, payload, { withCredentials: true })
+        return data
+      } catch (err: unknown) {
+        if (axios.isAxiosError(err) && err.response?.data?.message) {
+          this.error = err.response.data.message
+        } else {
+          this.error = 'Error actualizando pausa'
+        }
+        throw this.error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async removePausa(horarioId: number, pausaId: string) {
+      this.loading = true
+      try {
+        await api.delete(`/horario-barbero/${horarioId}/pausas/${pausaId}`, { withCredentials: true })
+        return true
+      } catch (err: unknown) {
+        if (axios.isAxiosError(err) && err.response?.data?.message) {
+          this.error = err.response.data.message
+        } else {
+          this.error = 'Error eliminando pausa'
+        }
+        throw this.error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async getHuecosLibres(barberoId: number, fecha: string, duracion: number = 60) {
+      this.loading = true
+      try {
+        const { data } = await api.get(`/horario-barbero/huecos-libres/${barberoId}/${fecha}/${duracion}`, { withCredentials: true })
+        return data || []
+      } catch (err: unknown) {
+        if (axios.isAxiosError(err) && err.response?.data?.message) {
+          this.error = err.response.data.message
+        } else {
+          this.error = 'Error obteniendo huecos libres'
+        }
+        throw this.error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async getTodasLasPausasDelBarbero(barberoId: number) {
+      this.loading = true
+      try {
+        const { data } = await api.get(`/horario-barbero/pausas-barbero/${barberoId}`, { withCredentials: true })
+        console.log('✅ Pausas del barbero cargadas:', data)
+        return data || []
+      } catch (err: unknown) {
+        console.error('❌ Error obteniendo pausas:', err)
+        if (axios.isAxiosError(err) && err.response?.data?.message) {
+          this.error = err.response.data.message
+        } else {
+          this.error = 'Error obteniendo pausas'
+        }
+        return []
+      } finally {
+        this.loading = false
+      }
     }
   },
 })
