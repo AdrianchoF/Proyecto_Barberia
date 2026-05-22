@@ -2,10 +2,17 @@
 import { RouterView } from 'vue-router';
 import { useTheme } from 'vuetify';
 import { useCustomizerStore } from '@/stores/customizer';
-import { watch } from 'vue';
+import { watch, onMounted } from 'vue';
+import { useAuthStore } from '@/stores/auth';
 
 const theme = useTheme();
 const customizer = useCustomizerStore();
+const authStore = useAuthStore();
+
+onMounted(async () => {
+  // Intentar cargar el usuario desde el token al montar la aplicación
+  await authStore.initFromUrl();
+});
 
 // Sincronizar el tema de Vuetify con el store de customizer
 watch(

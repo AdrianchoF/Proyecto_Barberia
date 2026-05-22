@@ -72,9 +72,9 @@ export const useAuthStore = defineStore('auth', {
 
     async loadUser() {
       try {
-        const { data: profile } = await api.get('/auth/profile', {
-          withCredentials: true,
-        });
+        const { data: profile } = await api.get('/auth/profile');
+        // Quita el withCredentials: true, deja que use el header que ya configuró setAuthToken
+        // withCredentials: true,
         console.log('LOADUSER EXITOSO:', profile);
         this.user = profile;
 
@@ -128,12 +128,18 @@ export const useAuthStore = defineStore('auth', {
       const token = urlParams.get('token');
   
       if (token) {
-        // Guardar el token en memoria/localStorage
+        // Guardar en localStorage para que persista al recargar
+        localStorage.setItem('auth_token', token);
         setAuthToken(token);
-        // Limpiar el token de la URL
         window.history.replaceState({}, '', window.location.pathname);
-        // Cargar el usuario
         await this.loadUser();
+      } else {
+        // Si no hay token en URL, intentar recuperarlo de localStorage
+        const savedToken = localStorage.getItem('auth_token');
+        if (savedToken) {
+          setAuthToken(savedToken);
+          await this.loadUser();
+        }
       }
     }
   },

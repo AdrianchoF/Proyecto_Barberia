@@ -357,9 +357,6 @@ const productosBajoStock = computed(() => {
 
 // Cargar datos exclusivamente si el usuario es administrador
 onMounted(async () => {
-  // Primero capturar el token de Google si viene en la URL
-  await authStore.initFromUrl();
-
   if (authStore.user?.Role.toLowerCase() === 'administrador') {
     loadingCitas.value = true;
     loadingBarbers.value = true;
