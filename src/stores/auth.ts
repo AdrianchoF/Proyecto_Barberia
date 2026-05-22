@@ -75,7 +75,7 @@ export const useAuthStore = defineStore('auth', {
         const { data: profile } = await api.get('/auth/profile');
         // Quita el withCredentials: true, deja que use el header que ya configuró setAuthToken
         // withCredentials: true,
-        console.log('LOADUSER EXITOSO:', profile);
+        // console.log('LOADUSER EXITOSO:', profile);
         this.user = profile;
 
         // También debes setear el menu según el rol
@@ -124,16 +124,14 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async initFromUrl() {
-      console.log('URL completa:', window.location.href);
       const urlParams = new URLSearchParams(window.location.search);
       const token = urlParams.get('token');
-      console.log('Token encontrado:', token);
 
       if (token) {
         localStorage.setItem('auth_token', token);
         // En lugar de setAuthToken, setear el header directamente
         api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        console.log('Header seteado:', api.defaults.headers.common['Authorization']);
+        // console.log('Header seteado:', api.defaults.headers.common['Authorization']);
         window.history.replaceState({}, '', window.location.pathname);
         await this.loadUser();
       } else {
