@@ -131,14 +131,15 @@ export const useAuthStore = defineStore('auth', {
 
       if (token) {
         localStorage.setItem('auth_token', token);
-        setAuthToken(token);
+        // En lugar de setAuthToken, setear el header directamente
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        console.log('Header seteado:', api.defaults.headers.common['Authorization']);
         window.history.replaceState({}, '', window.location.pathname);
         await this.loadUser();
       } else {
         const savedToken = localStorage.getItem('auth_token');
-        console.log('Token en localStorage:', savedToken);
         if (savedToken) {
-          setAuthToken(savedToken);
+          api.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`;
           await this.loadUser();
         }
       }
