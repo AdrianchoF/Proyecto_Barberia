@@ -101,6 +101,10 @@ export const useAuthStore = defineStore('auth', {
       } catch {
         // aunque falle, limpiamos
       }
+
+      localStorage.removeItem('auth_token');
+      delete api.defaults.headers.common['Authorization'];
+
       this.user = null;
       this.returnUrl = null;
     },
