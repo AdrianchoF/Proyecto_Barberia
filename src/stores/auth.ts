@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import api from '@/plugins/axios';
+import api, { setAuthToken } from '@/plugins/axios';
 import axios from 'axios';
 
 interface AuthState {
@@ -120,6 +120,20 @@ export const useAuthStore = defineStore('auth', {
           throw err.response.data.message;
         }
         throw 'Error al actualizar perfil';
+      }
+    },
+
+    async initFromUrl() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+  
+      if (token) {
+        // Guardar el token en memoria/localStorage
+        setAuthToken(token);
+        // Limpiar el token de la URL
+        window.history.replaceState({}, '', window.location.pathname);
+        // Cargar el usuario
+        await this.loadUser();
       }
     }
   },
