@@ -360,7 +360,7 @@ onMounted(async () => {
   // Primero capturar el token de Google si viene en la URL
   await authStore.initFromUrl();
 
-  if (userRole.value === 'administrador') {
+  if (authStore.user?.Role.toLowerCase() === 'administrador') {
     loadingCitas.value = true;
     loadingBarbers.value = true;
     loadingClients.value = true;
@@ -376,7 +376,7 @@ onMounted(async () => {
     ]);
   }
   
-  if (userRole.value === 'super-administrador') {
+  if (authStore.user?.Role?.toLowerCase() === 'super-administrador') {
     superStore.getAdmins();
   }
 });
