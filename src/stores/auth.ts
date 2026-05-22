@@ -124,18 +124,19 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async initFromUrl() {
+      console.log('URL completa:', window.location.href);
       const urlParams = new URLSearchParams(window.location.search);
       const token = urlParams.get('token');
-  
+      console.log('Token encontrado:', token);
+
       if (token) {
-        // Guardar en localStorage para que persista al recargar
         localStorage.setItem('auth_token', token);
         setAuthToken(token);
         window.history.replaceState({}, '', window.location.pathname);
         await this.loadUser();
       } else {
-        // Si no hay token en URL, intentar recuperarlo de localStorage
         const savedToken = localStorage.getItem('auth_token');
+        console.log('Token en localStorage:', savedToken);
         if (savedToken) {
           setAuthToken(savedToken);
           await this.loadUser();
