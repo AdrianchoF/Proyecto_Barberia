@@ -534,8 +534,21 @@
       top: 25px;
       right: 20px;
     }
+    .booking-content {
+      flex-direction: column;
+    }
+    .left-column {
+      flex: 0 1 auto;
+      max-height: 60vh;
+    }
     .right-column {
-      display: none !important;
+      display: block !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      border-left: none;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      flex-shrink: 0;
+      max-height: 40vh;
     }
   }
 </style>
