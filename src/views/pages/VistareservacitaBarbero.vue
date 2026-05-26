@@ -70,6 +70,12 @@
           :ultimo-tab="currentIndex === items.length - 1"/>
         </div>
 
+        <!-- INDICADOR DE SCROLL HACIA ABAJO - SOLO MÓVIL -->
+        <div class="scroll-indicator-mobile">
+          <span class="indicator-text">Desliza para ver detalles</span>
+          <i class="fa-solid fa-chevron-down"></i>
+        </div>
+
       </div>
     </v-card>
     <!-- Modales de notificación -->
@@ -277,7 +283,10 @@
       // Auto-scroll hacia arriba SOLO en móvil
       if (window.innerWidth < 960) {
         await nextTick()
-        window.scrollTo({ top: 0, behavior: 'smooth' })
+        const leftColumn = document.querySelector('.left-column')
+        if (leftColumn) {
+          leftColumn.scrollTop = 0
+        }
       }
     }
   }
