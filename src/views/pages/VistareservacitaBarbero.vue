@@ -10,6 +10,12 @@
         <div class="boton-cerrar" @click="closeDialog">
           <i class="fa-solid fa-x"></i>
         </div>
+
+        <!-- INDICADOR DE SCROLL HACIA ABAJO - SOLO MÓVIL -->
+        <div class="scroll-indicator-mobile">
+          <span class="indicator-text">Desliza para ver detalles</span>
+          <i class="fa-solid fa-chevron-down"></i>
+        </div>
       </div>
 
       <!-- Contenedor principal con layout de dos columnas -->
@@ -267,6 +273,12 @@
       mostrarModalConfirmacion.value = true
     } else {
       currentIndex.value++
+      
+      // Auto-scroll hacia arriba SOLO en móvil
+      if (window.innerWidth < 960) {
+        await nextTick()
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
     }
   }
 
@@ -474,7 +486,50 @@
     opacity: 0.3;
   }
 
+  /* Indicador de scroll solo para móvil */
+  .scroll-indicator-mobile {
+    display: none;
+  }
+
   @media (max-width: 960px) {
+    .scroll-indicator-mobile {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 20px;
+      background: rgba(238, 111, 56, 0.1);
+      border-top: 1px solid rgba(238, 111, 56, 0.3);
+      color: #ee6f38;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      animation: pulse-chevron 2s infinite;
+    }
+
+    .scroll-indicator-mobile i {
+      font-size: 14px;
+      animation: bounce-chevron 2s infinite;
+    }
+
+    @keyframes pulse-chevron {
+      0%, 100% {
+        opacity: 0.7;
+      }
+      50% {
+        opacity: 1;
+      }
+    }
+
+    @keyframes bounce-chevron {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(4px);
+      }
+    }
     .booking-header {
       padding: 20px;
     }
