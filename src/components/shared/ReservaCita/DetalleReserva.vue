@@ -4,7 +4,7 @@
     <v-card class="detalle-card" elevation="0">
       <div class="header-receipt">
         <v-avatar size="100">
-          <v-img src="/public/imagenes/logo/logo2.png" alt="Logo"></v-img>
+          <v-img src="/imagenes/logo/logo2.png" alt="Logo"></v-img>
         </v-avatar>
         <span class="shop-name">BARBERÍA STYLEHUB</span>
         <span class="shop-address">Calle 25 # 12-34 Barrio El Recreo, Montería</span>

@@ -482,21 +482,30 @@
       top: 25px;
       right: 20px;
     }
-    .booking-content {
-      flex-direction: column;
+    .right-column {
+      display: none !important;
     }
-    .left-column {
-      flex: 0 1 auto;
-      max-height: 60vh;
-    }
+  }
+
+  @media (max-width: 600px) {
     .right-column {
       display: block !important;
+      position: fixed !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
       width: 100% !important;
-      max-width: 100% !important;
-      border-left: none;
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
-      flex-shrink: 0;
-      max-height: 40vh;
+      max-width: none !important;
+      height: auto !important;
+      max-height: 50vh !important;
+      border-left: none !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+      z-index: 10 !important;
+      border-radius: 20px 20px 0 0;
+    }
+    .booking-content {
+      height: calc(100vh - 120px - 50vh) !important;
+      padding-bottom: 50vh !important;
     }
   }
 </style>
