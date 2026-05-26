@@ -58,7 +58,7 @@
           </div>
 
           <!-- Columna derecha: Detalles de la cita (fija) -->
-          <div class="right-column desktop-only">
+          <div class="right-column">
             <DetalleReserva
             :servicios="serviciosSeleccionados"
             :barbero="reservaStore.barberoSeleccionado"
@@ -534,30 +534,21 @@
       top: 25px;
       right: 20px;
     }
-    .right-column {
-      display: none !important;
-    }
-  }
-
-  @media (max-width: 600px) {
-    .right-column {
-      display: block !important;
-      position: fixed !important;
-      bottom: 0 !important;
-      left: 0 !important;
-      right: 0 !important;
-      width: 100% !important;
-      max-width: none !important;
-      height: auto !important;
-      max-height: 50vh !important;
-      border-left: none !important;
-      border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
-      z-index: 10 !important;
-      border-radius: 20px 20px 0 0;
-    }
     .booking-content {
-      height: calc(100vh - 120px - 50vh) !important;
-      padding-bottom: 50vh !important;
+      flex-direction: column;
+      height: auto;
+    }
+    .left-column {
+      flex: 1;
+      order: 1;
+    }
+    .right-column {
+      width: 100% !important;
+      max-width: 100% !important;
+      order: 2;
+      border-left: none;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      max-height: none;
     }
   }
 </style>
