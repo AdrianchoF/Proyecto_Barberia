@@ -71,7 +71,7 @@
 
           <!-- INDICADOR DE SCROLL HACIA ABAJO - SOLO MÓVIL -->
           <div class="scroll-indicator-mobile">
-            <span class="indicator-text">Desliza para ver detalles</span>
+            <span class="indicator-text">Desliza hacia abajo para continuar</span>
             <i class="fa-solid fa-chevron-down"></i>
           </div>
         </div>
@@ -308,7 +308,9 @@
         await nextTick()
         const leftColumn = document.querySelector('.left-column')
         if (leftColumn) {
-          leftColumn.scrollTop = 0
+          setTimeout(() => {
+            leftColumn.scrollTo({ top: 0, behavior: 'smooth' })
+          }, 0)
         }
       }
     }
